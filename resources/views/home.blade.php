@@ -23,7 +23,12 @@
         ->take(12)
         ->values();
 
-    $rotorWords = ['Tanıtımları', 'Backlinkleri', 'Bültenleri', 'Yayınları'];
+    $rotorWords = [
+        ['text' => 'Tanıtımları', 'gradient' => 'linear-gradient(90deg, rgb(103, 76, 208), rgb(168, 168, 255))'],
+        ['text' => 'Backlinkleri', 'gradient' => 'linear-gradient(90deg, rgb(240, 69, 170), rgb(238, 170, 210))'],
+        ['text' => 'Bültenleri', 'gradient' => 'linear-gradient(90deg, rgb(103, 164, 41), rgb(174, 229, 118))'],
+        ['text' => 'Yayınları', 'gradient' => 'linear-gradient(90deg, rgb(250, 136, 55), rgb(250, 172, 117))'],
+    ];
 
     // Hero: banner ortasından sağa açılan yarım-ay — radyal olarak dönen, seyrek favicon halkaları.
     // Halka sayısı marqueeDomains ile birebir eşleşir (12), her favicon yörüngede yalnızca bir kez görünür.
@@ -115,12 +120,12 @@
 
                     <h1 class="mt-5 font-display text-4xl font-medium leading-[1.1] sm:text-5xl lg:text-[3.6rem]" data-reveal>
                         Markanızın tüm
-                        <div class="relative inline-block rotor-wrapper">
+                        <div class="relative inline-block rotor-wrapper ml-4">
                             <span class="rotor-measure"></span>
 
                             <span class="word-rotor" data-word-rotor>
                                 @foreach ($rotorWords as $word)
-                                    <span>{{ $word }}</span>
+                                    <span style="background-image: {{ $word['gradient'] }}">{{ $word['text'] }}</span>
                                 @endforeach
                             </span>
 
@@ -172,7 +177,6 @@
             </div>
         </div>
 
-        {{-- Güven şeridi: hero paneline yapışık, yalnız alt köşeleri yuvarlak (Worklane) --}}
         <div class="mx-auto max-w-7xl rounded-b-[20px] bg-paper overflow-hidden">
             <div class="mx-auto flex max-w-6xl flex-col items-center gap-5 px-5 py-[30px] sm:px-8 lg:flex-row lg:gap-10">
                 <p class="shrink-0 text-center font-display text-[22px] font-semibold leading-[1.25] text-ink lg:max-w-[190px] lg:text-start">Türkiye çapında ekipler güveniyor</p>
@@ -201,19 +205,34 @@
         </div>
     </section>
 
-    {{-- ================= NELER SUNUYORUZ (What you get) ================= --}}
     <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
-        <div class="max-w-2xl">
-            <p data-reveal><span class="{{ $chip }}">Neler sunuyorsunuz</span></p>
-            <h2 class="mt-5 {{ $h2 }}" data-reveal>İhtiyacınız olan her şey tek yerde</h2>
+        <div class="mx-auto max-w-2xl text-center">
+            <p data-reveal>
+                <span class="inline-flex items-center rounded-[10px] border border-ink/5 bg-white px-3.5 py-2 text-sm font-medium text-ink shadow-soft">
+                    Neler sunuyorsunuz
+                </span>
+            </p>
+
+            <h2 class="mt-5 font-display text-3xl font-medium leading-[1.2] tracking-[-0.01em] text-ink sm:text-[44px] lg:text-[52px]" data-reveal>
+                İhtiyacınız olan her şey tek yerde
+            </h2>
         </div>
 
         <div class="mt-10 grid gap-5 md:grid-cols-3">
-            {{-- Kart 1: üst üste binen sipariş satırları --}}
+            {{-- Kart 1: üst üste binen sipariş satırları (Motion card stack) --}}
             <div class="relative overflow-hidden rounded-[20px] bg-paper p-8" data-reveal>
-                <div class="relative flex h-[200px] flex-col items-center">
-                    @foreach ([['Finans sitesinde tanıtım yazısı', 'Yayında', 'bg-emerald-100 text-emerald-700', 'w-full', 'z-30'], ['Teknoloji bülteni dağıtımı', 'Editörde', 'bg-accent-100 text-accent-700', 'w-[86%]', 'z-20 -mt-2 opacity-90'], ['Story yayını — 3 hesap', 'Sırada', 'bg-amber-100 text-amber-700', 'w-[72%]', 'z-10 -mt-2 opacity-75']] as [$is, $durum, $tone, $w, $z])
-                        <div class="{{ $w }} {{ $z }} relative rounded-[10px] bg-white p-3.5 shadow-[0_5px_20px_rgba(10,11,11,0.1)]">
+                <div class="relative mx-auto h-[260px] w-full max-w-[280px]" data-order-stack>
+                    @foreach ([
+                        ['Finans sitesinde tanıtım yazısı', 'Yayında', 'bg-emerald-100 text-emerald-700'],
+                        ['Teknoloji bülteni dağıtımı', 'Editörde', 'bg-accent-100 text-accent-700'],
+                        ['Story yayını — 3 hesap', 'Sırada', 'bg-amber-100 text-amber-700'],
+                        ['SEO backlink paketi', 'Hazırlanıyor', 'bg-sky-100 text-sky-700'],
+                        ['Basın bülteni gönderimi', 'Onayda', 'bg-violet-100 text-violet-700'],
+                    ] as [$is, $durum, $tone])
+                        <div
+                            data-order-card
+                            class="absolute inset-x-0 top-0 rounded-[10px] bg-white p-3.5 shadow-[0_5px_20px_rgba(10,11,11,0.1)]"
+                        >
                             <div class="flex items-center justify-between gap-2">
                                 <p class="flex min-w-0 items-center gap-x-2 truncate text-[12px] font-semibold text-ink">
                                     <span class="inline-flex size-4 shrink-0 items-center justify-center rounded border border-ink/15 bg-paper">

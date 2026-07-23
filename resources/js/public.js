@@ -142,6 +142,7 @@ window.addEventListener('load', () => {
  | [data-reveal-group]  : çocuk [data-reveal]'ları sırayla (stagger) oynatır
  | [data-countup]       : sayıyı 0'dan hedefe sayar (data-countup="2623")
  | [data-step-card]     : süreç kartı görünüme girince "aktif" (koyu) stile döner
+ | [data-order-stack]   : sipariş kartlarını slot'lar arasında layout-style döndürür
  */
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -218,6 +219,119 @@ if (!prefersReducedMotion) {
         );
     });
 
+    // Sipariş yığını: 5 kart, cubic-bezier — üst üste yarım görünür
+    document.querySelectorAll('[data-order-stack]').forEach((stack) => {
+        const cards = [...stack.querySelectorAll('[data-order-card]')];
+        if (cards.length < 2) return;
+
+        const ease = [0.25, 0.1, 0.25, 1];
+        const duration = 0.7;
+        const n = cards.length;
+
+        // Her kartın yarısı görünsün
+        const cardH = Math.max(cards[0].getBoundingClientRect().height, 56);
+        const gap = Math.round(cardH * 0.5);
+        stack.style.height = `${Math.ceil(cardH + gap * (n - 1) + 8)}px`;
+
+        // 1..5 choreography (senin 3'lü sıranın 5'li uzantısı)
+        const steps = [
+            [0, 1, 2, 3, 4], // 1 2 3 4 5
+            [1, 0, 2, 3, 4], // 2 → 1 üstüne
+            [0, 2, 3, 4, 1], // 2 → en alta
+            [2, 0, 3, 4, 1], // 3 → en üste
+            [1, 0, 3, 4, 2], // 3 ↔ 2
+            [0, 3, 4, 2, 1], // (üst) → en alta
+            [3, 0, 4, 2, 1], // 4 → en üste
+            [1, 0, 4, 2, 3], // 4 ↔ 2
+            [0, 4, 2, 3, 1], // (üst) → en alta
+            [4, 0, 2, 3, 1], // 5 → en üste
+            [1, 0, 2, 3, 4], // 5 ↔ 2
+        ];
+
+        const slotAt = (depth) => ({
+            y: depth * gap,
+            scale: 1 - depth * 0.015,
+            opacity: Math.max(0.88, 1 - depth * 0.04),
+            z: n - depth,
+        });
+
+        cards.forEach((card) => {
+            card.style.transformOrigin = '50% 0%';
+            card.style.backfaceVisibility = 'hidden';
+        });
+
+        let running = null;
+
+        const applyOrder = (order, animated) => {
+            if (running) {
+                running.stop?.();
+                running = null;
+            }
+
+            // Hedef z-index'i animasyondan önce sabitle (ortada z değişimi kasmasın)
+            order.forEach((cardIndex, depth) => {
+                cards[cardIndex].style.zIndex = String(slotAt(depth).z);
+            });
+
+            const animations = order.map((cardIndex, depth) => {
+                const slot = slotAt(depth);
+
+                return animate(
+                    cards[cardIndex],
+                    {
+                        y: slot.y,
+                        scale: slot.scale,
+                        opacity: slot.opacity,
+                    },
+                    {
+                        duration: animated ? duration : 0,
+                        easing: ease,
+                    },
+                );
+            });
+
+            running = {
+                stop() {
+                    animations.forEach((a) => a?.stop?.());
+                },
+            };
+
+            return Promise.all(animations);
+        };
+
+        const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+        applyOrder(steps[0], false);
+
+        const run = async (alive) => {
+            let step = 0;
+            while (alive()) {
+                await wait(step === 0 ? 1000 : 1400);
+                if (!alive()) return;
+                step += 1;
+                // Son adım (5↔2 → 2/1/3/4/5) sonrası "2 en alta" ile devam
+                if (step >= steps.length) {
+                    step = 2;
+                }
+                await applyOrder(steps[step], true);
+            }
+        };
+
+        inView(
+            stack,
+            () => {
+                let active = true;
+                run(() => active);
+
+                return () => {
+                    active = false;
+                    running?.stop?.();
+                };
+            },
+            { amount: 0.35 },
+        );
+    });
+
     // Odometre: rakamlar 0-9 şeridi üzerinde yuvarlanarak hedefe oturur
     document.querySelectorAll('[data-odometer]').forEach((el) => {
         const target = Number(el.dataset.odometer || '0');
@@ -260,65 +374,59 @@ if (!prefersReducedMotion) {
 
     // Hero'daki dönen kelime: sıradaki kelime aşağıdan kayarak girer
     document.querySelectorAll('[data-word-rotor]').forEach((rotor) => {
-
         const words = [...rotor.children];
-    
+
         if (words.length < 2) return;
-    
+
         const wrapper = rotor.closest('.rotor-wrapper');
         const measure = wrapper.querySelector('.rotor-measure');
-    
+
         let index = 0;
-    
-        // İlk kelime
+
+        const setWidth = (px, animateWidth = false) => {
+            if (!animateWidth) {
+                wrapper.style.transition = 'none';
+            } else {
+                wrapper.style.transition = '';
+            }
+            wrapper.style.width = `${Math.round(px)}px`;
+            if (!animateWidth) {
+                // reflow sonra transition'ı geri aç
+                void wrapper.offsetWidth;
+                wrapper.style.transition = '';
+            }
+        };
+
         measure.textContent = words[0].textContent;
-    
+        setWidth(measure.offsetWidth, false);
+
         words.forEach((word, i) => {
             word.style.opacity = i === 0 ? 1 : 0;
-            word.style.transform = i === 0
-                ? 'translateY(0%)'
-                : 'translateY(100%)';
+            word.style.transform = i === 0 ? 'translateY(0%)' : 'translateY(100%)';
         });
-    
+
         setInterval(() => {
-    
             const current = words[index];
-    
             index = (index + 1) % words.length;
-    
             const next = words[index];
-    
-            // Kutu genişliğini yeni kelimeye göre değiştir
+
             measure.textContent = next.textContent;
-    
+            setWidth(measure.offsetWidth, true);
+
             animate(
                 current,
-                {
-                    opacity: 0,
-                    transform: 'translateY(-100%)'
-                },
-                {
-                    duration: 0.45,
-                    easing: springEase
-                }
+                { opacity: 0, transform: 'translateY(-100%)' },
+                { duration: 0.4, easing: [0.33, 1, 0.68, 1] },
             );
-    
+
             next.style.transform = 'translateY(100%)';
-    
+
             animate(
                 next,
-                {
-                    opacity: 1,
-                    transform: 'translateY(0%)'
-                },
-                {
-                    duration: 0.45,
-                    easing: springEase
-                }
+                { opacity: 1, transform: 'translateY(0%)' },
+                { duration: 0.4, easing: [0.33, 1, 0.68, 1] },
             );
-    
         }, 2400);
-    
     });
 } else {
     document.querySelectorAll('[data-countup]').forEach((el) => {

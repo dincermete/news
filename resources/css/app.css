@@ -188,91 +188,121 @@ html.js [data-reveal] {
 }
 
 /* Hero'daki dönen kelime (Motion data-word-rotor) */
-.rotor-wrapper{
-    position:relative;
-    display:inline-block;
-    transition:width .35s cubic-bezier(.22,.61,.36,1);
+.rotor-wrapper {
+    --rotor-out-x: 0.2em;
+    --rotor-out-y: 0em;
+    position: relative;
+    display: inline-block;
+    vertical-align: baseline;
+    /* width CSS transition — Motion layout animasyonu kasmasın */
+    transition: width 0.5s cubic-bezier(0.33, 1, 0.68, 1);
+    will-change: width;
 }
 
-.rotor-measure{
-    visibility:hidden;
-    white-space:nowrap;
-    display:inline-block;
-    font:inherit;
-    font-weight:inherit;
-    letter-spacing:inherit;
-    line-height:inherit;
-    padding:0;
-    margin:0;
+.rotor-measure {
+    visibility: hidden;
+    white-space: nowrap;
+    display: inline-block;
+    font: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+    line-height: inherit;
+    padding: 0;
+    margin: 0;
 }
 
-.word-rotor{
-    position:absolute;
-    inset:0;
+.word-rotor {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
 }
 
-.word-rotor>span{
-    position:absolute;
-    left:0;
-    top:0;
-    white-space:nowrap;
+.word-rotor > span {
+    position: absolute;
+    left: 0;
+    top: 0;
+    white-space: nowrap;
 
-    background:linear-gradient(92deg,#6a88d4 0%,#a06ad4 55%,#ff6b6c 100%);
-    -webkit-background-clip:text;
-    background-clip:text;
-    color:transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
 
-    opacity:0;
-    transform:translateY(100%);
+    opacity: 0;
+    transform: translateY(100%);
 }
 
-.word-rotor>span:first-child{
-    opacity:1;
-    transform:translateY(0);
+.word-rotor > span:first-child {
+    opacity: 1;
+    transform: translateY(0);
 }
 
-.rotor-border{
-    position:absolute;
-    pointer-events:none;
+.rotor-border {
+    --size: 10px;
+    --radius: 4px;
+    --color: #ffffff80;
+    --border-width: 1px;
+
+    position: absolute;
+    width: var(--size);
+    height: var(--size);
+    overflow: clip;
+    pointer-events: none;
+    user-select: none;
+    z-index: 1;
+}
+
+.rotor-border::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    border-style: solid;
+    border-color: var(--color);
+    border-width:
+        var(--bt, 0)
+        var(--br, 0)
+        var(--bb, 0)
+        var(--bl, 0);
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+/* Köşeler absolute offset ile dışarı — text baseline bozulmaz */
+.rotor-border.tl {
+    top: calc(var(--rotor-out-y) * -1);
+    left: calc(var(--rotor-out-x) * -1);
+    border-top-left-radius: var(--radius);
+
+    --bt: var(--border-width);
+    --bl: var(--border-width);
+}
+
+.rotor-border.tr {
+    top: calc(var(--rotor-out-y) * -1);
+    right: calc(var(--rotor-out-x) * -1);
+    border-top-right-radius: var(--radius);
+
+    --bt: var(--border-width);
+    --br: var(--border-width);
+}
+
+.rotor-border.bl {
+    bottom: calc(var(--rotor-out-y) * -1);
+    left: calc(var(--rotor-out-x) * -1);
+    border-bottom-left-radius: var(--radius);
+
+    --bb: var(--border-width);
+    --bl: var(--border-width);
 }
 
 .rotor-border.br {
-    --border-bottom-width: 1px;
-    --border-color: #ffffff80;
-    --border-left-width: 0px;
-    --border-right-width: 1px;
-    --border-style: solid;
-    --border-top-width: 0px;
-    user-select: none;
-    height: 10px;
-    overflow: clip;
-    pointer-events: none;
-    will-change: transform;
-    z-index: 1;
-    border-bottom-right-radius: 4px;
-    flex: none;
-    width: 10px;
-    position: absolute;
-    bottom: 0;
-    right: 0;
-}
+    bottom: calc(var(--rotor-out-y) * -1);
+    right: calc(var(--rotor-out-x) * -1);
+    border-bottom-right-radius: var(--radius);
 
-.rotor-border.br:after {
-    content: "";
-    border-width: var(--border-top-width,0)var(--border-right-width,0)var(--border-bottom-width,0)var(--border-left-width,0);
-    border-color: var(--border-color,none);
-    border-style: var(--border-style,none);
-    box-sizing: border-box;
-    border-radius: inherit;
-    corner-shape: inherit;
-    pointer-events: none;
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
+    --bb: var(--border-width);
+    --br: var(--border-width);
 }
-
 html.js .word-rotor > span:not(:first-child) {
     opacity: 0;
 }
