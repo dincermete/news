@@ -23,16 +23,51 @@
             <div class="hidden items-center gap-x-1 lg:flex" role="navigation">
                 <a href="{{ route('home') }}" @class([request()->routeIs('home') ? $navLinkActive : $navLink])>Anasayfa</a>
                 <a href="{{ route('sites.index') }}" @class([request()->routeIs('sites.*') ? $navLinkActive : $navLink])>Tüm Siteler</a>
-                <a href="{{ url('/basin-bulteni') }}" @class([$navLink])>Basın Bülteni</a>
-                <a href="{{ url('/backlink-paketleri') }}" @class([request()->is('backlink-paketleri') ? $navLinkActive : $navLink])>Tanıtım Paketleri</a>
-                <a href="{{ url('/story-satis') }}" @class([$navLink])>Story Satış</a>
-                <a href="{{ url('/footer-link') }}" @class([$navLink])>Footer Link</a>
+                <a href="{{ route('press-release.index') }}" @class([request()->routeIs('press-release.*') ? $navLinkActive : $navLink])>Basın Bülteni</a>
+                <a href="{{ route('bundles.index') }}" @class([request()->routeIs('bundles.*') ? $navLinkActive : $navLink])>Tanıtım Paketleri</a>
+                <a href="{{ route('story.index') }}" @class([request()->routeIs('story.*') ? $navLinkActive : $navLink])>Story Satış</a>
+                <a href="{{ route('footer-links.index') }}" @class([request()->routeIs('footer-links.*') ? $navLinkActive : $navLink])>Footer Link</a>
             </div>
 
             <div class="flex items-center gap-x-1 sm:gap-x-1.5">
-                <button type="button" class="inline-flex size-9 items-center justify-center rounded-full text-ink-2 transition hover:bg-ink/5 hover:text-ink focus:outline-hidden" aria-label="Ara">
-                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
-                </button>
+                <div
+                    class="relative"
+                    x-data="{ open: false }"
+                    @keydown.escape.window="open = false"
+                    x-init="$watch('open', (value) => { if (value) $nextTick(() => $refs.headerSearchInput?.focus()) })"
+                >
+                    <button
+                        type="button"
+                        class="inline-flex size-9 items-center justify-center rounded-full text-ink-2 transition hover:bg-ink/5 hover:text-ink focus:outline-hidden"
+                        aria-label="Ara"
+                        @click="open = !open"
+                        :aria-expanded="open.toString()"
+                    >
+                        <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
+                    </button>
+
+                    <div
+                        x-show="open"
+                        x-cloak
+                        @click.outside="open = false"
+                        class="absolute end-0 z-50 mt-2 w-72 rounded-2xl border border-ink/10 bg-white p-2 shadow-pop sm:w-80"
+                    >
+                        <form method="get" action="{{ route('sites.index') }}" class="flex items-center gap-1.5" role="search">
+                            <svg class="ms-2 size-4 shrink-0 text-ink-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
+                            <input
+                                type="search"
+                                name="q"
+                                x-ref="headerSearchInput"
+                                placeholder="Site ara, ör. habergazetesi.com.tr"
+                                class="w-full border-0 bg-transparent p-0 py-1.5 text-sm text-ink placeholder:text-ink-3 focus:ring-0"
+                                aria-label="Site ara"
+                            >
+                            <button type="submit" class="inline-flex shrink-0 items-center justify-center rounded-full bg-ink px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-black">
+                                Ara
+                            </button>
+                        </form>
+                    </div>
+                </div>
 
                 @auth
                     @php
@@ -144,10 +179,10 @@
             <div class="mx-auto flex max-w-6xl flex-col gap-0.5 px-4 py-2 sm:px-6">
                 <a href="{{ route('home') }}" class="rounded-xl px-3 py-2 text-sm text-ink-2 transition hover:bg-ink/5 hover:text-ink">Anasayfa</a>
                 <a href="{{ route('sites.index') }}" class="rounded-xl px-3 py-2 text-sm text-ink-2 transition hover:bg-ink/5 hover:text-ink">Tüm Siteler</a>
-                <a href="{{ url('/basin-bulteni') }}" class="rounded-xl px-3 py-2 text-sm text-ink-2 transition hover:bg-ink/5 hover:text-ink">Basın Bülteni</a>
-                <a href="{{ url('/backlink-paketleri') }}" class="rounded-xl px-3 py-2 text-sm text-ink-2 transition hover:bg-ink/5 hover:text-ink">Tanıtım Paketleri</a>
-                <a href="{{ url('/story-satis') }}" class="rounded-xl px-3 py-2 text-sm text-ink-2 transition hover:bg-ink/5 hover:text-ink">Story Satış</a>
-                <a href="{{ url('/footer-link') }}" class="rounded-xl px-3 py-2 text-sm text-ink-2 transition hover:bg-ink/5 hover:text-ink">Footer Link</a>
+                <a href="{{ route('press-release.index') }}" class="rounded-xl px-3 py-2 text-sm text-ink-2 transition hover:bg-ink/5 hover:text-ink">Basın Bülteni</a>
+                <a href="{{ route('bundles.index') }}" class="rounded-xl px-3 py-2 text-sm text-ink-2 transition hover:bg-ink/5 hover:text-ink">Tanıtım Paketleri</a>
+                <a href="{{ route('story.index') }}" class="rounded-xl px-3 py-2 text-sm text-ink-2 transition hover:bg-ink/5 hover:text-ink">Story Satış</a>
+                <a href="{{ route('footer-links.index') }}" class="rounded-xl px-3 py-2 text-sm text-ink-2 transition hover:bg-ink/5 hover:text-ink">Footer Link</a>
                 <a href="tel:08503052241" class="rounded-xl px-3 py-2 text-sm font-medium text-ink transition hover:bg-ink/5">0850 305 22 41</a>
             </div>
         </div>

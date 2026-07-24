@@ -72,6 +72,18 @@ document.addEventListener('alpine:init', () => {
         },
     }));
 
+    Alpine.data('loginRequiredModal', () => ({
+        open: false,
+        init() {
+            window.addEventListener('open-login-modal', () => {
+                this.open = true;
+            });
+        },
+        close() {
+            this.open = false;
+        },
+    }));
+
     Alpine.data('fakeOrderToast', (endpoint) => ({
         endpoint,
         visible: false,

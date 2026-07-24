@@ -31,6 +31,7 @@
 
     @include('components.fake-order-toast')
     @include('components.chatbot-widget')
+    @include('components.login-required-modal')
 
     {{-- chatbot.js is a separate Vite entry: type=module ⇒ deferred, idle-mounted --}}
     @vite(['resources/js/chatbot.js'])

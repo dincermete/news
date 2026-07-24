@@ -49,6 +49,7 @@ class OrderResourceTest extends TestCase
         Livewire::test(CreateOrder::class)
             ->fillForm([
                 'user_id' => $customer->id,
+                'product_type' => 'site_article',
                 'site_id' => $site->id,
                 'content_source' => ContentSource::CustomerProvided->value,
                 'price' => 150,

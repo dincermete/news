@@ -3,15 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Enums\BillingProfileType;
+use App\Enums\Currency;
 use App\Enums\PaymentMethod;
 use App\Exceptions\EmptyCartException;
 use App\Exceptions\InsufficientWalletBalanceException;
 use App\Exceptions\InvalidCouponException;
-use App\Enums\Currency;
-use App\Models\BillingProfile;
+use App\Models\CartItem;
 use App\Models\OrderGroup;
 use App\Models\Payment;
 use App\Models\Wallet;
+use App\Services\BillingProfileResolver;
 use App\Services\CartCheckoutService;
 use App\Services\CartService;
 use App\Services\PaymentDiscountCalculator;
@@ -33,12 +34,13 @@ class CheckoutController extends Controller
         protected PaytrService $paytr,
         protected WalletPaymentService $walletPayments,
         protected SeoMetaService $seo,
+        protected BillingProfileResolver $billingProfiles,
     ) {}
 
     public function show(Request $request): View|RedirectResponse
     {
         $cart = $this->carts->resolveOrCreateCart($request);
-        $cart->load(['items.site']);
+        $cart->load(['items.site', 'items.siteBundle', 'items.footerLinkDurationOption', 'items.instagramAccount', 'items.instagramStoryPrice', 'items.seoPackage', 'items.seoPackageDurationOption']);
 
         if ($cart->items->isEmpty()) {
             return redirect()
@@ -46,27 +48,31 @@ class CheckoutController extends Controller
                 ->withErrors(['cart' => 'Sepetiniz boş.']);
         }
 
+        if ($cart->items->contains(fn (CartItem $item): bool => ! $item->isConfigured())) {
+            return redirect()
+                ->route('cart.index')
+                ->withErrors(['cart' => 'Ödemeye geçmeden önce sepetinizdeki tüm ürünleri yapılandırmalısınız.']);
+        }
+
         $user = $request->user();
-        $billingProfiles = BillingProfile::query()
-            ->where('user_id', $user->id)
-            ->latest('id')
-            ->get();
 
         $summary = $this->carts->summarize($cart, $this->carts->rememberedCoupon());
-        $payable = [
-            PaymentMethod::Card->value => $this->discounts->applyDiscount($summary['total'], PaymentMethod::Card),
-            PaymentMethod::BankTransfer->value => $this->discounts->applyDiscount($summary['total'], PaymentMethod::BankTransfer),
-            PaymentMethod::Balance->value => $this->discounts->applyDiscount($summary['total'], PaymentMethod::Balance),
-        ];
+        $payable = $this->payableByMethod($summary['total']);
+        $wallet = Wallet::forUser($user, Currency::Try);
 
         return view('checkout.show', [
             'meta' => $this->seo->forDefault(),
-            'cart' => $cart,
+            'lineItems' => $cart->items,
             'summary' => $summary,
-            'billingProfiles' => $billingProfiles,
             'payable' => $payable,
+            'walletBalance' => $wallet->totalAvailableBalance(),
             'bankTransferDiscountPercent' => (float) config('payment.bank_transfer_discount_percent', 0),
             'banks' => config('payment.banks', []),
+            'postSubmitMethod' => null,
+            'paytrToken' => null,
+            'bankTransferPayment' => null,
+            'orderGroup' => null,
+            'payment' => null,
         ]);
     }
 
@@ -80,10 +86,10 @@ class CheckoutController extends Controller
                 'integer',
                 Rule::exists('billing_profiles', 'id')->where('user_id', $user->id),
             ],
-            'billing_type' => ['required_without:billing_profile_id', Rule::enum(BillingProfileType::class)],
-            'tax_id' => ['required_without:billing_profile_id', 'string', 'max:32'],
+            'billing_type' => ['nullable', Rule::enum(BillingProfileType::class)],
+            'tax_id' => ['nullable', 'string', 'max:32'],
             'company_name' => ['nullable', 'string', 'max:255'],
-            'address' => ['required_without:billing_profile_id', 'string', 'max:2000'],
+            'address' => ['nullable', 'string', 'max:2000'],
             'tax_office' => ['nullable', 'string', 'max:255'],
             'payment_method' => ['required', Rule::enum(PaymentMethod::class)],
             'contracts_accepted' => ['accepted'],
@@ -100,7 +106,13 @@ class CheckoutController extends Controller
                 ->withErrors(['cart' => 'Sepetiniz boş.']);
         }
 
-        $billingProfile = $this->resolveBillingProfile($request, $data);
+        if ($cart->items->contains(fn (CartItem $item): bool => ! $item->isConfigured())) {
+            return redirect()
+                ->route('cart.index')
+                ->withErrors(['cart' => 'Ödemeye geçmeden önce sepetinizdeki tüm ürünleri yapılandırmalısınız.']);
+        }
+
+        $billingProfile = $this->billingProfiles->resolveOptional($request, $data);
         $method = PaymentMethod::from($data['payment_method']);
         $couponCode = $this->carts->rememberedCoupon();
         $summary = $this->carts->summarize($cart, $couponCode);
@@ -160,49 +172,21 @@ class CheckoutController extends Controller
         ]);
     }
 
-    /**
-     * @param  array<string, mixed>  $data
-     */
-    protected function resolveBillingProfile(Request $request, array $data): BillingProfile
-    {
-        if (filled($data['billing_profile_id'] ?? null)) {
-            return BillingProfile::query()
-                ->whereKey($data['billing_profile_id'])
-                ->where('user_id', $request->user()->id)
-                ->firstOrFail();
-        }
-
-        $type = BillingProfileType::from($data['billing_type']);
-
-        return BillingProfile::query()->create([
-            'user_id' => $request->user()->id,
-            'type' => $type,
-            'tax_id' => $data['tax_id'],
-            'company_name' => $type === BillingProfileType::Corporate ? ($data['company_name'] ?? null) : null,
-            'address' => $data['address'],
-            'tax_office' => $type === BillingProfileType::Corporate ? ($data['tax_office'] ?? null) : null,
-        ]);
-    }
-
     protected function handleCardPayment(Payment $payment, OrderGroup $orderGroup): View
     {
         $result = $this->paytr->getIframeToken($payment);
 
-        return view('checkout.paytr', [
-            'meta' => $this->seo->forDefault(),
-            'orderGroup' => $orderGroup,
-            'token' => $result['token'],
-            'payment' => $result['payment'],
+        return view('checkout.show', [
+            ...$this->postSubmitViewData($orderGroup, PaymentMethod::Card),
+            'paytrToken' => $result['token'],
         ]);
     }
 
     protected function handleBankTransfer(OrderGroup $orderGroup, Payment $payment): View
     {
-        return view('checkout.bank-transfer', [
-            'meta' => $this->seo->forDefault(),
-            'orderGroup' => $orderGroup->load(['orders.site']),
-            'payment' => $payment,
-            'banks' => config('payment.banks', []),
+        return view('checkout.show', [
+            ...$this->postSubmitViewData($orderGroup, PaymentMethod::BankTransfer),
+            'bankTransferPayment' => $payment,
         ]);
     }
 
@@ -220,5 +204,50 @@ class CheckoutController extends Controller
         }
 
         return redirect()->route('checkout.success', $orderGroup);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function postSubmitViewData(OrderGroup $orderGroup, PaymentMethod $method): array
+    {
+        $orderGroup->loadMissing(['user', 'payments', 'orders.site', 'orders.siteBundle', 'orders.footerLinkDurationOption', 'orders.instagramAccount', 'orders.instagramStoryPrice', 'orders.seoPackage', 'orders.seoPackageDurationOption']);
+
+        $payment = $orderGroup->payments->firstWhere('method', $method) ?? $orderGroup->payments->first();
+
+        return [
+            'meta' => $this->seo->forDefault(),
+            'lineItems' => $orderGroup->orders,
+            'summary' => [
+                'subtotal' => (float) $orderGroup->subtotal,
+                'tier_discount' => (float) $orderGroup->discount_tier_amount,
+                'coupon_discount' => (float) $orderGroup->coupon_discount_amount,
+                'coupon' => null,
+                'coupon_code' => null,
+                'coupon_error' => null,
+                'total' => (float) $orderGroup->total,
+            ],
+            'payable' => $this->payableByMethod((float) $orderGroup->total),
+            'walletBalance' => Wallet::forUser($orderGroup->user, Currency::Try)->totalAvailableBalance(),
+            'bankTransferDiscountPercent' => (float) config('payment.bank_transfer_discount_percent', 0),
+            'banks' => config('payment.banks', []),
+            'postSubmitMethod' => $method,
+            'paytrToken' => null,
+            'bankTransferPayment' => null,
+            'orderGroup' => $orderGroup,
+            'payment' => $payment,
+        ];
+    }
+
+    /**
+     * @return array<string, float>
+     */
+    protected function payableByMethod(float $total): array
+    {
+        return [
+            PaymentMethod::Card->value => $this->discounts->applyDiscount($total, PaymentMethod::Card),
+            PaymentMethod::BankTransfer->value => $this->discounts->applyDiscount($total, PaymentMethod::BankTransfer),
+            PaymentMethod::Balance->value => $this->discounts->applyDiscount($total, PaymentMethod::Balance),
+        ];
     }
 }

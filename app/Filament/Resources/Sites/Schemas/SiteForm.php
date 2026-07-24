@@ -90,6 +90,12 @@ class SiteForm
                                         ->numeric()
                                         ->minValue(0)
                                         ->step(0.01),
+                                    TextInput::make('press_release_price')
+                                        ->label('Basın Bülteni Fiyatı')
+                                        ->numeric()
+                                        ->minValue(0)
+                                        ->step(0.01)
+                                        ->helperText('Boş bırakılırsa bu site Basın Bülteni sayfasında listelenmez.'),
                                     Select::make('currency')
                                         ->label('Para birimi')
                                         ->options(Currency::class)

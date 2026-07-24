@@ -5,6 +5,7 @@ namespace App\View\Composers;
 use App\Enums\Currency;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
+use App\Enums\SeoAnalysisStatus;
 use App\Enums\SupportTicketStatus;
 use App\Enums\WalletBalanceType;
 use App\Models\Invoice;
@@ -50,6 +51,7 @@ class AccountLayoutComposer
                 'favorites' => $user->favorites()->count(),
                 'support' => $user->supportTickets()->where('status', '!=', SupportTicketStatus::Closed)->count(),
                 'payments' => $pendingNotifications,
+                'seo_analyses' => $user->seoAnalysisRequests()->where('status', '!=', SeoAnalysisStatus::Completed)->count(),
             ],
         ]);
     }

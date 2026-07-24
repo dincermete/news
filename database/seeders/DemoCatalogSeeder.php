@@ -6,12 +6,17 @@ use App\Enums\CouponType;
 use App\Enums\Currency;
 use App\Enums\SiteStatus;
 use App\Enums\SpinPrizeType;
+use App\Enums\StoryFormat;
 use App\Models\Coupon;
 use App\Models\DiscountTier;
 use App\Models\FooterLink;
 use App\Models\FooterLinkDurationOption;
+use App\Models\InstagramAccount;
+use App\Models\InstagramStoryPrice;
 use App\Models\Label;
 use App\Models\Page;
+use App\Models\SeoPackage;
+use App\Models\SeoPackageDurationOption;
 use App\Models\Site;
 use App\Models\SiteBundle;
 use App\Models\SiteCategory;
@@ -39,6 +44,8 @@ class DemoCatalogSeeder extends Seeder
 
         $this->seedSiteBundles($sites);
         $this->seedFooterLinkDurationOptions();
+        $this->seedInstagramAccounts();
+        $this->seedSeoPackages();
         $this->seedDiscountTiers();
         $this->seedCoupons();
         $this->seedSpinWheelPrizes();
@@ -138,6 +145,9 @@ class DemoCatalogSeeder extends Seeder
                 'discount_price' => fake()->boolean(35)
                     ? fake()->randomFloat(2, 15, 400)
                     : null,
+                'press_release_price' => fake()->boolean(50)
+                    ? fake()->randomFloat(2, 20, 500)
+                    : null,
                 'da_value' => fake()->randomFloat(2, 5, 90),
                 'pa_value' => fake()->randomFloat(2, 5, 85),
                 'is_dofollow' => fake()->boolean(75),
@@ -190,6 +200,34 @@ class DemoCatalogSeeder extends Seeder
         }
     }
 
+    protected function seedInstagramAccounts(): void
+    {
+        for ($i = 0; $i < 30; $i++) {
+            $account = InstagramAccount::query()->updateOrCreate(
+                ['handle' => '@'.fake()->unique()->userName()],
+                [
+                    'name' => fake()->company(),
+                    'follower_count' => fake()->numberBetween(5_000, 500_000),
+                    'status' => SiteStatus::Active,
+                ],
+            );
+
+            if (fake()->boolean(70)) {
+                InstagramStoryPrice::query()->updateOrCreate(
+                    ['instagram_account_id' => $account->id, 'format' => StoryFormat::Post],
+                    ['price' => fake()->randomFloat(2, 3000, 8000), 'currency' => 'TRY', 'is_active' => true],
+                );
+            }
+
+            if (fake()->boolean(70)) {
+                InstagramStoryPrice::query()->updateOrCreate(
+                    ['instagram_account_id' => $account->id, 'format' => StoryFormat::Story],
+                    ['price' => fake()->randomFloat(2, 1000, 5000), 'currency' => 'TRY', 'is_active' => true],
+                );
+            }
+        }
+    }
+
     protected function seedFooterLinkDurationOptions(): void
     {
         $options = [
@@ -208,6 +246,102 @@ class DemoCatalogSeeder extends Seeder
                     'price_multiplier' => $option['price_multiplier'] ?? null,
                     'flat_price' => $option['flat_price'] ?? null,
                     'is_active' => true,
+                ],
+            );
+        }
+    }
+
+    protected function seedSeoPackages(): void
+    {
+        $durationOptions = [
+            ['name' => 'Aylık', 'months' => 1, 'price_multiplier' => 1.0, 'bonus_label' => null, 'sort_order' => 1],
+            ['name' => '3 Aylık', 'months' => 3, 'price_multiplier' => 1.0, 'bonus_label' => null, 'sort_order' => 2],
+            ['name' => '6 Aylık', 'months' => 6, 'price_multiplier' => 0.9167, 'bonus_label' => '1 AY HEDİYE', 'sort_order' => 3],
+            ['name' => '12 Aylık', 'months' => 12, 'price_multiplier' => 0.875, 'bonus_label' => '2 AY HEDİYE', 'sort_order' => 4],
+        ];
+
+        foreach ($durationOptions as $option) {
+            SeoPackageDurationOption::query()->updateOrCreate(
+                ['name' => $option['name']],
+                [
+                    'months' => $option['months'],
+                    'price_multiplier' => $option['price_multiplier'],
+                    'bonus_label' => $option['bonus_label'],
+                    'sort_order' => $option['sort_order'],
+                    'is_active' => true,
+                ],
+            );
+        }
+
+        $packages = [
+            [
+                'name' => 'Temel',
+                'description' => 'Yeni ve küçük siteler için SEO + GEO\'ya uygun maliyetli giriş paketi.',
+                'keyword_count' => 12,
+                'monthly_price' => 24000,
+                'is_featured' => false,
+                'sort_order' => 1,
+                'features' => [
+                    '12 anahtar kelime + rekabet analizi',
+                    'Aylık 4 SEO + GEO uyumlu içerik',
+                    'Teknik SEO denetimi & Core Web Vitals',
+                    'AI erişimi: robots.txt + llms.txt + temel schema',
+                    'Link profili izleme',
+                    'Yerel SEO & Google İşletme Profili',
+                    'AI görünürlük takibi (3 motor)',
+                    'Aylık performans raporu',
+                ],
+            ],
+            [
+                'name' => 'Başlangıç',
+                'description' => 'SEO + GEO temelini kuran, büyümeye hazır markalar için sağlam başlangıç.',
+                'keyword_count' => 20,
+                'monthly_price' => 30000,
+                'is_featured' => true,
+                'sort_order' => 2,
+                'features' => [
+                    '20 anahtar kelime + rekabet analizi',
+                    'Aylık 8 SEO + GEO uyumlu içerik',
+                    'Teknik SEO denetimi & Core Web Vitals',
+                    'AI erişimi: robots.txt + llms.txt + temel schema',
+                    'Link profili izleme & disavow',
+                    'Yerel SEO & Google İşletme Profili',
+                    'AI görünürlük takibi (3 motor)',
+                    'Aylık performans raporu',
+                    'Entity & Knowledge Graph optimizasyonu',
+                ],
+            ],
+            [
+                'name' => 'Profesyonel',
+                'description' => 'Google, ChatGPT, Gemini ve Perplexity\'de tam görünürlük: SEO, GEO ve AEO bir arada.',
+                'keyword_count' => 40,
+                'monthly_price' => 45000,
+                'is_featured' => false,
+                'sort_order' => 3,
+                'features' => [
+                    '40 anahtar kelime + topic cluster mimarisi',
+                    'Aylık 16 içerik + AEO Quick Answer blokları',
+                    'Tam teknik SEO (99 kontrol noktası kapsamı)',
+                    'Gelişmiş schema + entity / Knowledge Graph',
+                    'Otorite ağı + dijital PR (Reddit, Medium, LinkedIn)',
+                    'AI Share of Voice + citation takibi (5 motor)',
+                    'Özel KPI dashboard + haftalık & aylık rapor',
+                ],
+            ],
+        ];
+
+        foreach ($packages as $package) {
+            SeoPackage::query()->updateOrCreate(
+                ['name' => $package['name']],
+                [
+                    'description' => $package['description'],
+                    'keyword_count' => $package['keyword_count'],
+                    'monthly_price' => $package['monthly_price'],
+                    'currency' => 'TRY',
+                    'features' => $package['features'],
+                    'is_featured' => $package['is_featured'],
+                    'sort_order' => $package['sort_order'],
+                    'status' => SiteStatus::Active,
                 ],
             );
         }

@@ -74,13 +74,24 @@
 
         <form method="post" action="{{ route('cart.add') }}">
             @csrf
+            <input type="hidden" name="product_type" value="site_article">
             <input type="hidden" name="site_id" value="{{ $site->id }}">
-            <button
-                type="submit"
-                class="inline-flex items-center gap-x-1.5 rounded-full bg-gradient-to-b from-black to-[#363b3c] px-3.5 py-1.5 text-xs font-semibold text-white transition hover:scale-[1.04] active:scale-[0.98]"
-            >
-                Sepete Ekle
-            </button>
+            @guest
+                <button
+                    type="button"
+                    class="inline-flex items-center gap-x-1.5 rounded-full bg-gradient-to-b from-black to-[#363b3c] px-3.5 py-1.5 text-xs font-semibold text-white transition hover:scale-[1.04] active:scale-[0.98]"
+                    onclick="window.dispatchEvent(new CustomEvent('open-login-modal'))"
+                >
+                    Sepete Ekle
+                </button>
+            @else
+                <button
+                    type="submit"
+                    class="inline-flex items-center gap-x-1.5 rounded-full bg-gradient-to-b from-black to-[#363b3c] px-3.5 py-1.5 text-xs font-semibold text-white transition hover:scale-[1.04] active:scale-[0.98]"
+                >
+                    Sepete Ekle
+                </button>
+            @endguest
         </form>
     </div>
 </div>

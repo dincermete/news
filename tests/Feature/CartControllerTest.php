@@ -7,11 +7,16 @@ use App\Enums\ContentMode;
 use App\Enums\Currency;
 use App\Enums\ProductType;
 use App\Enums\SiteStatus;
+use App\Enums\StoryFormat;
 use App\Models\ArticleWordPackage;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Coupon;
+use App\Models\FooterLinkDurationOption;
+use App\Models\InstagramAccount;
+use App\Models\InstagramStoryPrice;
 use App\Models\Site;
+use App\Models\SiteBundle;
 use App\Models\User;
 use App\Services\CartService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -23,7 +28,7 @@ class CartControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_guest_can_add_and_view_cart_item(): void
+    public function test_guest_is_redirected_to_login_and_item_is_not_added(): void
     {
         $site = Site::factory()->create([
             'status' => SiteStatus::Active,
@@ -32,7 +37,24 @@ class CartControllerTest extends TestCase
             'currency' => Currency::Try,
         ]);
 
-        $this->post(route('cart.add'), ['site_id' => $site->id])
+        $this->post(route('cart.add'), ['product_type' => 'site_article', 'site_id' => $site->id])
+            ->assertRedirect(route('login'));
+
+        $this->assertDatabaseMissing(CartItem::class, ['site_id' => $site->id]);
+    }
+
+    public function test_authenticated_user_can_add_and_view_cart_item(): void
+    {
+        $user = User::factory()->create();
+        $site = Site::factory()->create([
+            'status' => SiteStatus::Active,
+            'price' => 150,
+            'discount_price' => null,
+            'currency' => Currency::Try,
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('cart.add'), ['product_type' => 'site_article', 'site_id' => $site->id])
             ->assertRedirect(route('cart.index'));
 
         $this->assertDatabaseHas(CartItem::class, [
@@ -41,7 +63,8 @@ class CartControllerTest extends TestCase
             'price' => 150,
         ]);
 
-        $this->get(route('cart.index'))
+        $this->actingAs($user)
+            ->get(route('cart.index'))
             ->assertOk()
             ->assertSee($site->domain)
             ->assertSee('150,00');
@@ -57,12 +80,109 @@ class CartControllerTest extends TestCase
         ]);
 
         $this->actingAs($user)
-            ->post(route('cart.add'), ['site_id' => $site->id])
+            ->post(route('cart.add'), ['product_type' => 'site_article', 'site_id' => $site->id])
             ->assertRedirect(route('cart.index'));
 
         $this->assertDatabaseHas(Cart::class, [
             'user_id' => $user->id,
             'status' => CartStatus::Active->value,
+        ]);
+    }
+
+    public function test_authenticated_user_can_add_press_release(): void
+    {
+        $user = User::factory()->create();
+        $site = Site::factory()->create([
+            'status' => SiteStatus::Active,
+            'press_release_price' => 250,
+            'currency' => Currency::Try,
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('cart.add'), ['product_type' => 'press_release', 'site_id' => $site->id])
+            ->assertRedirect(route('cart.index'));
+
+        $this->assertDatabaseHas(CartItem::class, [
+            'site_id' => $site->id,
+            'product_type' => ProductType::PressRelease->value,
+            'price' => 250,
+        ]);
+    }
+
+    public function test_authenticated_user_can_add_bundle(): void
+    {
+        $user = User::factory()->create();
+        $bundle = SiteBundle::factory()->create([
+            'status' => SiteStatus::Active,
+            'price' => 999,
+            'currency' => Currency::Try,
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('cart.add'), ['product_type' => 'bundle', 'site_bundle_id' => $bundle->id])
+            ->assertRedirect(route('cart.index'));
+
+        $this->assertDatabaseHas(CartItem::class, [
+            'site_bundle_id' => $bundle->id,
+            'product_type' => ProductType::Bundle->value,
+            'price' => 999,
+        ]);
+    }
+
+    public function test_authenticated_user_can_add_footer_link(): void
+    {
+        $user = User::factory()->create();
+        $site = Site::factory()->create([
+            'status' => SiteStatus::Active,
+            'price' => 100,
+            'discount_price' => null,
+            'currency' => Currency::Try,
+        ]);
+        $option = FooterLinkDurationOption::factory()->create([
+            'is_active' => true,
+            'flat_price' => 350,
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('cart.add'), [
+                'product_type' => 'footer_link',
+                'site_id' => $site->id,
+                'footer_link_duration_option_id' => $option->id,
+            ])
+            ->assertRedirect(route('cart.index'));
+
+        $this->assertDatabaseHas(CartItem::class, [
+            'site_id' => $site->id,
+            'footer_link_duration_option_id' => $option->id,
+            'product_type' => ProductType::FooterLink->value,
+            'price' => 350,
+        ]);
+    }
+
+    public function test_authenticated_user_can_add_story(): void
+    {
+        $user = User::factory()->create();
+        $account = InstagramAccount::factory()->create(['status' => SiteStatus::Active]);
+        $storyPrice = InstagramStoryPrice::factory()->create([
+            'instagram_account_id' => $account->id,
+            'format' => StoryFormat::Post,
+            'price' => 4500,
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('cart.add'), [
+                'product_type' => 'story',
+                'instagram_account_id' => $account->id,
+                'instagram_story_price_id' => $storyPrice->id,
+            ])
+            ->assertRedirect(route('cart.index'));
+
+        $this->assertDatabaseHas(CartItem::class, [
+            'instagram_account_id' => $account->id,
+            'instagram_story_price_id' => $storyPrice->id,
+            'product_type' => ProductType::Story->value,
+            'price' => 4500,
         ]);
     }
 
@@ -112,6 +232,28 @@ class CartControllerTest extends TestCase
         $this->assertSame('https://example.com/hedef', $item->content_payload['target_url'] ?? null);
         $this->assertNotEmpty($item->content_payload['file_path'] ?? null);
         Storage::disk('local')->assertExists($item->content_payload['file_path']);
+        $this->assertTrue($item->isConfigured());
+    }
+
+    public function test_update_content_without_file_or_url_leaves_item_unconfigured(): void
+    {
+        $user = User::factory()->create();
+        $cart = Cart::factory()->create(['user_id' => $user->id]);
+        $item = CartItem::factory()->create([
+            'cart_id' => $cart->id,
+            'content_mode' => ContentMode::FileUpload,
+            'content_payload' => null,
+            'site_id' => Site::factory()->create(['status' => SiteStatus::Active, 'price' => 100]),
+            'price' => 100,
+        ]);
+
+        $this->actingAs($user)
+            ->patch(route('cart.update-content', $item), [
+                'content_mode' => ContentMode::FileUpload->value,
+            ])
+            ->assertRedirect(route('cart.index'));
+
+        $this->assertFalse($item->fresh()->isConfigured());
     }
 
     public function test_update_content_ai_article_mode_with_package(): void
@@ -151,6 +293,38 @@ class CartControllerTest extends TestCase
         $this->assertSame($package->id, $item->article_word_package_id);
         $this->assertSame('seo, backlink', $item->content_payload['keywords'] ?? null);
         $this->assertSame('125.00', $item->price);
+        $this->assertTrue($item->isConfigured());
+    }
+
+    public function test_update_content_footer_link_item(): void
+    {
+        $user = User::factory()->create();
+        $cart = Cart::factory()->create(['user_id' => $user->id]);
+        $item = CartItem::factory()->create([
+            'cart_id' => $cart->id,
+            'product_type' => ProductType::FooterLink,
+            'content_mode' => ContentMode::None,
+            'content_payload' => null,
+            'site_id' => Site::factory()->create(['status' => SiteStatus::Active]),
+            'footer_link_duration_option_id' => FooterLinkDurationOption::factory()->create(['flat_price' => 200]),
+            'price' => 200,
+        ]);
+
+        $this->actingAs($user)
+            ->patch(route('cart.update-content', $item), [
+                'target_url' => 'https://ornek.com',
+                'keywords' => 'seo danışmanlık',
+                'note' => 'Ek not',
+            ])
+            ->assertRedirect(route('cart.index'));
+
+        $item->refresh();
+
+        $this->assertSame('https://ornek.com', $item->content_payload['target_url'] ?? null);
+        $this->assertSame('seo danışmanlık', $item->content_payload['keywords'] ?? null);
+        $this->assertSame('Ek not', $item->content_payload['note'] ?? null);
+        $this->assertSame('200.00', $item->price);
+        $this->assertTrue($item->isConfigured());
     }
 
     public function test_apply_coupon_preview_stores_session_without_redemption(): void
@@ -176,7 +350,8 @@ class CartControllerTest extends TestCase
         $this->assertSame('SAVE10', session(CartService::SESSION_COUPON_KEY));
         $this->assertDatabaseCount('coupon_redemptions', 0);
 
-        $this->get(route('cart.index'))
+        $this->actingAs($user)
+            ->get(route('cart.index'))
             ->assertOk()
             ->assertSee('SAVE10');
     }

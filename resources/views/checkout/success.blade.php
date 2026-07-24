@@ -65,16 +65,19 @@
             </dl>
 
             <div class="mt-7 flex flex-wrap items-center justify-center gap-3">
-                <a href="{{ route('account.orders') }}" class="group inline-flex items-center gap-x-3 rounded-2xl bg-gradient-to-b from-black to-[#363b3c] p-1 pe-5 text-sm font-medium text-white transition hover:scale-[1.02] active:scale-[0.98]">
+                <a href="{{ route('account.orders.show', $orderGroup) }}" class="group inline-flex items-center gap-x-3 rounded-2xl bg-gradient-to-b from-black to-[#363b3c] p-1 pe-5 text-sm font-medium text-white transition hover:scale-[1.02] active:scale-[0.98]">
                     <span class="inline-flex size-9 items-center justify-center rounded-xl bg-white/15 text-white">
                         <svg class="size-3.5 transition group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
                     </span>
-                    Siparişlerim
+                    Sipariş Detayı
                 </a>
                 <a href="{{ route('sites.index') }}" class="inline-flex items-center justify-center rounded-2xl border border-ink/10 bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:border-ink/25">
                     Alışverişe devam
                 </a>
             </div>
+            <p class="mt-4 text-xs text-ink-3">
+                Fatura mı istiyorsunuz? Sipariş detayındaki <span class="font-semibold text-ink-2">Fatura</span> sekmesinden tamamlayabilirsiniz.
+            </p>
         </div>
     </div>
 @endsection

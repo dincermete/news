@@ -34,6 +34,7 @@ class Site extends Model
         'status',
         'price',
         'discount_price',
+        'press_release_price',
         'currency',
         'daily_capacity',
         'weekly_capacity',
@@ -104,6 +105,7 @@ class Site extends Model
             'status' => SiteStatus::class,
             'price' => 'decimal:2',
             'discount_price' => 'decimal:2',
+            'press_release_price' => 'decimal:2',
             'currency' => Currency::class,
             'daily_capacity' => 'integer',
             'weekly_capacity' => 'integer',
@@ -147,4 +149,5 @@ class Site extends Model
     {
         return $this->hasMany(SiteQuestion::class);
     }
+
 }

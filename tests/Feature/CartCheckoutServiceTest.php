@@ -57,6 +57,27 @@ class CartCheckoutServiceTest extends TestCase
         $this->assertSame(2, Order::query()->where('order_group_id', $group->id)->count());
     }
 
+    public function test_checkout_succeeds_without_billing_profile(): void
+    {
+        $user = User::factory()->create();
+        $cart = Cart::factory()->create(['user_id' => $user->id, 'status' => CartStatus::Active]);
+
+        CartItem::factory()->create([
+            'cart_id' => $cart->id,
+            'product_type' => ProductType::SiteArticle,
+            'site_id' => Site::factory()->create(['price' => 100])->id,
+            'price' => 100,
+            'currency' => Currency::Try,
+        ]);
+
+        $group = app(CartCheckoutService::class)->checkout($cart, null);
+
+        $this->assertInstanceOf(OrderGroup::class, $group);
+        $this->assertSame($user->id, $group->user_id);
+        $this->assertNull($group->billing_profile_id);
+        $this->assertCount(1, $group->orders);
+    }
+
     public function test_checkout_applies_highest_matching_discount_tier(): void
     {
         $user = User::factory()->create();

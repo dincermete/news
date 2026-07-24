@@ -7,17 +7,21 @@ use Filament\Support\Contracts\HasLabel;
 enum ProductType: string implements HasLabel
 {
     case SiteArticle = 'site_article';
+    case PressRelease = 'press_release';
     case FooterLink = 'footer_link';
     case Bundle = 'bundle';
     case Story = 'story';
+    case SeoPackage = 'seo_package';
 
     public function getLabel(): string
     {
         return match ($this) {
             self::SiteArticle => 'Site yazısı',
+            self::PressRelease => 'Basın Bülteni',
             self::FooterLink => 'Footer link',
             self::Bundle => 'Paket',
             self::Story => 'Story',
+            self::SeoPackage => 'SEO Paketi',
         };
     }
 }

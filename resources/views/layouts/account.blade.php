@@ -78,6 +78,7 @@
                         ['route' => 'account.invoices', 'label' => 'Faturalarım', 'count' => $accountNavCounts['invoices']],
                         ['route' => 'account.favorites', 'label' => 'Favori Ürünlerim', 'count' => $accountNavCounts['favorites']],
                         ['route' => 'account.support-tickets', 'label' => 'Destek Taleplerim', 'count' => $accountNavCounts['support']],
+                        ['route' => 'account.seo-analyses', 'label' => 'SEO Analizlerim', 'count' => $accountNavCounts['seo_analyses']],
                         ['route' => 'account.payment-notification', 'label' => 'Ödeme Bildirimi', 'count' => $accountNavCounts['payments']],
                         ['route' => 'account.site-submissions', 'label' => 'Site Başvurularım', 'count' => null],
                         ['route' => 'account.spin-wheel', 'label' => 'Çarkıfelek', 'count' => null],

@@ -29,7 +29,7 @@ class CartCheckoutService
 
     public function checkout(
         Cart $cart,
-        BillingProfile $billingProfile,
+        ?BillingProfile $billingProfile = null,
         ?string $couponCode = null,
         PaymentMethod $method = PaymentMethod::Card,
     ): OrderGroup {
@@ -73,7 +73,7 @@ class CartCheckoutService
             $total = max(0, round($subtotal - $tierDiscount - $couponDiscount, 2));
 
             $orderGroup = OrderGroup::query()->create([
-                'user_id' => $cart->user_id ?? $billingProfile->user_id,
+                'user_id' => $cart->user_id ?? $billingProfile?->user_id,
                 'subtotal' => $subtotal,
                 'discount_tier_amount' => $tierDiscount,
                 'coupon_discount_amount' => $couponDiscount,
@@ -81,7 +81,7 @@ class CartCheckoutService
                 'vat_withholding_amount' => null,
                 'total' => $total,
                 'currency' => $currency,
-                'billing_profile_id' => $billingProfile->id,
+                'billing_profile_id' => $billingProfile?->id,
                 'contract_accepted_at' => now(),
             ]);
 
@@ -97,6 +97,10 @@ class CartCheckoutService
                     'site_bundle_id' => $item->site_bundle_id,
                     'footer_link_duration_option_id' => $item->footer_link_duration_option_id,
                     'article_word_package_id' => $item->article_word_package_id,
+                    'instagram_account_id' => $item->instagram_account_id,
+                    'instagram_story_price_id' => $item->instagram_story_price_id,
+                    'seo_package_id' => $item->seo_package_id,
+                    'seo_package_duration_option_id' => $item->seo_package_duration_option_id,
                     'content_mode' => $item->content_mode,
                     'content_payload' => $item->content_payload,
                     'order_group_id' => $orderGroup->id,

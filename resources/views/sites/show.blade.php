@@ -120,13 +120,23 @@
 
                     <form method="post" action="{{ route('cart.add') }}" class="mt-5">
                         @csrf
+                        <input type="hidden" name="product_type" value="site_article">
                         <input type="hidden" name="site_id" value="{{ $site->id }}">
-                        <button type="submit" class="{{ $btnDark }} w-full">
-                            <span class="{{ $btnChip }} bg-white/15 text-white">
-                                <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                            </span>
-                            Sepete Ekle
-                        </button>
+                        @guest
+                            <button type="button" class="{{ $btnDark }} w-full" onclick="window.dispatchEvent(new CustomEvent('open-login-modal'))">
+                                <span class="{{ $btnChip }} bg-white/15 text-white">
+                                    <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                                </span>
+                                Sepete Ekle
+                            </button>
+                        @else
+                            <button type="submit" class="{{ $btnDark }} w-full">
+                                <span class="{{ $btnChip }} bg-white/15 text-white">
+                                    <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                                </span>
+                                Sepete Ekle
+                            </button>
+                        @endguest
                     </form>
 
                     <form method="post" action="{{ route('sites.favorite', $site) }}" class="mt-2.5">

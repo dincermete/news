@@ -18,8 +18,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'site_bundle_id',
     'footer_link_duration_option_id',
     'article_word_package_id',
+    'instagram_account_id',
+    'instagram_story_price_id',
+    'seo_package_id',
+    'seo_package_duration_option_id',
     'content_mode',
     'content_payload',
+    'configured_at',
     'price',
     'currency',
 ])]
@@ -47,10 +52,16 @@ class CartItem extends Model
             'product_type' => ProductType::class,
             'content_mode' => ContentMode::class,
             'content_payload' => 'array',
+            'configured_at' => 'datetime',
             'price' => 'decimal:2',
             'currency' => Currency::class,
             'created_at' => 'datetime',
         ];
+    }
+
+    public function isConfigured(): bool
+    {
+        return $this->configured_at !== null;
     }
 
     public function cart(): BelongsTo
@@ -76,5 +87,25 @@ class CartItem extends Model
     public function articleWordPackage(): BelongsTo
     {
         return $this->belongsTo(ArticleWordPackage::class);
+    }
+
+    public function instagramAccount(): BelongsTo
+    {
+        return $this->belongsTo(InstagramAccount::class);
+    }
+
+    public function instagramStoryPrice(): BelongsTo
+    {
+        return $this->belongsTo(InstagramStoryPrice::class);
+    }
+
+    public function seoPackage(): BelongsTo
+    {
+        return $this->belongsTo(SeoPackage::class);
+    }
+
+    public function seoPackageDurationOption(): BelongsTo
+    {
+        return $this->belongsTo(SeoPackageDurationOption::class);
     }
 }

@@ -12,7 +12,13 @@ use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Coupon;
 use App\Models\DiscountTier;
+use App\Models\FooterLinkDurationOption;
+use App\Models\InstagramAccount;
+use App\Models\InstagramStoryPrice;
+use App\Models\SeoPackage;
+use App\Models\SeoPackageDurationOption;
 use App\Models\Site;
+use App\Models\SiteBundle;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -134,6 +140,128 @@ class CartService
         ]);
     }
 
+    public function addPressRelease(Cart $cart, Site $site): CartItem
+    {
+        if ($site->status !== SiteStatus::Active) {
+            throw ValidationException::withMessages([
+                'site_id' => 'Bu site sepete eklenemez.',
+            ]);
+        }
+
+        if ($site->press_release_price === null) {
+            throw ValidationException::withMessages([
+                'site_id' => 'Bu site basın bülteni satmıyor.',
+            ]);
+        }
+
+        return CartItem::query()->create([
+            'cart_id' => $cart->id,
+            'product_type' => ProductType::PressRelease,
+            'site_id' => $site->id,
+            'content_mode' => ContentMode::FileUpload,
+            'content_payload' => null,
+            'price' => round((float) $site->press_release_price, 2),
+            'currency' => $site->currency,
+        ]);
+    }
+
+    public function addBundle(Cart $cart, SiteBundle $bundle): CartItem
+    {
+        if ($bundle->status !== SiteStatus::Active) {
+            throw ValidationException::withMessages([
+                'site_bundle_id' => 'Bu paket sepete eklenemez.',
+            ]);
+        }
+
+        return CartItem::query()->create([
+            'cart_id' => $cart->id,
+            'product_type' => ProductType::Bundle,
+            'site_bundle_id' => $bundle->id,
+            'content_mode' => ContentMode::FileUpload,
+            'content_payload' => null,
+            'price' => round((float) $bundle->price, 2),
+            'currency' => $bundle->currency,
+        ]);
+    }
+
+    public function addFooterLink(Cart $cart, Site $site, FooterLinkDurationOption $option): CartItem
+    {
+        if ($site->status !== SiteStatus::Active) {
+            throw ValidationException::withMessages([
+                'site_id' => 'Bu site sepete eklenemez.',
+            ]);
+        }
+
+        if (! $option->is_active) {
+            throw ValidationException::withMessages([
+                'footer_link_duration_option_id' => 'Geçerli bir süre seçin.',
+            ]);
+        }
+
+        return CartItem::query()->create([
+            'cart_id' => $cart->id,
+            'product_type' => ProductType::FooterLink,
+            'site_id' => $site->id,
+            'footer_link_duration_option_id' => $option->id,
+            'content_mode' => ContentMode::None,
+            'content_payload' => null,
+            'price' => $option->resolvePrice($this->siteBasePrice($site)),
+            'currency' => $site->currency,
+        ]);
+    }
+
+    public function addStory(Cart $cart, InstagramAccount $account, InstagramStoryPrice $storyPrice): CartItem
+    {
+        if ($account->status !== SiteStatus::Active) {
+            throw ValidationException::withMessages([
+                'instagram_account_id' => 'Bu hesap sepete eklenemez.',
+            ]);
+        }
+
+        if (! $storyPrice->is_active || (int) $storyPrice->instagram_account_id !== (int) $account->id) {
+            throw ValidationException::withMessages([
+                'instagram_story_price_id' => 'Geçerli bir story fiyatı seçin.',
+            ]);
+        }
+
+        return CartItem::query()->create([
+            'cart_id' => $cart->id,
+            'product_type' => ProductType::Story,
+            'instagram_account_id' => $account->id,
+            'instagram_story_price_id' => $storyPrice->id,
+            'content_mode' => ContentMode::None,
+            'content_payload' => null,
+            'price' => round((float) $storyPrice->price, 2),
+            'currency' => $storyPrice->currency,
+        ]);
+    }
+
+    public function addSeoPackage(Cart $cart, SeoPackage $package, SeoPackageDurationOption $option): CartItem
+    {
+        if ($package->status !== SiteStatus::Active) {
+            throw ValidationException::withMessages([
+                'seo_package_id' => 'Bu paket sepete eklenemez.',
+            ]);
+        }
+
+        if (! $option->is_active) {
+            throw ValidationException::withMessages([
+                'seo_package_duration_option_id' => 'Geçerli bir süre seçin.',
+            ]);
+        }
+
+        return CartItem::query()->create([
+            'cart_id' => $cart->id,
+            'product_type' => ProductType::SeoPackage,
+            'seo_package_id' => $package->id,
+            'seo_package_duration_option_id' => $option->id,
+            'content_mode' => ContentMode::None,
+            'content_payload' => null,
+            'price' => $option->resolvePrice($package->monthly_price),
+            'currency' => $package->currency,
+        ]);
+    }
+
     public function removeItem(CartItem $item): void
     {
         $item->delete();
@@ -141,15 +269,28 @@ class CartService
 
     /**
      * @param  array{
-     *     content_mode: string,
+     *     content_mode?: string|null,
      *     target_url?: string|null,
      *     keywords?: string|null,
      *     brief?: string|null,
      *     article_word_package_id?: int|null,
-     *     file?: \Illuminate\Http\UploadedFile|null
+     *     file?: \Illuminate\Http\UploadedFile|null,
+     *     image?: \Illuminate\Http\UploadedFile|null,
+     *     publish_at?: string|null,
+     *     note?: string|null
      * }  $data
      */
     public function updateContent(CartItem $item, array $data): CartItem
+    {
+        return match ($item->product_type) {
+            ProductType::FooterLink => $this->updateFooterLinkContent($item, $data),
+            ProductType::Story => $this->updateStoryContent($item, $data),
+            ProductType::SeoPackage => $this->updateSeoPackageContent($item, $data),
+            default => $this->updateArticleLikeContent($item, $data),
+        };
+    }
+
+    protected function updateArticleLikeContent(CartItem $item, array $data): CartItem
     {
         $mode = ContentMode::from($data['content_mode']);
         $payload = is_array($item->content_payload) ? $item->content_payload : [];
@@ -157,6 +298,16 @@ class CartService
         $payload['target_url'] = filled($data['target_url'] ?? null)
             ? (string) $data['target_url']
             : ($payload['target_url'] ?? null);
+        $payload['publish_at'] = filled($data['publish_at'] ?? null)
+            ? (string) $data['publish_at']
+            : ($payload['publish_at'] ?? null);
+        $payload['note'] = filled($data['note'] ?? null)
+            ? (string) $data['note']
+            : ($payload['note'] ?? null);
+
+        if (isset($data['image']) && $data['image'] !== null) {
+            $payload['image_path'] = $data['image']->store('cart-content/'.$item->id, 'local');
+        }
 
         $packageId = null;
         $price = $this->itemBasePrice($item);
@@ -195,14 +346,92 @@ class CartService
             $packageId = $package->id;
         }
 
+        $configured = $mode === ContentMode::AiArticle
+            ? $packageId !== null
+            : (filled($payload['file_path'] ?? null) || filled($payload['target_url'] ?? null));
+
         $item->forceFill([
             'content_mode' => $mode,
             'content_payload' => $payload,
             'article_word_package_id' => $packageId,
             'price' => $price,
+            'configured_at' => $configured ? now() : null,
         ])->save();
 
-        return $item->fresh(['site', 'articleWordPackage']) ?? $item;
+        return $item->fresh(['site', 'siteBundle', 'articleWordPackage']) ?? $item;
+    }
+
+    protected function updateFooterLinkContent(CartItem $item, array $data): CartItem
+    {
+        $payload = is_array($item->content_payload) ? $item->content_payload : [];
+
+        $payload['target_url'] = filled($data['target_url'] ?? null)
+            ? (string) $data['target_url']
+            : ($payload['target_url'] ?? null);
+        $payload['keywords'] = filled($data['keywords'] ?? null)
+            ? (string) $data['keywords']
+            : ($payload['keywords'] ?? null);
+        $payload['note'] = filled($data['note'] ?? null)
+            ? (string) $data['note']
+            : ($payload['note'] ?? null);
+
+        $item->forceFill([
+            'content_mode' => ContentMode::None,
+            'content_payload' => $payload,
+            'configured_at' => filled($payload['target_url'] ?? null) ? now() : null,
+        ])->save();
+
+        return $item->fresh(['site', 'footerLinkDurationOption']) ?? $item;
+    }
+
+    protected function updateStoryContent(CartItem $item, array $data): CartItem
+    {
+        $payload = is_array($item->content_payload) ? $item->content_payload : [];
+
+        $payload['target_url'] = filled($data['target_url'] ?? null)
+            ? (string) $data['target_url']
+            : ($payload['target_url'] ?? null);
+        $payload['note'] = filled($data['note'] ?? null)
+            ? (string) $data['note']
+            : ($payload['note'] ?? null);
+
+        if (isset($data['image']) && $data['image'] !== null) {
+            $payload['image_path'] = $data['image']->store('cart-content/'.$item->id, 'local');
+        }
+
+        $item->forceFill([
+            'content_mode' => ContentMode::None,
+            'content_payload' => $payload,
+            'configured_at' => (filled($payload['target_url'] ?? null) || filled($payload['image_path'] ?? null)) ? now() : null,
+        ])->save();
+
+        return $item->fresh(['instagramAccount', 'instagramStoryPrice']) ?? $item;
+    }
+
+    /**
+     * @param  array{site_address?: string|null, keywords?: array<int, array{word: string, target_url?: string|null}>|null, note?: string|null}  $data
+     */
+    protected function updateSeoPackageContent(CartItem $item, array $data): CartItem
+    {
+        $payload = is_array($item->content_payload) ? $item->content_payload : [];
+
+        $payload['site_address'] = filled($data['site_address'] ?? null)
+            ? (string) $data['site_address']
+            : ($payload['site_address'] ?? null);
+        $payload['keywords'] = ! empty($data['keywords'])
+            ? array_values($data['keywords'])
+            : ($payload['keywords'] ?? []);
+        $payload['note'] = filled($data['note'] ?? null)
+            ? (string) $data['note']
+            : ($payload['note'] ?? null);
+
+        $item->forceFill([
+            'content_mode' => ContentMode::None,
+            'content_payload' => $payload,
+            'configured_at' => (filled($payload['site_address'] ?? null) && ! empty($payload['keywords'])) ? now() : null,
+        ])->save();
+
+        return $item->fresh(['seoPackage', 'seoPackageDurationOption']) ?? $item;
     }
 
     /**
@@ -294,7 +523,15 @@ class CartService
 
     protected function itemBasePrice(CartItem $item): float
     {
-        $item->loadMissing('site');
+        $item->loadMissing(['site', 'siteBundle']);
+
+        if ($item->product_type === ProductType::PressRelease && $item->site instanceof Site) {
+            return round((float) ($item->site->press_release_price ?? $item->price), 2);
+        }
+
+        if ($item->product_type === ProductType::Bundle && $item->siteBundle instanceof SiteBundle) {
+            return round((float) $item->siteBundle->price, 2);
+        }
 
         if ($item->site instanceof Site) {
             return $this->siteBasePrice($item->site);

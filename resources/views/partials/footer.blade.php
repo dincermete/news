@@ -6,10 +6,10 @@
     $quickLinks = [
         ['label' => 'Anasayfa', 'url' => route('home')],
         ['label' => 'Tüm Siteler', 'url' => route('sites.index')],
-        ['label' => 'Tanıtım Paketleri', 'url' => url('/backlink-paketleri')],
-        ['label' => 'Basın Bülteni', 'url' => url('/basin-bulteni')],
-        ['label' => 'Story Satış', 'url' => url('/story-satis')],
-        ['label' => 'Footer Link', 'url' => url('/footer-link')],
+        ['label' => 'Tanıtım Paketleri', 'url' => route('bundles.index')],
+        ['label' => 'Basın Bülteni', 'url' => route('press-release.index')],
+        ['label' => 'Story Satış', 'url' => route('story.index')],
+        ['label' => 'Footer Link', 'url' => route('footer-links.index')],
     ];
 
     $companyLinks = [

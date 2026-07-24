@@ -7,12 +7,9 @@
 @section('mainClass', 'w-full flex-1')
 
 @php
-    use App\Enums\BillingProfileType;
     use App\Enums\PaymentMethod;
+    use Illuminate\Support\Js;
 
-    $chip = 'inline-flex items-center rounded-[10px] border border-ink/5 bg-white px-3.5 py-2 text-sm font-medium text-ink shadow-soft';
-    $label = 'mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-ink-3';
-    $input = 'block w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm text-ink focus:border-ink/30 focus:ring-0';
     $btnDark = 'group inline-flex w-full items-center justify-center gap-x-3 rounded-2xl bg-gradient-to-b from-black to-[#363b3c] p-1 pe-5 py-3 text-sm font-semibold text-white transition hover:scale-[1.01] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100';
 @endphp
 
@@ -26,7 +23,7 @@
                     Güvenli ödeme
                 </p>
                 <h1 class="mt-4 font-display text-3xl font-medium leading-tight sm:text-4xl">Ödeme</h1>
-                <p class="mt-1.5 text-sm text-white/60">Fatura bilgisi ve ödeme yöntemini seçin.</p>
+                <p class="mt-1.5 text-sm text-white/60">Ödeme yöntemini seçin.</p>
             </div>
         </div>
     </section>
@@ -47,147 +44,153 @@
             </div>
         @endif
 
-        <form
-            method="post"
-            action="{{ route('checkout.process') }}"
+        @if (session('status'))
+            <div class="mb-6 rounded-[20px] border border-emerald-200 bg-emerald-50 px-5 py-3.5 text-sm font-medium text-emerald-800" role="alert">
+                {{ session('status') }}
+            </div>
+        @endif
+
+        <div
             class="grid gap-6 lg:grid-cols-3"
             x-data="{
-                method: '{{ old('payment_method', PaymentMethod::Card->value) }}',
-                contracts: {{ old('contracts_accepted') ? 'true' : 'false' }},
-                billingMode: '{{ old('billing_profile_id') ? 'existing' : ($billingProfiles->isNotEmpty() ? 'existing' : 'new') }}',
+                tab: '{{ $postSubmitMethod?->value ?? old('payment_method', 'card') }}',
+                locked: {{ $postSubmitMethod ? 'true' : 'false' }},
                 payable: {{ Js::from($payable) }}
             }"
         >
-            @csrf
-
             <div class="space-y-5 lg:col-span-2">
-                <div class="rounded-[20px] border border-ink/10 bg-paper p-5">
-                    <h2 class="font-display text-base font-semibold text-ink">Fatura profili</h2>
+                @unless ($postSubmitMethod)
+                    <form
+                        method="post"
+                        action="{{ route('checkout.process') }}"
+                        x-data="{
+                            contracts: {{ old('contracts_accepted') ? 'true' : 'false' }},
+                        }"
+                        class="space-y-5"
+                    >
+                        @csrf
+                        <input type="hidden" name="payment_method" :value="tab">
 
-                    @if ($billingProfiles->isNotEmpty())
-                        <div class="mt-3 flex gap-4 text-sm">
-                            <label class="inline-flex items-center gap-x-2 text-ink-2">
-                                <input type="radio" name="billing_mode_ui" value="existing" x-model="billingMode" class="border-ink/20 text-ink focus:ring-0">
-                                Kayıtlı profil
-                            </label>
-                            <label class="inline-flex items-center gap-x-2 text-ink-2">
-                                <input type="radio" name="billing_mode_ui" value="new" x-model="billingMode" class="border-ink/20 text-ink focus:ring-0">
-                                Yeni profil
-                            </label>
-                        </div>
-
-                        <div class="mt-3" x-show="billingMode === 'existing'" x-cloak>
-                            <select name="billing_profile_id" class="{{ $input }}" :disabled="billingMode !== 'existing'">
-                                @foreach ($billingProfiles as $profile)
-                                    <option value="{{ $profile->id }}" @selected((int) old('billing_profile_id', $billingProfiles->first()->id) === (int) $profile->id)>
-                                        {{ $profile->displayName() }} — {{ $profile->type?->getLabel() }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    @endif
-
-                    <div class="mt-4 space-y-3" x-show="billingMode === 'new' || {{ $billingProfiles->isEmpty() ? 'true' : 'false' }}" x-cloak>
-                        <div class="grid gap-3 sm:grid-cols-2">
-                            <div>
-                                <label class="{{ $label }}">Tip</label>
-                                <select name="billing_type" class="{{ $input }}">
-                                    @foreach (BillingProfileType::cases() as $type)
-                                        <option value="{{ $type->value }}" @selected(old('billing_type', BillingProfileType::Individual->value) === $type->value)>{{ $type->getLabel() }}</option>
-                                    @endforeach
-                                </select>
+                        <div class="rounded-[20px] border border-ink/10 bg-paper p-5">
+                            <h2 class="font-display text-base font-semibold text-ink">Ödeme Yöntemi</h2>
+                            <div class="mt-3">
+                                @include('checkout.partials.method-tiles')
                             </div>
-                            <div>
-                                <label class="{{ $label }}">TCKN / VKN</label>
-                                <input type="text" name="tax_id" value="{{ old('tax_id') }}" class="{{ $input }}">
+
+                            <div class="mt-4">
+                                <div x-show="tab === 'card'" x-cloak>
+                                    @include('checkout.partials.card-tile')
+                                </div>
+                                <div x-show="tab === 'bank_transfer'" x-cloak>
+                                    @include('checkout.partials.bank-transfer-tile')
+                                </div>
+                                <div x-show="tab === 'balance'" x-cloak>
+                                    @include('checkout.partials.balance-tile')
+                                </div>
                             </div>
                         </div>
-                        <div>
-                            <label class="{{ $label }}">Ünvan / şirket</label>
-                            <input type="text" name="company_name" value="{{ old('company_name') }}" class="{{ $input }}">
-                        </div>
-                        <div>
-                            <label class="{{ $label }}">Adres</label>
-                            <textarea name="address" rows="2" class="{{ $input }}">{{ old('address') }}</textarea>
-                        </div>
-                        <div>
-                            <label class="{{ $label }}">Vergi dairesi</label>
-                            <input type="text" name="tax_office" value="{{ old('tax_office') }}" class="{{ $input }}">
-                        </div>
-                    </div>
-                </div>
 
-                <div class="rounded-[20px] border border-ink/10 bg-paper p-5">
-                    <h2 class="font-display text-base font-semibold text-ink">Ödeme yöntemi</h2>
-                    <div class="mt-3 space-y-2.5">
-                        @foreach ([
-                            ['method' => PaymentMethod::Card, 'label' => 'Kredi / banka kartı'],
-                            ['method' => PaymentMethod::BankTransfer, 'label' => 'Havale / EFT (−%'.rtrim(rtrim(number_format($bankTransferDiscountPercent, 2, '.', ''), '0'), '.').')'],
-                            ['method' => PaymentMethod::Balance, 'label' => 'Cüzdan bakiyesi'],
-                        ] as $option)
-                            @php $method = $option['method']; @endphp
-                            <label
-                                class="flex cursor-pointer items-center justify-between gap-3 rounded-xl border px-4 py-3 transition"
-                                :class="method === '{{ $method->value }}' ? 'border-ink bg-white' : 'border-ink/10 bg-white hover:border-ink/25'"
-                            >
-                                <span class="inline-flex items-center gap-x-2.5 text-sm font-medium text-ink">
-                                    <input type="radio" name="payment_method" value="{{ $method->value }}" x-model="method" class="border-ink/20 text-ink focus:ring-0" @checked(old('payment_method', PaymentMethod::Card->value) === $method->value)>
-                                    {{ $option['label'] }}
+                        <div class="rounded-[20px] border border-ink/10 bg-paper p-5">
+                            <label class="flex items-start gap-x-2.5 text-sm text-ink-2">
+                                <input type="checkbox" name="contracts_accepted" value="1" class="mt-0.5 size-4 rounded border-ink/20 text-ink focus:ring-0" x-model="contracts">
+                                <span>
+                                    <a href="{{ route('pages.show', 'mesafeli-satis-sozlesmesi') }}" target="_blank" class="font-semibold text-accent-700 hover:text-accent-800">Mesafeli satış sözleşmesi</a>
+                                    ve
+                                    <a href="{{ route('pages.show', 'on-bilgilendirme-formu') }}" target="_blank" class="font-semibold text-accent-700 hover:text-accent-800">ön bilgilendirme formu</a>
+                                    nu okudum, onaylıyorum.
                                 </span>
-                                <span class="font-display text-sm font-bold text-ink" x-text="(payable['{{ $method->value }}'] ?? 0).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺'"></span>
                             </label>
-                        @endforeach
-                    </div>
-                </div>
+                        </div>
+                    </form>
+                @else
+                    <div class="rounded-[20px] border border-ink/10 bg-paper p-5">
+                        <h2 class="font-display text-base font-semibold text-ink">Ödeme Yöntemi</h2>
+                        <div class="mt-3">
+                            @include('checkout.partials.method-tiles')
+                        </div>
 
-                <div class="rounded-[20px] border border-ink/10 bg-paper p-5">
-                    <label class="flex items-start gap-x-2.5 text-sm text-ink-2">
-                        <input type="checkbox" name="contracts_accepted" value="1" class="mt-0.5 size-4 rounded border-ink/20 text-ink focus:ring-0" x-model="contracts">
-                        <span>
-                            <a href="{{ route('pages.show', 'mesafeli-satis-sozlesmesi') }}" target="_blank" class="font-semibold text-accent-700 hover:text-accent-800">Mesafeli satış sözleşmesi</a>
-                            ve
-                            <a href="{{ route('pages.show', 'on-bilgilendirme-formu') }}" target="_blank" class="font-semibold text-accent-700 hover:text-accent-800">ön bilgilendirme formu</a>
-                            nu okudum, onaylıyorum.
-                        </span>
-                    </label>
-                </div>
+                        <div class="mt-4">
+                            @if ($postSubmitMethod === PaymentMethod::Card)
+                                @include('checkout.partials.card-tile')
+                            @elseif ($postSubmitMethod === PaymentMethod::BankTransfer)
+                                @include('checkout.partials.bank-transfer-tile')
+                            @endif
+                        </div>
+                    </div>
+                @endunless
             </div>
 
             <aside class="lg:col-span-1">
                 <div class="rounded-[20px] border border-ink/10 bg-paper p-5 lg:sticky lg:top-28">
-                    <h2 class="font-display text-base font-semibold text-ink">Özet</h2>
-                    <dl class="mt-4 space-y-2.5 text-sm">
+                    <h2 class="font-display text-base font-semibold text-ink">Sipariş Özeti</h2>
+                    <p class="mt-0.5 text-xs text-ink-3">{{ $lineItems->count() }} ürün</p>
+
+                    <div class="mt-4 max-h-72 space-y-3 overflow-y-auto pe-1">
+                        @foreach ($lineItems as $item)
+                            @php
+                                $itemTitle = $item->site?->domain
+                                    ?? $item->siteBundle?->name
+                                    ?? $item->instagramAccount?->handle
+                                    ?? $item->product_type?->getLabel()
+                                    ?? 'Ürün #'.$item->id;
+                            @endphp
+                            <div class="flex items-start justify-between gap-3 border-b border-ink/5 pb-3 last:border-0 last:pb-0">
+                                <div class="min-w-0">
+                                    <div class="flex flex-wrap items-center gap-1.5">
+                                        @if ($item->site)
+                                            <x-site-favicon :domain="$item->site->domain" :size="20" class="shrink-0 rounded-md" />
+                                        @elseif ($item->instagramAccount)
+                                            <x-instagram-avatar :account="$item->instagramAccount" :size="20" />
+                                        @endif
+                                        <p class="truncate text-sm font-medium text-ink">{{ $itemTitle }}</p>
+                                    </div>
+                                    <div class="mt-1">
+                                        @include('partials.cart-item-badge', ['item' => $item])
+                                    </div>
+                                </div>
+                                <span class="shrink-0 font-display text-sm font-bold text-ink">{{ number_format((float) $item->price, 2, ',', '.') }} ₺</span>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <dl class="mt-4 space-y-2.5 border-t border-ink/10 pt-4 text-sm">
                         <div class="flex justify-between gap-3">
                             <dt class="text-ink-2">Ara toplam</dt>
                             <dd class="font-semibold text-ink">{{ number_format($summary['subtotal'], 2, ',', '.') }} ₺</dd>
                         </div>
                         @if ($summary['tier_discount'] > 0)
                             <div class="flex justify-between gap-3">
-                                <dt class="text-ink-2">Kademe</dt>
+                                <dt class="text-ink-2">Kademe indirimi</dt>
                                 <dd class="font-semibold text-emerald-600">−{{ number_format($summary['tier_discount'], 2, ',', '.') }} ₺</dd>
                             </div>
                         @endif
                         @if ($summary['coupon_discount'] > 0)
                             <div class="flex justify-between gap-3">
-                                <dt class="text-ink-2">Kupon</dt>
+                                <dt class="text-ink-2">Kupon indirimi</dt>
                                 <dd class="font-semibold text-emerald-600">−{{ number_format($summary['coupon_discount'], 2, ',', '.') }} ₺</dd>
                             </div>
                         @endif
+                        @if ($postSubmitMethod === PaymentMethod::BankTransfer && $bankTransferDiscountPercent > 0)
+                            <div class="flex justify-between gap-3">
+                                <dt class="text-ink-2">Havale indirimi (%{{ rtrim(rtrim(number_format($bankTransferDiscountPercent, 2, '.', ''), '0'), '.') }})</dt>
+                                <dd class="font-semibold text-emerald-600">−{{ number_format(max(0, $summary['total'] - ($payment->amount ?? $summary['total'])), 2, ',', '.') }} ₺</dd>
+                            </div>
+                        @endif
                         <div class="flex justify-between gap-3 border-t border-ink/10 pt-3">
-                            <dt class="font-display text-base font-semibold text-ink">Ödenecek</dt>
-                            <dd class="font-display text-base font-bold text-ink" x-text="(payable[method] ?? 0).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺'"></dd>
+                            <dt class="font-display text-base font-semibold text-ink">Ödenecek Tutar</dt>
+                            @if ($postSubmitMethod)
+                                <dd class="font-display text-base font-bold text-ink">{{ number_format((float) ($payment->amount ?? $summary['total']), 2, ',', '.') }} ₺</dd>
+                            @else
+                                <dd class="font-display text-base font-bold text-ink" x-text="(payable[tab] ?? 0).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺'"></dd>
+                            @endif
                         </div>
                     </dl>
 
-                    <button type="submit" class="{{ $btnDark }} mt-5" :disabled="!contracts">
-                        <span class="inline-flex size-9 items-center justify-center rounded-xl bg-white/15 text-white">
-                            <svg class="size-3.5 transition group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
-                        </span>
-                        Siparişi tamamla
-                    </button>
-                    <a href="{{ route('cart.index') }}" class="mt-3 block text-center text-xs font-medium text-ink-3 hover:text-ink">Sepete dön</a>
+                    @unless ($postSubmitMethod)
+                        <a href="{{ route('cart.index') }}" class="mt-4 block text-center text-xs font-medium text-ink-3 hover:text-ink">Sepete dön</a>
+                    @endunless
                 </div>
             </aside>
-        </form>
+        </div>
     </div>
 @endsection

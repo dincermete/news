@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Orders\Schemas;
 use App\Enums\ContentSource;
 use App\Enums\Currency;
 use App\Enums\OrderStatus;
+use App\Enums\ProductType;
 use App\Enums\UserRole;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -12,6 +13,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 
@@ -33,11 +35,59 @@ class OrderForm
                                         ->searchable()
                                         ->preload()
                                         ->required(),
+                                    Select::make('product_type')
+                                        ->label('Ürün tipi')
+                                        ->options(ProductType::class)
+                                        ->required()
+                                        ->default(ProductType::SiteArticle)
+                                        ->live(),
                                     Select::make('site_id')
                                         ->label('Site')
                                         ->relationship('site', 'domain')
                                         ->searchable()
-                                        ->preload(),
+                                        ->preload()
+                                        ->visible(fn (Get $get): bool => in_array(self::productType($get), [
+                                            ProductType::SiteArticle,
+                                            ProductType::PressRelease,
+                                            ProductType::FooterLink,
+                                        ], true)),
+                                    Select::make('instagram_account_id')
+                                        ->label('Instagram hesabı')
+                                        ->relationship('instagramAccount', 'handle')
+                                        ->searchable()
+                                        ->preload()
+                                        ->visible(fn (Get $get): bool => self::productType($get) === ProductType::Story),
+                                    Select::make('site_bundle_id')
+                                        ->label('Site paketi')
+                                        ->relationship('siteBundle', 'name')
+                                        ->searchable()
+                                        ->preload()
+                                        ->visible(fn (Get $get): bool => self::productType($get) === ProductType::Bundle),
+                                    Select::make('footer_link_duration_option_id')
+                                        ->label('Footer link süresi')
+                                        ->relationship('footerLinkDurationOption', 'name')
+                                        ->searchable()
+                                        ->preload()
+                                        ->visible(fn (Get $get): bool => self::productType($get) === ProductType::FooterLink),
+                                    Select::make('instagram_story_price_id')
+                                        ->label('Story fiyatı')
+                                        ->relationship('instagramStoryPrice', 'id')
+                                        ->getOptionLabelFromRecordUsing(fn ($record): string => $record->instagramAccount?->handle.' — '.$record->format->getLabel())
+                                        ->searchable()
+                                        ->preload()
+                                        ->visible(fn (Get $get): bool => self::productType($get) === ProductType::Story),
+                                    Select::make('seo_package_id')
+                                        ->label('SEO paketi')
+                                        ->relationship('seoPackage', 'name')
+                                        ->searchable()
+                                        ->preload()
+                                        ->visible(fn (Get $get): bool => self::productType($get) === ProductType::SeoPackage),
+                                    Select::make('seo_package_duration_option_id')
+                                        ->label('SEO paketi süresi')
+                                        ->relationship('seoPackageDurationOption', 'name')
+                                        ->searchable()
+                                        ->preload()
+                                        ->visible(fn (Get $get): bool => self::productType($get) === ProductType::SeoPackage),
                                     TextInput::make('site_package_id')
                                         ->label('Site paketi ID')
                                         ->numeric()
@@ -91,5 +141,12 @@ class OrderForm
                     ->columnSpanFull()
                     ->persistTabInQueryString(),
             ]);
+    }
+
+    protected static function productType(Get $get): ?ProductType
+    {
+        $value = $get('product_type');
+
+        return $value instanceof ProductType ? $value : ProductType::tryFrom((string) $value);
     }
 }

@@ -26,6 +26,10 @@ class OrderObserver
             'site_id',
             'site_bundle_id',
             'footer_link_duration_option_id',
+            'instagram_account_id',
+            'instagram_story_price_id',
+            'seo_package_id',
+            'seo_package_duration_option_id',
             'content_payload',
         ])) {
             $this->assertProductRequirements($order);
@@ -51,9 +55,11 @@ class OrderObserver
 
         match ($productType) {
             ProductType::SiteArticle => $this->requireFilled($order->site_id, 'site_article için site_id zorunludur.'),
+            ProductType::PressRelease => $this->requireFilled($order->site_id, 'press_release için site_id zorunludur.'),
             ProductType::Bundle => $this->requireFilled($order->site_bundle_id, 'bundle için site_bundle_id zorunludur.'),
             ProductType::FooterLink => $this->assertFooterLink($order),
             ProductType::Story => $this->assertStoryPayload($order),
+            ProductType::SeoPackage => $this->assertSeoPackagePayload($order),
         };
     }
 
@@ -68,11 +74,30 @@ class OrderObserver
 
     protected function assertStoryPayload(Order $order): void
     {
+        $this->requireFilled($order->instagram_account_id, 'story için instagram_account_id zorunludur.');
+        $this->requireFilled($order->instagram_story_price_id, 'story için instagram_story_price_id zorunludur.');
+
         $payload = is_array($order->content_payload) ? $order->content_payload : [];
 
         if (blank($payload['target_url'] ?? null) && blank($payload['image_path'] ?? null) && blank($payload['image'] ?? null)) {
             throw InvalidOrderProductException::make(
                 'story için content_payload içinde target_url veya görsel (image_path) zorunludur.',
+            );
+        }
+    }
+
+    protected function assertSeoPackagePayload(Order $order): void
+    {
+        $this->requireFilled($order->seo_package_id, 'seo_package için seo_package_id zorunludur.');
+        $this->requireFilled($order->seo_package_duration_option_id, 'seo_package için seo_package_duration_option_id zorunludur.');
+
+        $payload = is_array($order->content_payload) ? $order->content_payload : [];
+
+        $this->requireFilled($payload['site_address'] ?? null, 'seo_package için content_payload içinde site_address zorunludur.');
+
+        if (blank($payload['keywords'] ?? null)) {
+            throw InvalidOrderProductException::make(
+                'seo_package için content_payload içinde en az bir hedef kelime zorunludur.',
             );
         }
     }

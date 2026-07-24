@@ -182,6 +182,11 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         return $this->hasMany(SiteSubmission::class);
     }
 
+    public function seoAnalysisRequests(): HasMany
+    {
+        return $this->hasMany(SeoAnalysisRequest::class);
+    }
+
     public function customerNotes(): HasMany
     {
         return $this->hasMany(CustomerNote::class);

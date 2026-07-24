@@ -40,6 +40,7 @@ class CheckoutControllerTest extends TestCase
             'site_id' => Site::factory()->create(['status' => SiteStatus::Active]),
             'price' => $price,
             'currency' => Currency::Try,
+            'configured_at' => now(),
         ]);
 
         return $cart;
@@ -49,6 +50,36 @@ class CheckoutControllerTest extends TestCase
     {
         $this->get(route('checkout.show'))
             ->assertRedirect(route('login'));
+    }
+
+    public function test_checkout_blocked_when_cart_has_unconfigured_item(): void
+    {
+        $user = User::factory()->create();
+        $cart = Cart::factory()->create(['user_id' => $user->id, 'status' => CartStatus::Active]);
+
+        CartItem::factory()->create([
+            'cart_id' => $cart->id,
+            'site_id' => Site::factory()->create(['status' => SiteStatus::Active]),
+            'price' => 100,
+            'currency' => Currency::Try,
+            'configured_at' => null,
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('checkout.show'))
+            ->assertRedirect(route('cart.index'))
+            ->assertSessionHasErrors('cart');
+
+        $this->actingAs($user)
+            ->from(route('cart.index'))
+            ->post(route('checkout.process'), [
+                'payment_method' => PaymentMethod::Card->value,
+                'contracts_accepted' => '1',
+            ])
+            ->assertRedirect(route('cart.index'))
+            ->assertSessionHasErrors('cart');
+
+        $this->assertDatabaseCount('order_groups', 0);
     }
 
     public function test_process_requires_contract_acceptance(): void
@@ -133,6 +164,38 @@ class CheckoutControllerTest extends TestCase
             'amount' => 98,
             'status' => PaymentStatus::Pending->value,
         ]);
+    }
+
+    public function test_checkout_succeeds_without_any_billing_info(): void
+    {
+        $user = User::factory()->create();
+        $this->seedCart($user, 100);
+
+        $this->mock(PaytrService::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('getIframeToken')
+                ->once()
+                ->andReturnUsing(function (Payment $payment): array {
+                    $payment->forceFill(['paytr_token' => 'test-token'])->save();
+
+                    return [
+                        'token' => 'test-token',
+                        'merchant_oid' => 'GRPTEST',
+                        'payment' => $payment,
+                    ];
+                });
+        });
+
+        $this->actingAs($user)
+            ->post(route('checkout.process'), [
+                'payment_method' => PaymentMethod::Card->value,
+                'contracts_accepted' => '1',
+            ])
+            ->assertOk();
+
+        $group = OrderGroup::query()->where('user_id', $user->id)->first();
+
+        $this->assertNotNull($group);
+        $this->assertNull($group->billing_profile_id);
     }
 
     public function test_balance_checkout_calls_wallet_payment_service(): void

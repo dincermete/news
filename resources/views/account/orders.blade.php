@@ -41,7 +41,16 @@
                             @foreach ($orders as $order)
                                 <tr class="transition hover:bg-paper">
                                     <td class="px-5 py-3.5 text-ink-2">{{ $order->id }}</td>
-                                    <td class="px-4 py-3.5 font-semibold text-ink">{{ $order->site?->domain ?? '—' }}</td>
+                                    @php
+                                        $orderLabel = $order->site?->domain ?? $order->instagramAccount?->handle ?? '—';
+                                    @endphp
+                                    <td class="px-4 py-3.5 font-semibold text-ink">
+                                        @if ($order->order_group_id)
+                                            <a href="{{ route('account.orders.show', $order->order_group_id) }}" class="hover:text-accent-700 hover:underline">{{ $orderLabel }}</a>
+                                        @else
+                                            {{ $orderLabel }}
+                                        @endif
+                                    </td>
                                     <td class="px-4 py-3.5">
                                         <span class="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold {{ $tone($order->status?->getColor()) }}">
                                             {{ $order->status?->getLabel() }}

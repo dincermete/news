@@ -14,7 +14,7 @@ class PageControllerTest extends TestCase
     public function test_active_page_renders_with_seo_meta(): void
     {
         Page::factory()->create([
-            'slug' => 'geo',
+            'slug' => 'hakkimizda',
             'title' => 'GEO',
             'meta_title' => 'GEO Meta Başlık',
             'meta_description' => 'GEO meta açıklaması buradadır.',
@@ -22,7 +22,7 @@ class PageControllerTest extends TestCase
             'is_active' => true,
         ]);
 
-        $this->get(route('pages.show', 'geo'))
+        $this->get(route('pages.show', 'hakkimizda'))
             ->assertOk()
             ->assertSee('GEO', false)
             ->assertSee('GEO Meta Başlık', false)

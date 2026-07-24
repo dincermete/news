@@ -237,14 +237,26 @@
                                         <td class="px-5 py-3.5 text-end">
                                             <form method="post" action="{{ route('cart.add') }}">
                                                 @csrf
+                                                <input type="hidden" name="product_type" value="site_article">
                                                 <input type="hidden" name="site_id" value="{{ $site->id }}">
-                                                <button
-                                                    type="submit"
-                                                    class="group inline-flex items-center gap-x-1.5 rounded-full bg-gradient-to-b from-black to-[#363b3c] px-3.5 py-2 text-xs font-semibold text-white transition hover:scale-[1.04] active:scale-[0.98]"
-                                                >
-                                                    <svg class="size-3.5 transition group-hover:rotate-90" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                                                    Sepete Ekle
-                                                </button>
+                                                @guest
+                                                    <button
+                                                        type="button"
+                                                        class="group inline-flex items-center gap-x-1.5 rounded-full bg-gradient-to-b from-black to-[#363b3c] px-3.5 py-2 text-xs font-semibold text-white transition hover:scale-[1.04] active:scale-[0.98]"
+                                                        onclick="window.dispatchEvent(new CustomEvent('open-login-modal'))"
+                                                    >
+                                                        <svg class="size-3.5 transition group-hover:rotate-90" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                                                        Sepete Ekle
+                                                    </button>
+                                                @else
+                                                    <button
+                                                        type="submit"
+                                                        class="group inline-flex items-center gap-x-1.5 rounded-full bg-gradient-to-b from-black to-[#363b3c] px-3.5 py-2 text-xs font-semibold text-white transition hover:scale-[1.04] active:scale-[0.98]"
+                                                    >
+                                                        <svg class="size-3.5 transition group-hover:rotate-90" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                                                        Sepete Ekle
+                                                    </button>
+                                                @endguest
                                             </form>
                                         </td>
                                     </tr>

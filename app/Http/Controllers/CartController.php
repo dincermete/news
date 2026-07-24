@@ -3,10 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Enums\ContentMode;
+use App\Enums\ProductType;
 use App\Exceptions\InvalidCouponException;
 use App\Models\ArticleWordPackage;
 use App\Models\CartItem;
+use App\Models\FooterLinkDurationOption;
+use App\Models\InstagramAccount;
+use App\Models\InstagramStoryPrice;
+use App\Models\SeoPackage;
+use App\Models\SeoPackageDurationOption;
 use App\Models\Site;
+use App\Models\SiteBundle;
 use App\Services\CartService;
 use App\Services\SeoMetaService;
 use Illuminate\Http\RedirectResponse;
@@ -24,7 +31,7 @@ class CartController extends Controller
     public function index(Request $request): View
     {
         $cart = $this->carts->resolveOrCreateCart($request);
-        $cart->load(['items.site', 'items.articleWordPackage', 'items.siteBundle', 'items.footerLinkDurationOption']);
+        $cart->load(['items.site', 'items.articleWordPackage', 'items.siteBundle', 'items.footerLinkDurationOption', 'items.instagramAccount', 'items.instagramStoryPrice', 'items.seoPackage', 'items.seoPackageDurationOption']);
 
         $summary = $this->carts->summarize($cart, $this->carts->rememberedCoupon());
 
@@ -44,13 +51,80 @@ class CartController extends Controller
 
     public function addItem(Request $request): RedirectResponse
     {
+        if ($request->user() === null) {
+            return redirect()
+                ->guest(route('login'))
+                ->with('status', 'Sepete ürün eklemek için önce giriş yapmalısınız.');
+        }
+
         $data = $request->validate([
-            'site_id' => ['required', 'integer', 'exists:sites,id'],
+            'product_type' => ['required', Rule::enum(ProductType::class)],
+            'site_id' => [
+                'nullable', 'integer', 'exists:sites,id',
+                Rule::requiredIf(fn (): bool => in_array($request->input('product_type'), [
+                    ProductType::SiteArticle->value,
+                    ProductType::PressRelease->value,
+                    ProductType::FooterLink->value,
+                ], true)),
+            ],
+            'site_bundle_id' => [
+                'nullable', 'integer', 'exists:site_bundles,id',
+                Rule::requiredIf(fn (): bool => $request->input('product_type') === ProductType::Bundle->value),
+            ],
+            'footer_link_duration_option_id' => [
+                'nullable', 'integer', 'exists:footer_link_duration_options,id',
+                Rule::requiredIf(fn (): bool => $request->input('product_type') === ProductType::FooterLink->value),
+            ],
+            'instagram_account_id' => [
+                'nullable', 'integer', 'exists:instagram_accounts,id',
+                Rule::requiredIf(fn (): bool => $request->input('product_type') === ProductType::Story->value),
+            ],
+            'instagram_story_price_id' => [
+                'nullable', 'integer', 'exists:instagram_story_prices,id',
+                Rule::requiredIf(fn (): bool => $request->input('product_type') === ProductType::Story->value),
+            ],
+            'seo_package_id' => [
+                'nullable', 'integer', 'exists:seo_packages,id',
+                Rule::requiredIf(fn (): bool => $request->input('product_type') === ProductType::SeoPackage->value),
+            ],
+            'seo_package_duration_option_id' => [
+                'nullable', 'integer', 'exists:seo_package_duration_options,id',
+                Rule::requiredIf(fn (): bool => $request->input('product_type') === ProductType::SeoPackage->value),
+            ],
         ]);
 
-        $site = Site::query()->findOrFail($data['site_id']);
+        $productType = ProductType::from($data['product_type']);
         $cart = $this->carts->resolveOrCreateCart($request);
-        $this->carts->addSiteArticle($cart, $site);
+
+        match ($productType) {
+            ProductType::SiteArticle => $this->carts->addSiteArticle(
+                $cart,
+                Site::query()->findOrFail($data['site_id']),
+            ),
+            ProductType::PressRelease => $this->carts->addPressRelease(
+                $cart,
+                Site::query()->findOrFail($data['site_id']),
+            ),
+            ProductType::Bundle => $this->carts->addBundle(
+                $cart,
+                SiteBundle::query()->findOrFail($data['site_bundle_id']),
+            ),
+            ProductType::FooterLink => $this->carts->addFooterLink(
+                $cart,
+                Site::query()->findOrFail($data['site_id']),
+                FooterLinkDurationOption::query()->findOrFail($data['footer_link_duration_option_id']),
+            ),
+            ProductType::Story => $this->carts->addStory(
+                $cart,
+                InstagramAccount::query()->findOrFail($data['instagram_account_id']),
+                InstagramStoryPrice::query()->findOrFail($data['instagram_story_price_id']),
+            ),
+            ProductType::SeoPackage => $this->carts->addSeoPackage(
+                $cart,
+                SeoPackage::query()->findOrFail($data['seo_package_id']),
+                SeoPackageDurationOption::query()->findOrFail($data['seo_package_duration_option_id']),
+            ),
+        };
 
         return redirect()
             ->route('cart.index')
@@ -73,11 +147,19 @@ class CartController extends Controller
         $cart = $this->carts->resolveOrCreateCart($request);
         $this->carts->assertOwnsItem($cart, $cartItem);
 
+        $needsMode = in_array($cartItem->product_type, [
+            ProductType::SiteArticle,
+            ProductType::PressRelease,
+            ProductType::Bundle,
+        ], true);
+
         $data = $request->validate([
-            'content_mode' => ['required', Rule::enum(ContentMode::class)],
+            'content_mode' => [Rule::requiredIf($needsMode), 'nullable', Rule::enum(ContentMode::class)],
             'target_url' => ['nullable', 'url', 'max:2048'],
             'keywords' => ['nullable', 'string', 'max:500'],
             'brief' => ['nullable', 'string', 'max:5000'],
+            'note' => ['nullable', 'string', 'max:2000'],
+            'publish_at' => ['nullable', 'date'],
             'article_word_package_id' => [
                 'nullable',
                 'integer',
@@ -85,13 +167,55 @@ class CartController extends Controller
                 'exists:article_word_packages,id',
             ],
             'file' => ['nullable', 'file', 'mimes:doc,docx,pdf,txt,rtf', 'max:10240'],
+            'image' => ['nullable', 'file', 'mimes:png,jpg,jpeg', 'max:20480'],
+            'site_address' => ['nullable', 'url', 'max:2048'],
+            'seo_keywords' => ['nullable', 'json'],
         ]);
+
+        if ($cartItem->product_type === ProductType::SeoPackage) {
+            $data['keywords'] = $this->parseSeoKeywords($data['seo_keywords'] ?? null);
+        }
 
         $this->carts->updateContent($cartItem, $data);
 
         return redirect()
             ->route('cart.index')
             ->with('status', 'İçerik ayarları kaydedildi.');
+    }
+
+    /**
+     * @return array<int, array{word: string, target_url: string|null}>
+     */
+    protected function parseSeoKeywords(?string $json): array
+    {
+        if (blank($json)) {
+            return [];
+        }
+
+        $decoded = json_decode($json, true);
+
+        if (! is_array($decoded)) {
+            return [];
+        }
+
+        $keywords = [];
+
+        foreach ($decoded as $entry) {
+            $word = trim((string) ($entry['word'] ?? ''));
+
+            if ($word === '') {
+                continue;
+            }
+
+            $targetUrl = trim((string) ($entry['target_url'] ?? ''));
+
+            $keywords[] = [
+                'word' => mb_substr($word, 0, 100),
+                'target_url' => $targetUrl !== '' ? mb_substr($targetUrl, 0, 500) : null,
+            ];
+        }
+
+        return $keywords;
     }
 
     public function applyCoupon(Request $request): RedirectResponse
