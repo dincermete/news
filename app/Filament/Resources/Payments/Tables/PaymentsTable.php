@@ -50,6 +50,12 @@ class PaymentsTable
                     ->label('Yöntem')
                     ->badge()
                     ->sortable(),
+                TextColumn::make('reference_code')
+                    ->label('Referans')
+                    ->searchable()
+                    ->fontFamily('mono')
+                    ->placeholder('—')
+                    ->toggleable(),
                 TextColumn::make('status')
                     ->label('Durum')
                     ->badge()

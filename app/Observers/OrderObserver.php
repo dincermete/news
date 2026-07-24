@@ -30,6 +30,7 @@ class OrderObserver
             'instagram_story_price_id',
             'seo_package_id',
             'seo_package_duration_option_id',
+            'backlink_package_id',
             'content_payload',
         ])) {
             $this->assertProductRequirements($order);
@@ -60,7 +61,16 @@ class OrderObserver
             ProductType::FooterLink => $this->assertFooterLink($order),
             ProductType::Story => $this->assertStoryPayload($order),
             ProductType::SeoPackage => $this->assertSeoPackagePayload($order),
+            ProductType::BacklinkPackage => $this->assertBacklinkPackagePayload($order),
+            ProductType::Balance => $this->assertBalancePayload($order),
         };
+    }
+
+    protected function assertBalancePayload(Order $order): void
+    {
+        if ((float) $order->price <= 0) {
+            throw InvalidOrderProductException::make('balance için price sıfırdan büyük olmalıdır.');
+        }
     }
 
     protected function assertFooterLink(Order $order): void
@@ -98,6 +108,21 @@ class OrderObserver
         if (blank($payload['keywords'] ?? null)) {
             throw InvalidOrderProductException::make(
                 'seo_package için content_payload içinde en az bir hedef kelime zorunludur.',
+            );
+        }
+    }
+
+    protected function assertBacklinkPackagePayload(Order $order): void
+    {
+        $this->requireFilled($order->backlink_package_id, 'backlink_package için backlink_package_id zorunludur.');
+
+        $payload = is_array($order->content_payload) ? $order->content_payload : [];
+
+        $this->requireFilled($payload['site_address'] ?? null, 'backlink_package için content_payload içinde site_address zorunludur.');
+
+        if (blank($payload['keywords'] ?? null)) {
+            throw InvalidOrderProductException::make(
+                'backlink_package için content_payload içinde en az bir hedef kelime zorunludur.',
             );
         }
     }

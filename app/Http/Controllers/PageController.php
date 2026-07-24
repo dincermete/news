@@ -40,13 +40,9 @@ class PageController extends Controller
      */
     protected function faqsForPage(string $slug): Collection
     {
-        if ($slug !== 'backlink-paketleri') {
-            return collect();
-        }
-
         return FaqEntry::query()
             ->active()
-            ->where('category', 'backlink-paketleri')
+            ->where('category', $slug)
             ->orderBy('id')
             ->get();
     }

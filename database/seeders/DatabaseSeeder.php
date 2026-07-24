@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             WalletTopupPackageSeeder::class,
+            BankAccountSeeder::class,
             ArticleWordPackageSeeder::class,
             PageSeeder::class,
         ]);

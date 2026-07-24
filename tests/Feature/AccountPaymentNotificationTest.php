@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\Currency;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
+use App\Models\BankAccount;
 use App\Models\OrderGroup;
 use App\Models\Payment;
 use App\Models\User;
@@ -17,14 +18,10 @@ class AccountPaymentNotificationTest extends TestCase
 
     public function test_payment_notification_page_lists_banks_and_pending_payments(): void
     {
-        config([
-            'payment.banks' => [
-                [
-                    'name' => 'Ziraat Bankası',
-                    'iban' => 'TR00 0000 0000 0000 0000 0000 00',
-                    'account_name' => 'NewsTanıtım',
-                ],
-            ],
+        BankAccount::factory()->create([
+            'name' => 'Ziraat Bankası',
+            'iban' => 'TR00 0000 0000 0000 0000 0000 00',
+            'account_name' => 'NewsTanıtım',
         ]);
 
         $user = User::factory()->customer()->create();
@@ -43,7 +40,7 @@ class AccountPaymentNotificationTest extends TestCase
             ->get(route('account.payment-notification'))
             ->assertOk()
             ->assertSee('Ziraat Bankası')
-            ->assertSee('Bildirim formu')
+            ->assertSee('Ödeme Bildirimi Yap')
             ->assertSee('100,00');
     }
 

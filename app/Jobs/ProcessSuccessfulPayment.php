@@ -19,6 +19,7 @@ class ProcessSuccessfulPayment implements ShouldQueue
 
         InvoiceGenerationJob::dispatchSync($this->payment);
         AwardSpinCredits::dispatchSync($this->payment);
+        CreditWalletTopupBalance::dispatchSync($this->payment);
         SuccessfulPaymentProcessed::dispatch($this->payment);
     }
 }

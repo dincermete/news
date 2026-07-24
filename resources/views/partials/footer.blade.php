@@ -21,7 +21,7 @@
 
     $supportLinks = [
         ['label' => 'Destek', 'url' => auth()->check() ? route('account.support-tickets') : route('login')],
-        ['label' => 'İletişim', 'url' => 'mailto:info@newstanitim.com'],
+        ['label' => 'İletişim', 'url' => route('contact.show')],
         ['label' => 'Mesafeli Satış Sözleşmesi', 'url' => route('pages.show', 'mesafeli-satis-sozlesmesi')],
         ['label' => 'Ön Bilgilendirme Formu', 'url' => route('pages.show', 'on-bilgilendirme-formu')],
     ];

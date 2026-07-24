@@ -101,6 +101,8 @@ class CartCheckoutService
                     'instagram_story_price_id' => $item->instagram_story_price_id,
                     'seo_package_id' => $item->seo_package_id,
                     'seo_package_duration_option_id' => $item->seo_package_duration_option_id,
+                    'backlink_package_id' => $item->backlink_package_id,
+                    'wallet_topup_package_id' => $item->wallet_topup_package_id,
                     'content_mode' => $item->content_mode,
                     'content_payload' => $item->content_payload,
                     'order_group_id' => $orderGroup->id,

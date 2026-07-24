@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Account;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Http\Controllers\Controller;
+use App\Models\BankAccount;
 use App\Models\Payment;
 use App\Services\SeoMetaService;
 use Illuminate\Http\Request;
@@ -35,14 +36,14 @@ class AccountPaymentNotificationController extends Controller
             })
             ->whereNotNull('bank_name')
             ->latest('id')
-            ->limit(20)
+            ->limit(5)
             ->get();
 
         return view('account.payment-notification', [
             'meta' => $seo->forDefault(),
             'pendingPayments' => $pendingPayments,
             'history' => $history,
-            'banks' => config('payment.banks', []),
+            'banks' => BankAccount::query()->active()->ordered()->get(),
         ]);
     }
 }

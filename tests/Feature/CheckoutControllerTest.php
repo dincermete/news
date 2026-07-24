@@ -8,6 +8,7 @@ use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Enums\SiteStatus;
 use App\Enums\WalletBalanceType;
+use App\Models\BankAccount;
 use App\Models\BillingProfile;
 use App\Models\Cart;
 use App\Models\CartItem;
@@ -143,6 +144,7 @@ class CheckoutControllerTest extends TestCase
     public function test_bank_transfer_checkout_applies_two_percent_discount_and_shows_banks(): void
     {
         config(['payment.bank_transfer_discount_percent' => 2]);
+        BankAccount::factory()->create(['name' => 'Ziraat Bankası']);
 
         $user = User::factory()->create();
         $billing = BillingProfile::factory()->create(['user_id' => $user->id]);

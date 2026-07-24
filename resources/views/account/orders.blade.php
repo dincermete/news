@@ -42,7 +42,7 @@
                                 <tr class="transition hover:bg-paper">
                                     <td class="px-5 py-3.5 text-ink-2">{{ $order->id }}</td>
                                     @php
-                                        $orderLabel = $order->site?->domain ?? $order->instagramAccount?->handle ?? '—';
+                                        $orderLabel = $order->site?->domain ?? $order->instagramAccount?->handle ?? $order->seoPackage?->name ?? $order->backlinkPackage?->name ?? '—';
                                     @endphp
                                     <td class="px-4 py-3.5 font-semibold text-ink">
                                         @if ($order->order_group_id)

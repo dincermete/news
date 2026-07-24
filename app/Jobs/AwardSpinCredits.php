@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Enums\SpinCreditTransactionType;
+use App\Models\Order;
 use App\Models\Payment;
 use App\Models\SpinCreditTransaction;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -16,17 +17,22 @@ class AwardSpinCredits implements ShouldQueue
 
     public function handle(): void
     {
-        $payment = $this->payment->loadMissing(['order.user', 'walletTopupPackage']);
+        $payment = $this->payment;
+        $orders = $payment->walletTopupOrders();
 
-        $credits = $this->resolveCredits($payment);
+        $userId = $payment->order?->user_id ?? $payment->orderGroup?->user_id;
 
-        if ($credits <= 0) {
+        if ($userId === null) {
             return;
         }
 
-        $userId = $payment->order?->user_id;
+        $credits = $orders->isNotEmpty()
+            ? $orders->sum(fn (Order $order): int => $this->resolveOrderCredits($order))
+            : $this->resolveLegacyCredits($payment);
 
-        if ($userId === null) {
+        $credits = (int) $credits;
+
+        if ($credits <= 0) {
             return;
         }
 
@@ -49,8 +55,19 @@ class AwardSpinCredits implements ShouldQueue
         ]);
     }
 
-    protected function resolveCredits(Payment $payment): int
+    protected function resolveOrderCredits(Order $order): int
     {
+        if ($order->wallet_topup_package_id && $order->walletTopupPackage) {
+            return (int) $order->walletTopupPackage->spin_credits;
+        }
+
+        return (int) floor(((float) $order->price) / 100) * 3;
+    }
+
+    protected function resolveLegacyCredits(Payment $payment): int
+    {
+        $payment->loadMissing('walletTopupPackage');
+
         if ($payment->wallet_topup_package_id && $payment->walletTopupPackage) {
             return (int) $payment->walletTopupPackage->spin_credits;
         }

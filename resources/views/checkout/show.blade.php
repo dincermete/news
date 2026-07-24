@@ -50,10 +50,16 @@
             </div>
         @endif
 
+        @php
+            $initialTab = $postSubmitMethod?->value ?? old('payment_method', 'card');
+            if ($hasWalletTopupItem && $initialTab === 'balance') {
+                $initialTab = 'card';
+            }
+        @endphp
         <div
             class="grid gap-6 lg:grid-cols-3"
             x-data="{
-                tab: '{{ $postSubmitMethod?->value ?? old('payment_method', 'card') }}',
+                tab: '{{ $initialTab }}',
                 locked: {{ $postSubmitMethod ? 'true' : 'false' }},
                 payable: {{ Js::from($payable) }}
             }"
@@ -131,6 +137,8 @@
                                 $itemTitle = $item->site?->domain
                                     ?? $item->siteBundle?->name
                                     ?? $item->instagramAccount?->handle
+                                    ?? $item->seoPackage?->name
+                                    ?? $item->backlinkPackage?->name
                                     ?? $item->product_type?->getLabel()
                                     ?? 'Ürün #'.$item->id;
                             @endphp

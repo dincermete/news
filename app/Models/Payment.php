@@ -6,6 +6,7 @@ use App\Enums\Currency;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
+use App\Enums\ProductType;
 use App\Observers\PaymentObserver;
 use Database\Factories\PaymentFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -29,6 +30,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'bank_name',
     'payer_name',
     'payer_note',
+    'reference_code',
     'wallet_topup_package_id',
     'custom_topup_amount',
 ])]
@@ -81,10 +83,31 @@ class Payment extends Model
             && $this->status === PaymentStatus::Notified;
     }
 
+    /**
+     * The cart-checkout Balance orders funded by this payment (a wallet top-up
+     * bought like any other product, via order_group_id — not the legacy
+     * direct order_id + wallet_topup_package_id shape below).
+     *
+     * @return \Illuminate\Support\Collection<int, Order>
+     */
+    public function walletTopupOrders(): \Illuminate\Support\Collection
+    {
+        $this->loadMissing(['order', 'orderGroup.orders']);
+
+        if ($this->order?->product_type === ProductType::Balance) {
+            return collect([$this->order]);
+        }
+
+        return ($this->orderGroup?->orders ?? collect())
+            ->where('product_type', ProductType::Balance)
+            ->values();
+    }
+
     public function isWalletTopup(): bool
     {
         return $this->wallet_topup_package_id !== null
-            || $this->custom_topup_amount !== null;
+            || $this->custom_topup_amount !== null
+            || $this->walletTopupOrders()->isNotEmpty();
     }
 
     public function markRelatedOrdersContentPending(): void

@@ -12,6 +12,8 @@ enum ProductType: string implements HasLabel
     case Bundle = 'bundle';
     case Story = 'story';
     case SeoPackage = 'seo_package';
+    case BacklinkPackage = 'backlink_package';
+    case Balance = 'balance';
 
     public function getLabel(): string
     {
@@ -22,6 +24,8 @@ enum ProductType: string implements HasLabel
             self::Bundle => 'Paket',
             self::Story => 'Story',
             self::SeoPackage => 'SEO Paketi',
+            self::BacklinkPackage => 'Backlink Paketi',
+            self::Balance => 'Bakiye Paketi',
         };
     }
 }

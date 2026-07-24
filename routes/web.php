@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AboutController;
 use App\Http\Controllers\Account\AccountAffiliateController;
 use App\Http\Controllers\Account\AccountDashboardController;
 use App\Http\Controllers\Account\AccountFavoriteController;
@@ -12,13 +13,16 @@ use App\Http\Controllers\Account\AccountSeoAnalysisController;
 use App\Http\Controllers\Account\AccountSiteSubmissionController;
 use App\Http\Controllers\Account\AccountSpinWheelController;
 use App\Http\Controllers\Account\AccountSupportTicketController;
+use App\Http\Controllers\Account\AccountWalletTopupController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\BacklinkPackageCatalogController;
 use App\Http\Controllers\BankTransferNotificationController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ChatbotMessageController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\FooterLinkCatalogController;
 use App\Http\Controllers\FreeAnalysisController;
 use App\Http\Controllers\GeoPageController;
@@ -53,7 +57,10 @@ Route::get('/story-satis', StoryCatalogController::class)->name('story.index');
 Route::get('/footer-linkler', FooterLinkCatalogController::class)->name('footer-links.index');
 Route::get('/geo', GeoPageController::class)->name('geo.index');
 Route::get('/seo-paketleri', SeoPackageCatalogController::class)->name('seo-packages.index');
+Route::get('/backlink-paketleri', BacklinkPackageCatalogController::class)->name('backlink-packages.index');
 Route::get('/ucretsiz-analiz', [FreeAnalysisController::class, 'show'])->name('free-analysis.show');
+Route::get('/hakkimizda', AboutController::class)->name('about.show');
+Route::get('/iletisim', ContactController::class)->name('contact.show');
 // {slug} = Site.domain (public URL); do not change Site::getRouteKeyName (breaks /site/{site}/view id binding)
 Route::get('/site/{slug}', SiteShowController::class)->name('sites.show');
 Route::post('/site/{site}/favori', SiteFavoriteController::class)->name('sites.favorite');
@@ -109,6 +116,7 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/destek', [AccountSupportTicketController::class, 'store'])->name('support-tickets.store');
         Route::get('/analizlerim', [AccountSeoAnalysisController::class, 'index'])->name('seo-analyses');
         Route::get('/odeme-bildirimi', AccountPaymentNotificationController::class)->name('payment-notification');
+        Route::get('/cuzdan-yukle', AccountWalletTopupController::class)->name('wallet-topup');
         Route::get('/site-basvurulari', [AccountSiteSubmissionController::class, 'index'])->name('site-submissions');
         Route::post('/site-basvurulari', [AccountSiteSubmissionController::class, 'store'])->name('site-submissions.store');
         Route::get('/cark', [AccountSpinWheelController::class, 'index'])->name('spin-wheel');

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\CartStatus;
 use App\Enums\ContentMode;
+use App\Enums\Currency;
 use App\Enums\ProductType;
 use App\Enums\SiteStatus;
 use App\Exceptions\InvalidCouponException;
@@ -13,6 +14,7 @@ use App\Models\CartItem;
 use App\Models\Coupon;
 use App\Models\DiscountTier;
 use App\Models\FooterLinkDurationOption;
+use App\Models\BacklinkPackage;
 use App\Models\InstagramAccount;
 use App\Models\InstagramStoryPrice;
 use App\Models\SeoPackage;
@@ -20,6 +22,7 @@ use App\Models\SeoPackageDurationOption;
 use App\Models\Site;
 use App\Models\SiteBundle;
 use App\Models\User;
+use App\Models\WalletTopupPackage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -30,6 +33,8 @@ class CartService
     public const SESSION_TOKEN_KEY = 'cart_session_token';
 
     public const SESSION_COUPON_KEY = 'cart_coupon_code';
+
+    public const MIN_WALLET_TOPUP_AMOUNT = 50.0;
 
     public function sessionToken(Request $request): string
     {
@@ -262,6 +267,57 @@ class CartService
         ]);
     }
 
+    public function addBacklinkPackage(Cart $cart, BacklinkPackage $package): CartItem
+    {
+        if ($package->status !== SiteStatus::Active) {
+            throw ValidationException::withMessages([
+                'backlink_package_id' => 'Bu paket sepete eklenemez.',
+            ]);
+        }
+
+        return CartItem::query()->create([
+            'cart_id' => $cart->id,
+            'product_type' => ProductType::BacklinkPackage,
+            'backlink_package_id' => $package->id,
+            'content_mode' => ContentMode::None,
+            'content_payload' => null,
+            'price' => round((float) $package->price, 2),
+            'currency' => $package->currency,
+        ]);
+    }
+
+    public function addWalletTopup(Cart $cart, ?WalletTopupPackage $package, ?float $customAmount): CartItem
+    {
+        if ($package !== null) {
+            if (! $package->is_active) {
+                throw ValidationException::withMessages([
+                    'wallet_topup_package_id' => 'Bu bakiye paketi şu anda satışta değil.',
+                ]);
+            }
+
+            $amount = round((float) $package->amount, 2);
+        } else {
+            $amount = round((float) $customAmount, 2);
+
+            if ($amount < self::MIN_WALLET_TOPUP_AMOUNT) {
+                throw ValidationException::withMessages([
+                    'custom_topup_amount' => 'En az '.number_format(self::MIN_WALLET_TOPUP_AMOUNT, 0, ',', '.').' ₺ bakiye yükleyebilirsiniz.',
+                ]);
+            }
+        }
+
+        return CartItem::query()->create([
+            'cart_id' => $cart->id,
+            'product_type' => ProductType::Balance,
+            'wallet_topup_package_id' => $package?->id,
+            'content_mode' => ContentMode::None,
+            'content_payload' => null,
+            'price' => $amount,
+            'currency' => Currency::Try,
+            'configured_at' => now(),
+        ]);
+    }
+
     public function removeItem(CartItem $item): void
     {
         $item->delete();
@@ -285,7 +341,7 @@ class CartService
         return match ($item->product_type) {
             ProductType::FooterLink => $this->updateFooterLinkContent($item, $data),
             ProductType::Story => $this->updateStoryContent($item, $data),
-            ProductType::SeoPackage => $this->updateSeoPackageContent($item, $data),
+            ProductType::SeoPackage, ProductType::BacklinkPackage => $this->updateKeywordTargetingContent($item, $data),
             default => $this->updateArticleLikeContent($item, $data),
         };
     }
@@ -409,9 +465,12 @@ class CartService
     }
 
     /**
+     * Shared by SeoPackage and BacklinkPackage cart items — both are ordered with
+     * a target site address plus a set of keywords (each with an optional landing page).
+     *
      * @param  array{site_address?: string|null, keywords?: array<int, array{word: string, target_url?: string|null}>|null, note?: string|null}  $data
      */
-    protected function updateSeoPackageContent(CartItem $item, array $data): CartItem
+    protected function updateKeywordTargetingContent(CartItem $item, array $data): CartItem
     {
         $payload = is_array($item->content_payload) ? $item->content_payload : [];
 
@@ -431,7 +490,11 @@ class CartService
             'configured_at' => (filled($payload['site_address'] ?? null) && ! empty($payload['keywords'])) ? now() : null,
         ])->save();
 
-        return $item->fresh(['seoPackage', 'seoPackageDurationOption']) ?? $item;
+        $relations = $item->product_type === ProductType::BacklinkPackage
+            ? ['backlinkPackage']
+            : ['seoPackage', 'seoPackageDurationOption'];
+
+        return $item->fresh($relations) ?? $item;
     }
 
     /**

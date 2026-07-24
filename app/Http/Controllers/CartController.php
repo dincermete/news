@@ -6,6 +6,7 @@ use App\Enums\ContentMode;
 use App\Enums\ProductType;
 use App\Exceptions\InvalidCouponException;
 use App\Models\ArticleWordPackage;
+use App\Models\BacklinkPackage;
 use App\Models\CartItem;
 use App\Models\FooterLinkDurationOption;
 use App\Models\InstagramAccount;
@@ -14,11 +15,13 @@ use App\Models\SeoPackage;
 use App\Models\SeoPackageDurationOption;
 use App\Models\Site;
 use App\Models\SiteBundle;
+use App\Models\WalletTopupPackage;
 use App\Services\CartService;
 use App\Services\SeoMetaService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class CartController extends Controller
@@ -31,7 +34,7 @@ class CartController extends Controller
     public function index(Request $request): View
     {
         $cart = $this->carts->resolveOrCreateCart($request);
-        $cart->load(['items.site', 'items.articleWordPackage', 'items.siteBundle', 'items.footerLinkDurationOption', 'items.instagramAccount', 'items.instagramStoryPrice', 'items.seoPackage', 'items.seoPackageDurationOption']);
+        $cart->load(['items.site', 'items.articleWordPackage', 'items.siteBundle', 'items.footerLinkDurationOption', 'items.instagramAccount', 'items.instagramStoryPrice', 'items.seoPackage', 'items.seoPackageDurationOption', 'items.backlinkPackage']);
 
         $summary = $this->carts->summarize($cart, $this->carts->rememberedCoupon());
 
@@ -91,9 +94,27 @@ class CartController extends Controller
                 'nullable', 'integer', 'exists:seo_package_duration_options,id',
                 Rule::requiredIf(fn (): bool => $request->input('product_type') === ProductType::SeoPackage->value),
             ],
+            'backlink_package_id' => [
+                'nullable', 'integer', 'exists:backlink_packages,id',
+                Rule::requiredIf(fn (): bool => $request->input('product_type') === ProductType::BacklinkPackage->value),
+            ],
+            'wallet_topup_package_id' => ['nullable', 'integer', 'exists:wallet_topup_packages,id'],
+            'custom_topup_amount' => ['nullable', 'numeric', 'min:'.CartService::MIN_WALLET_TOPUP_AMOUNT, 'max:250000'],
         ]);
 
         $productType = ProductType::from($data['product_type']);
+
+        if ($productType === ProductType::Balance) {
+            $hasPackage = filled($data['wallet_topup_package_id'] ?? null);
+            $hasCustomAmount = filled($data['custom_topup_amount'] ?? null);
+
+            if ($hasPackage === $hasCustomAmount) {
+                throw ValidationException::withMessages([
+                    'wallet_topup_package_id' => 'Bir bakiye paketi seçin veya tutarı elle girin (ikisi birden değil).',
+                ]);
+            }
+        }
+
         $cart = $this->carts->resolveOrCreateCart($request);
 
         match ($productType) {
@@ -123,6 +144,17 @@ class CartController extends Controller
                 $cart,
                 SeoPackage::query()->findOrFail($data['seo_package_id']),
                 SeoPackageDurationOption::query()->findOrFail($data['seo_package_duration_option_id']),
+            ),
+            ProductType::BacklinkPackage => $this->carts->addBacklinkPackage(
+                $cart,
+                BacklinkPackage::query()->findOrFail($data['backlink_package_id']),
+            ),
+            ProductType::Balance => $this->carts->addWalletTopup(
+                $cart,
+                filled($data['wallet_topup_package_id'] ?? null)
+                    ? WalletTopupPackage::query()->findOrFail($data['wallet_topup_package_id'])
+                    : null,
+                filled($data['custom_topup_amount'] ?? null) ? (float) $data['custom_topup_amount'] : null,
             ),
         };
 
@@ -172,7 +204,7 @@ class CartController extends Controller
             'seo_keywords' => ['nullable', 'json'],
         ]);
 
-        if ($cartItem->product_type === ProductType::SeoPackage) {
+        if (in_array($cartItem->product_type, [ProductType::SeoPackage, ProductType::BacklinkPackage], true)) {
             $data['keywords'] = $this->parseSeoKeywords($data['seo_keywords'] ?? null);
         }
 

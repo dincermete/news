@@ -97,6 +97,7 @@
                                         ?? $item->siteBundle?->name
                                         ?? $item->instagramAccount?->handle
                                         ?? $item->seoPackage?->name
+                                        ?? $item->backlinkPackage?->name
                                         ?? $item->product_type?->getLabel()
                                         ?? 'Ürün #'.$item->id;
                                     $configured = $item->isConfigured();
@@ -187,6 +188,7 @@
                                                     @include('cart.partials.story-editor', ['item' => $item])
                                                     @break
                                                 @case(\App\Enums\ProductType::SeoPackage)
+                                                @case(\App\Enums\ProductType::BacklinkPackage)
                                                     @include('cart.partials.seo-package-editor', ['item' => $item])
                                                     @break
                                                 @default

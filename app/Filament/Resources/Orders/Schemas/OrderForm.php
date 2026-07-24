@@ -88,6 +88,19 @@ class OrderForm
                                         ->searchable()
                                         ->preload()
                                         ->visible(fn (Get $get): bool => self::productType($get) === ProductType::SeoPackage),
+                                    Select::make('backlink_package_id')
+                                        ->label('Backlink paketi')
+                                        ->relationship('backlinkPackage', 'name')
+                                        ->searchable()
+                                        ->preload()
+                                        ->visible(fn (Get $get): bool => self::productType($get) === ProductType::BacklinkPackage),
+                                    Select::make('wallet_topup_package_id')
+                                        ->label('Bakiye paketi')
+                                        ->relationship('walletTopupPackage', 'amount')
+                                        ->searchable()
+                                        ->preload()
+                                        ->helperText('Boş bırakılırsa fiyat alanındaki tutar özel bakiye yüklemesi olarak kabul edilir.')
+                                        ->visible(fn (Get $get): bool => self::productType($get) === ProductType::Balance),
                                     TextInput::make('site_package_id')
                                         ->label('Site paketi ID')
                                         ->numeric()

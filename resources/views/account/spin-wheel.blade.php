@@ -118,7 +118,7 @@
                         </table>
                     </div>
                     <a
-                        href="{{ route('account.payment-notification') }}"
+                        href="{{ route('account.wallet-topup') }}"
                         class="group mt-4 flex w-full items-center justify-center gap-x-2 rounded-2xl bg-gradient-to-b from-black to-[#363b3c] px-4 py-2.5 text-sm font-semibold text-white transition hover:scale-[1.02] active:scale-[0.98]"
                     >
                         Bakiye Yükle

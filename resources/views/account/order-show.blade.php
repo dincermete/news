@@ -95,6 +95,8 @@
                         $orderTitle = $order->site?->domain
                             ?? $order->siteBundle?->name
                             ?? $order->instagramAccount?->handle
+                            ?? $order->seoPackage?->name
+                            ?? $order->backlinkPackage?->name
                             ?? $order->product_type?->getLabel()
                             ?? 'Ürün #'.$order->id;
                     @endphp

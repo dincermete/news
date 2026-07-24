@@ -15,14 +15,14 @@
                 x-data="{ copied: false }"
             >
                 <div class="min-w-0">
-                    <p class="text-sm font-semibold text-ink">{{ $bank['name'] }}</p>
-                    <p class="text-xs text-ink-2">{{ $bank['account_name'] }}</p>
-                    <p class="mt-0.5 font-mono text-xs text-ink-2">{{ $bank['iban'] }}</p>
+                    <p class="text-sm font-semibold text-ink">{{ $bank->name }}</p>
+                    <p class="text-xs text-ink-2">{{ $bank->account_name }}</p>
+                    <p class="mt-0.5 font-mono text-xs text-ink-2">{{ $bank->iban }}</p>
                 </div>
                 <button
                     type="button"
                     class="shrink-0 rounded-lg border border-ink/10 bg-white px-3 py-1.5 text-xs font-semibold text-ink-2 transition hover:border-ink/25"
-                    @click="navigator.clipboard.writeText('{{ $bank['iban'] }}'); copied = true; setTimeout(() => copied = false, 1500)"
+                    @click="navigator.clipboard.writeText('{{ $bank->iban }}'); copied = true; setTimeout(() => copied = false, 1500)"
                 >
                     <span x-show="!copied">Kopyala</span>
                     <span x-show="copied" x-cloak>Kopyalandı</span>
@@ -34,40 +34,57 @@
     </ul>
 
     @if ($bankTransferPayment)
-        <div class="mt-5 border-t border-ink/10 pt-5">
+        <div class="mt-5 border-t border-ink/10 pt-5" x-data="{ bankChosen: '', copiedRef: false }">
             <h3 class="font-display text-sm font-semibold text-ink">Ödeme Bildirimi</h3>
+
+            @if ($bankTransferPayment->reference_code)
+                <div class="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-accent-200 bg-accent-50/60 px-4 py-3 text-sm text-accent-800">
+                    <span>Havale açıklamasına bu referans kodunu yazın: <strong class="font-mono">{{ $bankTransferPayment->reference_code }}</strong></span>
+                    <button
+                        type="button"
+                        class="shrink-0 rounded-lg border border-accent-200 bg-white px-3 py-1.5 text-xs font-semibold text-accent-800 transition hover:border-accent-300"
+                        @click="navigator.clipboard.writeText('{{ $bankTransferPayment->reference_code }}'); copiedRef = true; setTimeout(() => copiedRef = false, 1500)"
+                    >
+                        <span x-show="!copiedRef">Kopyala</span>
+                        <span x-show="copiedRef" x-cloak>Kopyalandı</span>
+                    </button>
+                </div>
+            @endif
+
             <form method="post" action="{{ route('payment.bank-transfer-notify') }}" class="mt-3 space-y-3">
                 @csrf
                 <input type="hidden" name="payment_id" value="{{ $bankTransferPayment->id }}">
                 <div class="grid gap-3 sm:grid-cols-2">
                     <div>
                         <label class="{{ $label }}">Banka Adı</label>
-                        <input type="text" name="bank_name" required class="{{ $input }}" list="bank-names-list">
-                        <datalist id="bank-names-list">
+                        <select name="bank_name" required class="{{ $input }}" x-model="bankChosen">
+                            <option value="">Seçin</option>
                             @foreach ($banks as $bank)
-                                <option value="{{ $bank['name'] }}"></option>
+                                <option value="{{ $bank->name }}">{{ $bank->name }}</option>
                             @endforeach
-                        </datalist>
+                        </select>
                     </div>
                     <div>
                         <label class="{{ $label }}">Ödenecek Tutar</label>
                         <input type="text" value="{{ number_format((float) $bankTransferPayment->amount, 2, ',', '.') }} {{ $bankTransferPayment->currency?->value ?? 'TRY' }}" class="{{ $input }} bg-paper" readonly>
                     </div>
                 </div>
-                <div>
-                    <label class="{{ $label }}">Ad Soyad</label>
-                    <input type="text" name="payer_name" required class="{{ $input }}">
+                <div x-show="bankChosen !== ''" x-cloak class="space-y-3">
+                    <div>
+                        <label class="{{ $label }}">Ad Soyad</label>
+                        <input type="text" name="payer_name" :required="bankChosen !== ''" class="{{ $input }}">
+                    </div>
+                    <div>
+                        <label class="{{ $label }}">Açıklama</label>
+                        <textarea name="payer_note" rows="2" class="{{ $input }}"></textarea>
+                    </div>
+                    <button type="submit" class="{{ $btnDark }}">
+                        <span class="inline-flex size-9 items-center justify-center rounded-xl bg-white/15 text-white">
+                            <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
+                        </span>
+                        Siparişi Tamamla
+                    </button>
                 </div>
-                <div>
-                    <label class="{{ $label }}">Açıklama</label>
-                    <textarea name="payer_note" rows="2" class="{{ $input }}"></textarea>
-                </div>
-                <button type="submit" class="{{ $btnDark }}">
-                    <span class="inline-flex size-9 items-center justify-center rounded-xl bg-white/15 text-white">
-                        <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
-                    </span>
-                    Siparişi Tamamla
-                </button>
             </form>
         </div>
     @else

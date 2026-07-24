@@ -14,7 +14,7 @@ class PageControllerTest extends TestCase
     public function test_active_page_renders_with_seo_meta(): void
     {
         Page::factory()->create([
-            'slug' => 'hakkimizda',
+            'slug' => 'test-cms-sayfasi',
             'title' => 'GEO',
             'meta_title' => 'GEO Meta Başlık',
             'meta_description' => 'GEO meta açıklaması buradadır.',
@@ -22,7 +22,7 @@ class PageControllerTest extends TestCase
             'is_active' => true,
         ]);
 
-        $this->get(route('pages.show', 'hakkimizda'))
+        $this->get(route('pages.show', 'test-cms-sayfasi'))
             ->assertOk()
             ->assertSee('GEO', false)
             ->assertSee('GEO Meta Başlık', false)
@@ -69,23 +69,23 @@ class PageControllerTest extends TestCase
             ->assertRedirect('/mesafeli-satis-sozlesmesi');
     }
 
-    public function test_backlink_packages_page_shows_category_faqs(): void
+    public function test_generic_cms_page_shows_category_faqs(): void
     {
         Page::factory()->create([
-            'slug' => 'backlink-paketleri',
-            'title' => 'Backlink Paketleri',
+            'slug' => 'ornek-hizmet-sayfasi',
+            'title' => 'Örnek Hizmet Sayfası',
             'content' => '<p>İçerik eklenecek</p>',
             'is_active' => true,
         ]);
 
         FaqEntry::factory()->create([
-            'category' => 'backlink-paketleri',
+            'category' => 'ornek-hizmet-sayfasi',
             'question_topic' => 'Backlink paketi nedir?',
             'answer' => 'SSS cevabı örnek',
             'is_active' => true,
         ]);
 
-        $this->get(route('pages.show', 'backlink-paketleri'))
+        $this->get(route('pages.show', 'ornek-hizmet-sayfasi'))
             ->assertOk()
             ->assertSee('Sıkça Sorulan Sorular')
             ->assertSee('Backlink paketi nedir?')

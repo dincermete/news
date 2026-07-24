@@ -13,6 +13,7 @@ use App\Models\FooterLink;
 use App\Models\FooterLinkDurationOption;
 use App\Models\InstagramAccount;
 use App\Models\InstagramStoryPrice;
+use App\Models\BacklinkPackage;
 use App\Models\Label;
 use App\Models\Page;
 use App\Models\SeoPackage;
@@ -46,6 +47,7 @@ class DemoCatalogSeeder extends Seeder
         $this->seedFooterLinkDurationOptions();
         $this->seedInstagramAccounts();
         $this->seedSeoPackages();
+        $this->seedBacklinkPackages();
         $this->seedDiscountTiers();
         $this->seedCoupons();
         $this->seedSpinWheelPrizes();
@@ -337,6 +339,113 @@ class DemoCatalogSeeder extends Seeder
                     'description' => $package['description'],
                     'keyword_count' => $package['keyword_count'],
                     'monthly_price' => $package['monthly_price'],
+                    'currency' => 'TRY',
+                    'features' => $package['features'],
+                    'is_featured' => $package['is_featured'],
+                    'sort_order' => $package['sort_order'],
+                    'status' => SiteStatus::Active,
+                ],
+            );
+        }
+    }
+
+    protected function seedBacklinkPackages(): void
+    {
+        $packages = [
+            [
+                'name' => 'Feniks',
+                'description' => 'Düşük-orta rekabetli kelimeler için güçlü bir otorite temeli.',
+                'competition_label' => '%39 Orta Rekabet',
+                'price' => 5000,
+                'is_featured' => false,
+                'sort_order' => 1,
+                'features' => [
+                    '3 Adet Anahtar Kelime',
+                    '8 Adet AEO Pro İçerik (600-1200 Kelime)',
+                    '4 Ulusal Haber Tanıtımı (AEO)',
+                    '2 Yerel Haber Tanıtımı (AEO)',
+                    '2 Adet AEO Network Yayını',
+                    '12 Adet DA85-95 Premium Backlink',
+                    '10 Adet DA75-85 Yüksek Otorite Backlink',
+                    '8 Adet DA65-75 Orta Otorite Backlink',
+                    '3 Adet DA40-65 Destek Backlink',
+                    '5 Adet Facebook Paylaşımı',
+                    '5 Adet LinkedIn Paylaşımı',
+                    '5 Adet Tumblr Backlink',
+                    '5 Adet PDF Paylaşımı',
+                    'Anchor Dağıtım Haritası Raporu',
+                ],
+            ],
+            [
+                'name' => 'Zodyak',
+                'description' => 'Rekabetçi sektörlerde sıralama ve otorite için en dengeli seçim.',
+                'competition_label' => '%60 Orta Rekabet',
+                'price' => 8500,
+                'is_featured' => true,
+                'sort_order' => 2,
+                'features' => [
+                    '6 Adet Anahtar Kelime',
+                    'Anchor Varyasyon Stratejisi',
+                    'Long-tail Varyasyon Planlaması',
+                    '16 Adet AEO Pro İçerik (600-1200 Kelime)',
+                    '8 Ulusal Haber Tanıtımı (AEO)',
+                    '4 Yerel Haber Tanıtımı (AEO)',
+                    '4 Adet AEO Network Yayını',
+                    'AI Overviews için Long-tail Kurgusu',
+                    '20 Adet DA85-95 Premium Backlink',
+                    '15 Adet DA75-85 Yüksek Otorite Backlink',
+                    '15 Adet DA65-75 Orta Otorite Backlink',
+                    '5 Adet DA40-65 Destek Backlink',
+                    '10 Adet Facebook Paylaşımı',
+                    '10 Adet LinkedIn Paylaşımı',
+                    '10 Adet Tumblr Backlink',
+                    '5 Adet PDF Paylaşımı',
+                    'Semrush Site Audit Raporu',
+                    'Semrush Backlink Raporu',
+                    'Zararlı Backlink Temizliği (Disavow)',
+                    'Anchor Dağıtım Haritası Raporu',
+                ],
+            ],
+            [
+                'name' => 'Quantum',
+                'description' => 'Yüksek rekabetli pazarlarda agresif otorite ve entity inşası.',
+                'competition_label' => '%100 Yüksek Rekabet',
+                'price' => 15000,
+                'is_featured' => false,
+                'sort_order' => 3,
+                'features' => [
+                    '9 Adet Anahtar Kelime',
+                    'Anchor Varyasyon Stratejisi',
+                    'Long-tail Varyasyon Planlaması',
+                    '26 Adet AEO Pro İçerik (600-1200 Kelime)',
+                    '14 Ulusal Haber Tanıtımı (AEO)',
+                    '6 Yerel Haber Tanıtımı (AEO)',
+                    '6 Adet AEO Network Yayını',
+                    'AI Overviews için Long-tail Kurgusu',
+                    'Entity Ağı Oluşumu',
+                    '30 Adet DA85-95 Premium Backlink',
+                    '20 Adet DA75-85 Yüksek Otorite Backlink',
+                    '20 Adet DA65-75 Orta Otorite Backlink',
+                    '15 Adet DA40-65 Destek Backlink',
+                    '10 Adet Facebook Paylaşımı',
+                    '10 Adet LinkedIn Paylaşımı',
+                    '10 Adet Tumblr Backlink',
+                    '5 Adet PDF Paylaşımı',
+                    'Semrush Site Audit Raporu',
+                    'Semrush Backlink Raporu',
+                    'Zararlı Backlink Temizliği (Disavow)',
+                    'Anchor Dağıtım Haritası Raporu',
+                ],
+            ],
+        ];
+
+        foreach ($packages as $package) {
+            BacklinkPackage::query()->updateOrCreate(
+                ['name' => $package['name']],
+                [
+                    'description' => $package['description'],
+                    'competition_label' => $package['competition_label'],
+                    'price' => $package['price'],
                     'currency' => 'TRY',
                     'features' => $package['features'],
                     'is_featured' => $package['is_featured'],

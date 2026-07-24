@@ -38,6 +38,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'instagram_story_price_id',
     'seo_package_id',
     'seo_package_duration_option_id',
+    'backlink_package_id',
+    'wallet_topup_package_id',
     'content_mode',
     'content_payload',
     'order_group_id',
@@ -122,6 +124,16 @@ class Order extends Model
     public function seoPackageDurationOption(): BelongsTo
     {
         return $this->belongsTo(SeoPackageDurationOption::class);
+    }
+
+    public function backlinkPackage(): BelongsTo
+    {
+        return $this->belongsTo(BacklinkPackage::class);
+    }
+
+    public function walletTopupPackage(): BelongsTo
+    {
+        return $this->belongsTo(WalletTopupPackage::class);
     }
 
     public function orderGroup(): BelongsTo

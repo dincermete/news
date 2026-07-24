@@ -47,10 +47,8 @@
     ];
 
     $aiTabs = [
-        ['key' => 'icerik', 'label' => 'Otomatik içerik', 'title' => 'İçeriği yapay zekâ yazsın', 'text' => 'Birkaç cümlelik brief verin; AI asistanımız SEO uyumlu, özgün tanıtım yazınızı başlık, alt başlık ve linklerle birlikte hazırlasın — siz tek satır yazmadan.', 'benefits' => ['Brief’ten yayına hazır metin üretir', 'Anahtar kelimeleri doğal yerleştirir', 'Başlık ve meta önerileri sunar']],
-        ['key' => 'oneri', 'label' => 'Site önerisi', 'title' => 'Bütçenize göre site önerisi', 'text' => 'Bütçenizi ve hedef kelimenizi söyleyin; asistan katalogdan en verimli site kombinasyonunu saniyeler içinde önersin.', 'benefits' => ['Bütçeye göre en yüksek DA seçkisi', 'Kategoriye uygun yayın planı', 'İndirimli fırsatları otomatik yakalar']],
-        ['key' => 'oncelik', 'label' => 'Önceliklendirme', 'title' => 'Siparişleriniz akıllıca sıralanır', 'text' => 'Teslim tarihine ve yayın hızına göre siparişleriniz otomatik önceliklendirilir; kritik işler öne alınır.', 'benefits' => ['Acil yayınlar öne çekilir', 'Editör ataması otomatik yapılır', 'Gecikme riski önceden bildirilir']],
-        ['key' => 'rapor', 'label' => 'Özet raporlar', 'title' => 'Haftalık özetler hazır gelsin', 'text' => 'Yayınlarınızın durumunu, link sağlığını ve harcamalarınızı özetleyen rapor her hafta panelinize düşer.', 'benefits' => ['Haftalık yayın ve link özeti', 'Harcama ve bakiye dökümü', 'Tek tıkla PDF dışa aktarım']],
+        ['key' => 'icerik', 'label' => 'Otomatik içerik', 'title' => 'İçeriği yapay zekâ yazsın', 'text' => 'Sepette "Makale Yazdır" seçeneğini işaretleyip birkaç cümlelik brief verin; AI, SEO uyumlu özgün tanıtım yazınızı hazırlasın — siz tek satır yazmadan.', 'benefits' => ['Brief’ten yayına hazır metin üretir', 'Anahtar kelimeleri doğal yerleştirir', 'Kelime paketine göre fiyatlanır']],
+        ['key' => 'oneri', 'label' => 'Sohbet asistanı', 'title' => 'Bütçenize göre site önerisi', 'text' => 'Sağ alttaki sohbet asistanına bütçenizi ve hedef kelimenizi yazın; katalogdaki gerçek sitelerden en uygun seçkiyi anında önersin.', 'benefits' => ['Bütçeye göre gerçek site önerileri', 'Sık sorulan sorulara anında yanıt', 'Gerekirse canlı destek ekibine yönlendirir']],
     ];
 
     $counters = [
@@ -61,19 +59,23 @@
 
     $roles = ['Ajanslar', 'SEO Uzmanları', 'E-Ticaret', 'Girişimler', 'Markalar', 'Freelancerlar', 'Daha fazlası+'];
 
-    $plans = [
-        [
-            'name' => 'Tekli Yayın', 'tagline' => 'Hızlı başlangıç için ideal', 'monthly' => 'Katalog fiyatı', 'yearly' => 'Katalog fiyatı', 'unit' => '/site başına', 'popular' => false, 'url' => route('sites.index'), 'cta' => 'Hemen Başla',
-            'items' => ['Katalogdan dilediğin siteyi seç', '1–2 gün içinde yayın', '6 ay link garantisi', 'Yayın linki + panel raporu', 'Koşulsuz iade', 'E-posta desteği'],
-        ],
-        [
-            'name' => 'Kurumsal Paket', 'tagline' => 'Düzenli yayın yapan markalar', 'monthly' => 'Teklife özel', 'yearly' => '%20 indirimli', 'unit' => '/aylık', 'popular' => true, 'url' => url('/backlink-paketleri'), 'cta' => 'Teklif Al',
-            'items' => ['Tekli Yayın’daki her şey', 'Aylık çoklu yayın planı', 'Editörden ücretsiz içerik', 'Öncelikli yayın sırası', 'Özel indirim kademeleri', 'WhatsApp öncelikli destek'],
-        ],
-        [
-            'name' => 'Ajans Paketi', 'tagline' => 'Müşteri yöneten ekipler', 'monthly' => 'Teklife özel', 'yearly' => '%20 indirimli', 'unit' => '/aylık', 'popular' => false, 'url' => url('/backlink-paketleri'), 'cta' => 'Satışla Görüş',
-            'items' => ['Kurumsal Paket’teki her şey', 'Sınırsız marka / müşteri', 'Toplu sipariş ve API erişimi', 'Gelişmiş yetkilendirme', 'Birebir hesap yöneticisi', 'Premium destek'],
-        ],
+    $moneyShort = function (?float $amount, string $suffix = ''): string {
+        if ($amount === null || $amount <= 0.0) {
+            return 'Katalog fiyatı';
+        }
+
+        return number_format($amount, 0, ',', '.').'₺'.$suffix;
+    };
+
+    $products = [
+        ['name' => 'Site Yazısı', 'text' => 'Katalogdan kategori, fiyat ve DA/PA\'ya göre site seçip tanıtım yazınızı yayınlayın.', 'price' => $moneyShort($productPrices['site_article']), 'suffix' => '\'den başlayan', 'url' => route('sites.index'), 'icon' => 'M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25M16.5 7.5V18a2.25 2.25 0 0 0 2.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 0 0 2.25 2.25h13.5'],
+        ['name' => 'Basın Bülteni', 'text' => 'Haber sitelerinde basın bülteninizi yayınlayın, geniş kitlelere ulaşın.', 'price' => $moneyShort($productPrices['press_release']), 'suffix' => '\'den başlayan', 'url' => route('press-release.index'), 'icon' => 'M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 1 1 0-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783'],
+        ['name' => 'Footer Link', 'text' => 'Seçtiğiniz sitenin footer\'ında kalıcı veya süreli link yerleşimi alın.', 'price' => 'Katalog fiyatı', 'suffix' => '', 'url' => route('footer-links.index'), 'icon' => 'M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244'],
+        ['name' => 'Story Satış', 'text' => 'Instagram hesaplarında Post veya Story olarak markanızı duyurun.', 'price' => 'Hesaba özel fiyat', 'suffix' => '', 'url' => route('story.index'), 'icon' => 'M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169'],
+        ['name' => 'Tanıtım Paketleri', 'text' => 'Birden fazla siteyi tek pakette, tek işlemle satın alın.', 'price' => $moneyShort($productPrices['bundle']), 'suffix' => '\'den başlayan', 'url' => route('bundles.index'), 'icon' => 'M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 0 0 .75-1.653v-2.882a2.25 2.25 0 0 0-.596-1.6'],
+        ['name' => 'SEO Paketleri', 'text' => 'SEO, GEO ve AEO\'yu tek pakette birleştiren aylık büyüme paketleri.', 'price' => $moneyShort($productPrices['seo_package']), 'suffix' => '/ay\'dan başlayan', 'url' => route('seo-packages.index'), 'icon' => 'M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25'],
+        ['name' => 'Backlink Paketleri', 'text' => 'Yüksek otoriteli kaynaklardan doğal anchor dağılımıyla kalıcı backlink.', 'price' => $moneyShort($productPrices['backlink_package']), 'suffix' => '\'den başlayan', 'url' => route('backlink-packages.index'), 'icon' => 'M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22'],
+        ['name' => 'GEO', 'text' => 'ChatGPT, Gemini ve Perplexity gibi AI motorlarında kaynak gösterilin.', 'price' => 'Ücretsiz analiz', 'suffix' => '', 'url' => route('geo.index'), 'icon' => 'M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z'],
     ];
 
     $testimonials = [
@@ -469,22 +471,23 @@
         </div>
 
         <div class="mt-5 grid gap-5 lg:grid-cols-[1fr_1.53fr]" data-reveal-group>
-            {{-- Editör Performansı (dar) --}}
+            {{-- Favori Sitelerim (dar) --}}
             <div class="rounded-[20px] bg-paper p-8" data-reveal>
                 <div class="flex items-center gap-x-3">
                     <span class="inline-flex size-10 items-center justify-center rounded-[10px] bg-gradient-to-br from-[#67a429] to-[#aee576] text-white">
-                        <svg class="size-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a6.026 6.026 0 0 1-.94 3.198m0 0A11.943 11.943 0 0 1 3 18.72m3.002-.021a9.094 9.094 0 0 1-3.741-.479m0 0A5.974 5.974 0 0 1 3 12.75a5.974 5.974 0 0 1 .26-1.741"/></svg>
+                        <svg class="size-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>
                     </span>
-                    <h3 class="font-display text-[22px] font-semibold text-ink">Editör Performansı</h3>
+                    <h3 class="font-display text-[22px] font-semibold text-ink">Favori Sitelerim</h3>
                 </div>
-                <p class="mt-3 {{ $sub }}">Yoğunluğu görün, tamamlanma oranlarını izleyin.</p>
+                <p class="mt-3 {{ $sub }}">Beğendiğiniz siteleri favorileyin, tek tıkla tekrar sipariş verin.</p>
 
                 <div class="mt-6 space-y-2.5">
-                    @foreach ([['Selin Ç.', '12 sipariş', 89, 'bg-brand-100 text-brand-700'], ['Emre D.', '15 sipariş', 95, 'bg-accent-100 text-accent-700'], ['Mert J.', '8 sipariş', 60, 'bg-amber-100 text-amber-700'], ['Gizem T.', '10 sipariş', 79, 'bg-emerald-100 text-emerald-700']] as [$kisi, $adet, $pct, $tone])
+                    @foreach ([['habergazetesi.com.tr', 'DA 45', 'bg-brand-100 text-brand-700'], ['olaymedya.com', 'DA 38', 'bg-accent-100 text-accent-700'], ['nesilhaber.com', 'DA 41', 'bg-amber-100 text-amber-700']] as [$domain, $da, $tone])
                         <div class="flex items-center gap-3 rounded-full bg-white p-2 pe-3 shadow-soft">
-                            <span class="{{ $tone }} inline-flex size-10 shrink-0 items-center justify-center rounded-full text-xs font-bold">{{ mb_substr($kisi, 0, 1) }}</span>
-                            <p class="min-w-0 flex-1 truncate text-[13px] font-semibold text-ink">{{ $kisi }} <span class="font-medium text-ink-3">{{ $adet }}</span></p>
-                            <span class="shrink-0 rounded-md bg-ink/10 px-2 py-1 text-[11px] font-bold text-ink tabular-nums">{{ $pct }}%</span>
+                            <x-site-favicon :domain="$domain" :size="32" class="shrink-0 rounded-full" />
+                            <p class="min-w-0 flex-1 truncate text-[13px] font-semibold text-ink">{{ $domain }}</p>
+                            <span class="{{ $tone }} shrink-0 rounded-md px-2 py-1 text-[11px] font-bold tabular-nums">{{ $da }}</span>
+                            <svg class="size-4 shrink-0 text-brand-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-6.5-4.35-9.192-8.51C1.02 9.72 1.9 6.5 4.6 5.24c2.1-.98 4.2-.2 5.4 1.36C11.2 5.04 13.3 4.26 15.4 5.24c2.7 1.26 3.58 4.48 1.79 7.25C18.5 16.65 12 21 12 21Z"/></svg>
                         </div>
                     @endforeach
                 </div>
@@ -547,7 +550,7 @@
                             NewsTanıtım
                         </p>
                         <ul class="mt-5 space-y-1">
-                            @foreach ([['Genel Bakış', true], ['Siparişler', false], ['Siteler', false], ['Favoriler', false], ['Faturalar', false], ['Raporlar', false]] as [$menu, $aktif])
+                            @foreach ([['Genel Bakış', true], ['Siparişler', false], ['Siteler', false], ['Favoriler', false], ['Faturalar', false], ['Destek', false]] as [$menu, $aktif])
                                 <li @class(['rounded-lg px-3 py-2 text-[12px] font-medium', 'bg-white text-ink shadow-soft' => $aktif, 'text-ink-2' => ! $aktif])>{{ $menu }}</li>
                             @endforeach
                         </ul>
@@ -594,7 +597,7 @@
                         <span class="inline-flex size-5 items-center justify-center rounded-full bg-brand-500 text-[9px] font-bold text-white">3</span>
                     </div>
                     <div class="space-y-2 p-3">
-                        @foreach ([['Yazınız yayında 🎉', 'habergazetesi.com.tr'], ['Rapor hazır', 'Haftalık link özeti'], ['Onay bekliyor', 'olaymedya.com taslağı']] as [$baslik, $alt])
+                        @foreach ([['Yazınız yayında 🎉', 'habergazetesi.com.tr'], ['Bakiye yüklendi', '500₺ hesabınıza tanımlandı'], ['Onay bekliyor', 'olaymedya.com taslağı']] as [$baslik, $alt])
                             <div class="rounded-xl border border-ink/5 bg-white p-2.5 shadow-soft">
                                 <p class="text-[11px] font-semibold text-ink">{{ $baslik }}</p>
                                 <p class="text-[10px] text-ink-2">{{ $alt }}</p>
@@ -767,12 +770,12 @@
             <div class="relative overflow-hidden rounded-[20px] bg-[#f5f3ff] p-8 lg:min-h-[483px]" data-reveal>
                 <div class="relative mx-auto h-[300px] max-w-[420px]">
                     <div class="absolute start-0 top-2 w-[240px] rounded-[20px] bg-white p-4 shadow-[0_6px_20px_rgba(10,11,11,0.1)]">
-                        <p class="text-[11px] font-semibold uppercase tracking-wide text-ink-3">Ajans görünümü</p>
+                        <p class="text-[11px] font-semibold uppercase tracking-wide text-ink-3">Sipariş görünümü</p>
                         <div class="mt-3 space-y-2">
-                            @foreach ([['Marka A', '12 yayın', 'bg-brand-100 text-brand-700'], ['Marka B', '8 yayın', 'bg-accent-100 text-accent-700'], ['Marka C', '21 yayın', 'bg-emerald-100 text-emerald-700']] as [$marka, $adet, $tone])
+                            @foreach ([['Site Yazısı', '12 yayın', 'bg-brand-100 text-brand-700'], ['Basın Bülteni', '8 yayın', 'bg-accent-100 text-accent-700'], ['Backlink Paketi', '3 sipariş', 'bg-emerald-100 text-emerald-700']] as [$urun, $adet, $tone])
                                 <div class="flex items-center gap-2.5 rounded-xl bg-paper px-3 py-2.5">
-                                    <span class="{{ $tone }} inline-flex size-6 items-center justify-center rounded-full text-[10px] font-bold">{{ mb_substr($marka, -1) }}</span>
-                                    <p class="min-w-0 flex-1 truncate text-[12px] font-semibold text-ink">{{ $marka }}</p>
+                                    <span class="{{ $tone }} inline-flex size-6 items-center justify-center rounded-full text-[10px] font-bold">{{ mb_substr($urun, 0, 1) }}</span>
+                                    <p class="min-w-0 flex-1 truncate text-[12px] font-semibold text-ink">{{ $urun }}</p>
                                     <span class="text-[10px] font-medium text-ink-2">{{ $adet }}</span>
                                 </div>
                             @endforeach
@@ -792,60 +795,28 @@
         </div>
     </section>
 
-    {{-- ================= FİYATLANDIRMA ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" x-data="{ yearly: false }">
-        <div data-reveal-group>
-            <div class="mx-auto max-w-2xl text-center">
-                <p data-reveal><span class="{{ $chip }}">Fiyatlandırma</span></p>
-                <h2 class="mt-5 {{ $h2 }}" data-reveal>Ekibinizle birlikte büyüyen sade fiyatlar</h2>
-            </div>
-
-            <div class="mt-8 flex items-center justify-center gap-2" data-reveal>
-                <div class="inline-flex items-center rounded-2xl border border-ink/10 bg-paper p-1">
-                    <button type="button" class="rounded-xl px-4 py-2 text-xs font-medium transition" :class="yearly ? 'text-ink-2' : 'bg-ink text-white'" @click="yearly = false">Aylık</button>
-                    <button type="button" class="rounded-xl px-4 py-2 text-xs font-medium transition" :class="yearly ? 'bg-ink text-white' : 'text-ink-2'" @click="yearly = true">Yıllık</button>
-                </div>
-                <span class="rounded-full bg-brand-100 px-2.5 py-1 text-[10px] font-semibold text-brand-700">%20 indirim</span>
-            </div>
+    {{-- ================= ÜRÜNLERİMİZ ================= --}}
+    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-2xl text-center" data-reveal-group>
+            <p data-reveal><span class="{{ $chip }}">Ürünlerimiz</span></p>
+            <h2 class="mt-5 {{ $h2 }}" data-reveal>İhtiyacınıza göre tek tek ya da paket halinde satın alın</h2>
+            <p class="mt-4 {{ $sub }}" data-reveal>Gizli ücret yok; her ürünün fiyatı katalog sayfasında net olarak görünür.</p>
         </div>
 
-        <div class="mt-12 grid gap-5 lg:grid-cols-3" data-reveal-group>
-            @foreach ($plans as $plan)
-                <div @class([
-                    'relative flex flex-col rounded-[20px] p-6',
-                    'bg-ink text-white shadow-pop' => $plan['popular'],
-                    'bg-paper' => ! $plan['popular'],
-                ]) data-reveal>
-                    @if ($plan['popular'])
-                        <span class="absolute -top-3 start-6 rounded-full bg-brand-500 px-3 py-1 text-[10px] font-semibold text-white">En popüler</span>
-                    @endif
-
-                    <h3 @class(['font-display text-[22px] font-semibold', 'text-white' => $plan['popular'], 'text-ink' => ! $plan['popular']])>{{ $plan['name'] }}</h3>
-                    <p @class(['mt-0.5 text-[13px] font-medium', 'text-white/60' => $plan['popular'], 'text-ink-2' => ! $plan['popular']])>{{ $plan['tagline'] }}</p>
-
-                    <p class="mt-5">
-                        <span @class(['font-display text-3xl font-semibold tracking-tight', 'text-white' => $plan['popular'], 'text-ink' => ! $plan['popular']]) x-text="yearly ? @js($plan['yearly']) : @js($plan['monthly'])">{{ $plan['monthly'] }}</span>
-                        <span @class(['text-xs', 'text-white/50' => $plan['popular'], 'text-ink-3' => ! $plan['popular']])>{{ $plan['unit'] }}</span>
-                    </p>
-
-                    <a href="{{ $plan['url'] }}" @class([
-                        'group mt-5 inline-flex items-center justify-center gap-x-2 rounded-2xl px-5 py-3 text-sm font-medium transition hover:scale-[1.02] active:scale-[0.98]',
-                        'bg-gradient-to-b from-white to-[#c9c9c9] text-ink' => $plan['popular'],
-                        'bg-gradient-to-b from-black to-[#363b3c] text-white' => ! $plan['popular'],
-                    ])>
-                        {{ $plan['cta'] }}
-                        {!! $arrowIcon !!}
-                    </a>
-
-                    <ul class="mt-6 space-y-2.5 border-t pt-5 {{ $plan['popular'] ? 'border-white/10' : 'border-ink/10' }}">
-                        @foreach ($plan['items'] as $item)
-                            <li class="flex items-start gap-x-2.5 text-[13px] font-medium leading-relaxed">
-                                <svg @class(['mt-0.5 size-4 shrink-0', 'text-emerald-400' => $plan['popular'], 'text-emerald-600' => ! $plan['popular']]) xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
-                                <span @class(['text-white/80' => $plan['popular'], 'text-ink-2' => ! $plan['popular']])>{{ $item }}</span>
-                            </li>
-                        @endforeach
-                    </ul>
-                </div>
+        <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4" data-reveal-group>
+            @foreach ($products as $product)
+                <a href="{{ $product['url'] }}" class="group flex flex-col rounded-[20px] bg-paper p-6 transition hover:-translate-y-0.5 hover:shadow-pop" data-reveal>
+                    <span class="inline-flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-ink text-white">
+                        <svg class="size-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $product['icon'] }}"/></svg>
+                    </span>
+                    <h3 class="mt-4 font-display text-lg font-semibold text-ink">{{ $product['name'] }}</h3>
+                    <p class="mt-1.5 text-sm font-medium leading-relaxed text-ink-2">{{ $product['text'] }}</p>
+                    <p class="mt-4 text-sm font-semibold text-ink">{{ $product['price'] }}{{ $product['suffix'] }}</p>
+                    <span class="mt-auto flex items-center gap-x-1.5 pt-4 text-xs font-semibold text-ink-2 transition group-hover:text-ink">
+                        İncele
+                        <svg class="size-3 transition group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
+                    </span>
+                </a>
             @endforeach
         </div>
     </section>

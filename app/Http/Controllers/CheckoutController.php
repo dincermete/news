@@ -5,10 +5,13 @@ namespace App\Http\Controllers;
 use App\Enums\BillingProfileType;
 use App\Enums\Currency;
 use App\Enums\PaymentMethod;
+use App\Enums\ProductType;
 use App\Exceptions\EmptyCartException;
 use App\Exceptions\InsufficientWalletBalanceException;
 use App\Exceptions\InvalidCouponException;
+use App\Models\BankAccount;
 use App\Models\CartItem;
+use App\Models\Order;
 use App\Models\OrderGroup;
 use App\Models\Payment;
 use App\Models\Wallet;
@@ -40,7 +43,7 @@ class CheckoutController extends Controller
     public function show(Request $request): View|RedirectResponse
     {
         $cart = $this->carts->resolveOrCreateCart($request);
-        $cart->load(['items.site', 'items.siteBundle', 'items.footerLinkDurationOption', 'items.instagramAccount', 'items.instagramStoryPrice', 'items.seoPackage', 'items.seoPackageDurationOption']);
+        $cart->load(['items.site', 'items.siteBundle', 'items.footerLinkDurationOption', 'items.instagramAccount', 'items.instagramStoryPrice', 'items.seoPackage', 'items.seoPackageDurationOption', 'items.backlinkPackage']);
 
         if ($cart->items->isEmpty()) {
             return redirect()
@@ -67,7 +70,8 @@ class CheckoutController extends Controller
             'payable' => $payable,
             'walletBalance' => $wallet->totalAvailableBalance(),
             'bankTransferDiscountPercent' => (float) config('payment.bank_transfer_discount_percent', 0),
-            'banks' => config('payment.banks', []),
+            'banks' => $this->activeBanks(),
+            'hasWalletTopupItem' => $cart->items->contains(fn (CartItem $item): bool => $item->product_type === ProductType::Balance),
             'postSubmitMethod' => null,
             'paytrToken' => null,
             'bankTransferPayment' => null,
@@ -117,6 +121,16 @@ class CheckoutController extends Controller
         $couponCode = $this->carts->rememberedCoupon();
         $summary = $this->carts->summarize($cart, $couponCode);
         $payableAmount = $this->discounts->applyDiscount($summary['total'], $method);
+
+        $hasWalletTopupItem = $cart->items->contains(fn (CartItem $item): bool => $item->product_type === ProductType::Balance);
+
+        if ($method === PaymentMethod::Balance && $hasWalletTopupItem) {
+            return redirect()
+                ->route('checkout.show')
+                ->withErrors([
+                    'payment_method' => 'Sepetinizde bakiye paketi varken bakiye ile ödeme yapamazsınız.',
+                ]);
+        }
 
         if ($method === PaymentMethod::Balance) {
             $wallet = Wallet::forUser($user, Currency::Try);
@@ -211,7 +225,7 @@ class CheckoutController extends Controller
      */
     protected function postSubmitViewData(OrderGroup $orderGroup, PaymentMethod $method): array
     {
-        $orderGroup->loadMissing(['user', 'payments', 'orders.site', 'orders.siteBundle', 'orders.footerLinkDurationOption', 'orders.instagramAccount', 'orders.instagramStoryPrice', 'orders.seoPackage', 'orders.seoPackageDurationOption']);
+        $orderGroup->loadMissing(['user', 'payments', 'orders.site', 'orders.siteBundle', 'orders.footerLinkDurationOption', 'orders.instagramAccount', 'orders.instagramStoryPrice', 'orders.seoPackage', 'orders.seoPackageDurationOption', 'orders.backlinkPackage']);
 
         $payment = $orderGroup->payments->firstWhere('method', $method) ?? $orderGroup->payments->first();
 
@@ -230,13 +244,22 @@ class CheckoutController extends Controller
             'payable' => $this->payableByMethod((float) $orderGroup->total),
             'walletBalance' => Wallet::forUser($orderGroup->user, Currency::Try)->totalAvailableBalance(),
             'bankTransferDiscountPercent' => (float) config('payment.bank_transfer_discount_percent', 0),
-            'banks' => config('payment.banks', []),
+            'banks' => $this->activeBanks(),
+            'hasWalletTopupItem' => $orderGroup->orders->contains(fn (Order $order): bool => $order->product_type === ProductType::Balance),
             'postSubmitMethod' => $method,
             'paytrToken' => null,
             'bankTransferPayment' => null,
             'orderGroup' => $orderGroup,
             'payment' => $payment,
         ];
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, BankAccount>
+     */
+    protected function activeBanks(): \Illuminate\Database\Eloquent\Collection
+    {
+        return BankAccount::query()->active()->ordered()->get();
     }
 
     /**
