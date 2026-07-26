@@ -21,15 +21,15 @@ class SeoPackageResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRocketLaunch;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Ürünler & Kampanyalar';
+    protected static string|UnitEnum|null $navigationGroup = 'Ürünler';
 
-    protected static ?string $navigationLabel = 'SEO paketleri';
+    protected static ?string $navigationLabel = 'SEO Paketleri';
 
     protected static ?string $modelLabel = 'SEO paketi';
 
     protected static ?string $pluralModelLabel = 'SEO paketleri';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 6;
 
     protected static ?string $recordTitleAttribute = 'name';
 

@@ -22,7 +22,7 @@ class SiteQuestionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChatBubbleLeftRight;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Bildirimler';
+    protected static string|UnitEnum|null $navigationGroup = 'Destek';
 
     protected static ?string $navigationLabel = 'Site Soruları';
 
@@ -30,7 +30,7 @@ class SiteQuestionResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Site Soruları';
 
-    protected static ?int $navigationSort = 7;
+    protected static ?int $navigationSort = 2;
 
     protected static ?string $recordTitleAttribute = 'question';
 

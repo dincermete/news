@@ -21,9 +21,9 @@ class SiteBundleResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCube;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Ürünler & Kampanyalar';
+    protected static string|UnitEnum|null $navigationGroup = 'Ürünler';
 
-    protected static ?string $navigationLabel = 'Site paketleri';
+    protected static ?string $navigationLabel = 'Tanıtım Paketleri';
 
     protected static ?string $modelLabel = 'Site paketi';
 

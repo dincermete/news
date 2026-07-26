@@ -204,29 +204,25 @@ class DemoCatalogSeeder extends Seeder
 
     protected function seedInstagramAccounts(): void
     {
-        for ($i = 0; $i < 30; $i++) {
+        for ($i = 1; $i <= 30; $i++) {
             $account = InstagramAccount::query()->updateOrCreate(
-                ['handle' => '@'.fake()->unique()->userName()],
+                ['handle' => '@demo_story_'.$i],
                 [
-                    'name' => fake()->company(),
+                    'name' => 'Demo Hesap '.$i,
                     'follower_count' => fake()->numberBetween(5_000, 500_000),
                     'status' => SiteStatus::Active,
                 ],
             );
 
-            if (fake()->boolean(70)) {
-                InstagramStoryPrice::query()->updateOrCreate(
-                    ['instagram_account_id' => $account->id, 'format' => StoryFormat::Post],
-                    ['price' => fake()->randomFloat(2, 3000, 8000), 'currency' => 'TRY', 'is_active' => true],
-                );
-            }
+            InstagramStoryPrice::query()->updateOrCreate(
+                ['instagram_account_id' => $account->id, 'format' => StoryFormat::Post],
+                ['price' => fake()->randomFloat(2, 3000, 8000), 'currency' => 'TRY', 'is_active' => true],
+            );
 
-            if (fake()->boolean(70)) {
-                InstagramStoryPrice::query()->updateOrCreate(
-                    ['instagram_account_id' => $account->id, 'format' => StoryFormat::Story],
-                    ['price' => fake()->randomFloat(2, 1000, 5000), 'currency' => 'TRY', 'is_active' => true],
-                );
-            }
+            InstagramStoryPrice::query()->updateOrCreate(
+                ['instagram_account_id' => $account->id, 'format' => StoryFormat::Story],
+                ['price' => fake()->randomFloat(2, 1000, 5000), 'currency' => 'TRY', 'is_active' => true],
+            );
         }
     }
 
@@ -507,11 +503,33 @@ class DemoCatalogSeeder extends Seeder
             ],
         );
 
-        Coupon::factory()->count(3)->create([
-            'is_active' => true,
-            'valid_from' => now()->subDay(),
-            'valid_until' => now()->addMonths(3),
-        ]);
+        Coupon::query()->updateOrCreate(
+            ['code' => 'YAZ25'],
+            [
+                'type' => CouponType::Percentage,
+                'value' => 25,
+                'valid_from' => now()->subDay(),
+                'valid_until' => now()->addMonths(3),
+                'usage_limit' => 250,
+                'used_count' => 0,
+                'min_cart_amount' => 500,
+                'is_active' => true,
+            ],
+        );
+
+        Coupon::query()->updateOrCreate(
+            ['code' => 'PAKET100'],
+            [
+                'type' => CouponType::FixedAmount,
+                'value' => 100,
+                'valid_from' => now()->subDay(),
+                'valid_until' => now()->addMonths(3),
+                'usage_limit' => 100,
+                'used_count' => 0,
+                'min_cart_amount' => 1000,
+                'is_active' => true,
+            ],
+        );
     }
 
     protected function seedSpinWheelPrizes(): void

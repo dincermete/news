@@ -30,6 +30,7 @@ class AccountSupportTicketController extends Controller
 
         $tickets = SupportTicket::query()
             ->where('user_id', $user->id)
+            ->withCount('messages')
             ->when($statusFilter === 'open', fn ($q) => $q->where('status', SupportTicketStatus::Open))
             ->when($statusFilter === 'answered', fn ($q) => $q->where('status', SupportTicketStatus::InProgress))
             ->when($statusFilter === 'closed', fn ($q) => $q->where('status', SupportTicketStatus::Closed))
@@ -52,6 +53,18 @@ class AccountSupportTicketController extends Controller
         ]);
     }
 
+    public function show(Request $request, SupportTicket $ticket, SeoMetaService $seo): View
+    {
+        $this->authorizeTicket($request, $ticket);
+
+        $ticket->load(['messages.user']);
+
+        return view('account.support-ticket-show', [
+            'meta' => $seo->forDefault(),
+            'ticket' => $ticket,
+        ]);
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
@@ -59,7 +72,7 @@ class AccountSupportTicketController extends Controller
             'body' => ['required', 'string', 'max:5000'],
         ]);
 
-        SupportTicket::query()->create([
+        $ticket = SupportTicket::query()->create([
             'user_id' => $request->user()->id,
             'subject' => $data['subject'],
             'body' => $data['body'],
@@ -67,8 +80,42 @@ class AccountSupportTicketController extends Controller
             'source' => SupportTicketSource::Manual,
         ]);
 
+        $ticket->messages()->create([
+            'user_id' => $request->user()->id,
+            'body' => $data['body'],
+            'is_staff' => false,
+        ]);
+
         return redirect()
-            ->route('account.support-tickets')
+            ->route('account.support-tickets.show', $ticket)
             ->with('status', 'Destek talebiniz oluşturuldu.');
+    }
+
+    public function reply(Request $request, SupportTicket $ticket): RedirectResponse
+    {
+        $this->authorizeTicket($request, $ticket);
+
+        $data = $request->validate([
+            'body' => ['required', 'string', 'max:5000'],
+        ]);
+
+        if ($ticket->status === SupportTicketStatus::Closed) {
+            $ticket->reopen();
+        }
+
+        $ticket->addMessage($request->user(), $data['body'], isStaff: false);
+
+        if ($ticket->status === SupportTicketStatus::InProgress) {
+            $ticket->forceFill(['status' => SupportTicketStatus::Open])->save();
+        }
+
+        return redirect()
+            ->route('account.support-tickets.show', $ticket)
+            ->with('status', 'Yanıtınız gönderildi.');
+    }
+
+    protected function authorizeTicket(Request $request, SupportTicket $ticket): void
+    {
+        abort_unless($ticket->user_id === $request->user()->id, 404);
     }
 }

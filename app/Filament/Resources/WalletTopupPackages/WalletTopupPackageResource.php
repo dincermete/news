@@ -21,15 +21,15 @@ class WalletTopupPackageResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedGift;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Çark & Bakiye';
+    protected static string|UnitEnum|null $navigationGroup = 'Kampanyalar';
 
-    protected static ?string $navigationLabel = 'Bakiye paketleri';
+    protected static ?string $navigationLabel = 'Bakiye Paketleri';
 
     protected static ?string $modelLabel = 'Bakiye paketi';
 
     protected static ?string $pluralModelLabel = 'Bakiye paketleri';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $recordTitleAttribute = 'amount';
 

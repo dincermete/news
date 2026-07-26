@@ -20,9 +20,11 @@ class SeoAnalysisRequestResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMagnifyingGlassCircle;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Destek & Talepler';
+    protected static string|UnitEnum|null $navigationGroup = 'Destek';
 
     protected static ?string $navigationLabel = 'SEO Analiz Talepleri';
+
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $modelLabel = 'SEO analiz talebi';
 

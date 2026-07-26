@@ -27,11 +27,7 @@ class SeoPackageCatalogController extends Controller
         return view('seo-packages.index', [
             'packages' => $packages,
             'durationOptions' => $durationOptions,
-            'meta' => [
-                ...$seo->forDefault(),
-                'title' => 'SEO Paketleri | '.config('app.name'),
-                'description' => 'Google ve yapay zeka aramalarında görünürlük için SEO, GEO ve AEO\'yu tek pakette birleştiren hazır SEO paketleri.',
-            ],
+            'meta' => $seo->forRoute('seo-packages.index', 'SEO Paketleri | '.site_setting('site_name')),
         ]);
     }
 }

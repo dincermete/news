@@ -21,7 +21,7 @@ class CouponResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTicket;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Ürünler & Kampanyalar';
+    protected static string|UnitEnum|null $navigationGroup = 'Kampanyalar';
 
     protected static ?string $navigationLabel = 'Kuponlar';
 
@@ -29,7 +29,7 @@ class CouponResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Kuponlar';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'code';
 

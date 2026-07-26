@@ -59,11 +59,7 @@ class FooterLinkCatalogController extends Controller
             'q' => $q !== '' ? $q : null,
             'kategori' => $kategori,
             'sort' => $sort,
-            'meta' => [
-                ...$seo->forDefault(),
-                'title' => 'Footer Link | '.config('app.name'),
-                'description' => 'Kalıcı ve süreli footer link yerleşimleri için uygun siteler.',
-            ],
+            'meta' => $seo->forRoute('footer-links.index', 'Footer Link | '.site_setting('site_name')),
         ]);
     }
 }

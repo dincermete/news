@@ -21,15 +21,15 @@ class InstagramStoryPriceResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCamera;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Ürünler & Kampanyalar';
+    protected static string|UnitEnum|null $navigationGroup = 'Ürünler';
 
-    protected static ?string $navigationLabel = 'Story fiyatları';
+    protected static ?string $navigationLabel = 'Story Fiyatları';
 
     protected static ?string $modelLabel = 'Story fiyatı';
 
     protected static ?string $pluralModelLabel = 'Story fiyatları';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 5;
 
     public static function form(Schema $schema): Schema
     {

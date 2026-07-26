@@ -18,15 +18,25 @@ class BudgetAssistant extends Page
 {
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalculator;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Ürünler & Kampanyalar';
+    protected static string|UnitEnum|null $navigationGroup = 'Kampanyalar';
 
     protected static ?string $navigationLabel = 'Bütçe Asistanı';
 
     protected static ?string $title = 'Bütçe Asistanı';
 
-    protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 7;
 
     protected string $view = 'filament.pages.budget-assistant';
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
+
+    public static function canAccess(): bool
+    {
+        return false;
+    }
 
     /**
      * @var array{budget: ?float, category_id: ?int}

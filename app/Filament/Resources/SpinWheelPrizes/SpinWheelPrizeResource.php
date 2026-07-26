@@ -21,15 +21,15 @@ class SpinWheelPrizeResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSparkles;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Çark & Bakiye';
+    protected static string|UnitEnum|null $navigationGroup = 'Kampanyalar';
 
-    protected static ?string $navigationLabel = 'Çark ödülleri';
+    protected static ?string $navigationLabel = 'Çark Ödülleri';
 
     protected static ?string $modelLabel = 'Çark ödülü';
 
     protected static ?string $pluralModelLabel = 'Çark ödülleri';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 4;
 
     protected static ?string $recordTitleAttribute = 'name';
 

@@ -19,11 +19,7 @@ class BacklinkPackageCatalogController extends Controller
 
         return view('backlink-packages.index', [
             'packages' => $packages,
-            'meta' => [
-                ...$seo->forDefault(),
-                'title' => 'Backlink Paketleri | '.config('app.name'),
-                'description' => 'Konuyla alakalı, yüksek otoriteli kaynaklardan doğal anchor dağılımıyla kalıcı backlink paketleri.',
-            ],
+            'meta' => $seo->forRoute('backlink-packages.index', 'Backlink Paketleri | '.site_setting('site_name')),
         ]);
     }
 }

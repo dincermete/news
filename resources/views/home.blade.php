@@ -353,13 +353,13 @@
                         <svg class="size-[70px] text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                         </svg>
-                        <span class="font-display text-sm font-semibold text-white/90">NewsTanıtım</span>
+                        <span class="font-display text-sm font-semibold text-white/90">{{ $siteSettings->siteName() }}</span>
                     </span>
                 </div>
 
                 <div class="relative mt-10 text-center">
                     <span class="inline-flex items-center rounded-[10px] bg-white/10 px-3.5 py-2 text-sm font-medium text-white">Araç değiştirmek yok</span>
-                    <p class="mx-auto mt-3 max-w-sm text-lg font-medium text-white">Tüm yollar NewsTanıtım birleşik paneline çıkar</p>
+                    <p class="mx-auto mt-3 max-w-sm text-lg font-medium text-white">Tüm yollar {{ $siteSettings->siteName() }} birleşik paneline çıkar</p>
                 </div>
             </div>
 
@@ -529,105 +529,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
-
-    {{-- ================= ÖNE ÇIKANLAR (Feature highlights) ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
-        <div class="max-w-2xl">
-            <p data-reveal><span class="{{ $chip }}">Öne çıkanlar</span></p>
-            <h2 class="mt-5 {{ $h2 }}" data-reveal>Ekibinizi odakta tutmak için tasarlandı</h2>
-        </div>
-
-        {{-- Büyük panel mockup + telefon --}}
-        <div class="relative mt-10" data-reveal>
-            <div class="overflow-hidden rounded-[20px] border border-ink/10 bg-white shadow-pop">
-                <div class="flex">
-                    {{-- Kenar çubuğu --}}
-                    <div class="hidden w-52 shrink-0 border-e border-ink/5 bg-paper p-4 lg:block">
-                        <p class="flex items-center gap-x-2 text-[13px] font-bold text-ink">
-                            <span class="inline-flex size-6 items-center justify-center rounded-lg bg-gradient-to-br from-accent-500 to-accent-700 text-[10px] text-white">N</span>
-                            NewsTanıtım
-                        </p>
-                        <ul class="mt-5 space-y-1">
-                            @foreach ([['Genel Bakış', true], ['Siparişler', false], ['Siteler', false], ['Favoriler', false], ['Faturalar', false], ['Destek', false]] as [$menu, $aktif])
-                                <li @class(['rounded-lg px-3 py-2 text-[12px] font-medium', 'bg-white text-ink shadow-soft' => $aktif, 'text-ink-2' => ! $aktif])>{{ $menu }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                    {{-- Ana içerik --}}
-                    <div class="min-w-0 flex-1 p-5 lg:pe-64">
-                        <div class="flex items-center justify-between">
-                            <p class="text-[15px] font-bold text-ink">Günaydın, Metehan 👋</p>
-                            <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-semibold text-emerald-700">3 yayın bugün canlıda</span>
-                        </div>
-                        <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                            @foreach ([['Aktif sipariş', '14'], ['Yayında', '128'], ['Bekleyen onay', '3'], ['Bakiye', '8.450₺']] as [$k, $v])
-                                <div class="rounded-xl border border-ink/5 bg-paper p-3">
-                                    <p class="text-[10px] font-medium text-ink-2">{{ $k }}</p>
-                                    <p class="mt-1 font-display text-lg font-semibold text-ink tabular-nums">{{ $v }}</p>
-                                </div>
-                            @endforeach
-                        </div>
-                        <div class="mt-4 rounded-xl border border-ink/5">
-                            <div class="grid grid-cols-[1fr_auto_auto] gap-3 border-b border-ink/5 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wide text-ink-3 sm:grid-cols-[1.6fr_1fr_auto_auto]">
-                                <span>Site</span><span class="hidden sm:block">Sipariş</span><span>Durum</span><span class="text-end">Tutar</span>
-                            </div>
-                            @foreach ([['habergazetesi.com.tr', 'Tanıtım yazısı', 'Yayında', 'bg-emerald-100 text-emerald-700', '500₺'], ['olaymedya.com', 'Basın bülteni', 'Editörde', 'bg-accent-100 text-accent-700', '1.000₺'], ['nesilhaber.com', 'Footer link', 'Onayda', 'bg-amber-100 text-amber-700', '300₺']] as [$domain, $tur, $durum, $tone, $tutar])
-                                <div class="grid grid-cols-[1fr_auto_auto] items-center gap-3 border-b border-ink/5 px-4 py-2.5 last:border-0 sm:grid-cols-[1.6fr_1fr_auto_auto]">
-                                    <p class="flex min-w-0 items-center gap-x-2 truncate text-[12px] font-semibold text-ink">
-                                        <x-site-favicon :domain="$domain" :size="14" class="shrink-0" />
-                                        {{ $domain }}
-                                    </p>
-                                    <span class="hidden text-[11px] font-medium text-ink-2 sm:block">{{ $tur }}</span>
-                                    <span class="{{ $tone }} rounded-full px-2 py-0.5 text-[10px] font-semibold">{{ $durum }}</span>
-                                    <span class="text-end text-[12px] font-bold text-ink tabular-nums">{{ $tutar }}</span>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Telefon mockup --}}
-            <div class="absolute -bottom-8 end-6 hidden w-[230px] rounded-[28px] border-[6px] border-ink bg-ink shadow-pop lg:block">
-                <div class="overflow-hidden rounded-[22px] bg-white">
-                    <div class="flex items-center justify-between bg-paper px-4 py-3">
-                        <p class="text-[11px] font-bold text-ink">Bildirimler</p>
-                        <span class="inline-flex size-5 items-center justify-center rounded-full bg-brand-500 text-[9px] font-bold text-white">3</span>
-                    </div>
-                    <div class="space-y-2 p-3">
-                        @foreach ([['Yazınız yayında 🎉', 'habergazetesi.com.tr'], ['Bakiye yüklendi', '500₺ hesabınıza tanımlandı'], ['Onay bekliyor', 'olaymedya.com taslağı']] as [$baslik, $alt])
-                            <div class="rounded-xl border border-ink/5 bg-white p-2.5 shadow-soft">
-                                <p class="text-[11px] font-semibold text-ink">{{ $baslik }}</p>
-                                <p class="text-[10px] text-ink-2">{{ $alt }}</p>
-                            </div>
-                        @endforeach
-                        <div class="rounded-xl bg-gradient-to-br from-accent-600 to-accent-700 p-2.5 text-white">
-                            <p class="text-[11px] font-semibold">6 ay garanti aktif</p>
-                            <p class="text-[10px] text-white/70">1.042 link korunuyor</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {{-- 4 kolon --}}
-        <div class="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            @foreach ([
-            ['Sade günlük görünüm', 'Bugün ne önemli, kazmadan görün.', 'M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5'],
-            ['Anlık durum takibi', 'Gecikme ve sorunları büyümeden yakalayın.', 'M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z'],
-            ['Net yayın geçmişi', 'Tüm linkleri ve raporları tek bakışta izleyin.', 'M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z'],
-            ['İş + bütçe bir arada', 'Yayınlarla harcamaların bağlantısını görün.', 'M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z'],
-            ] as [$baslik, $metin, $ikon])
-                <div class="flex items-start gap-3" data-reveal>
-                    <svg class="mt-0.5 size-5 shrink-0 text-ink" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $ikon }}"/></svg>
-                    <div>
-                        <h3 class="font-display text-lg font-semibold text-ink">{{ $baslik }}</h3>
-                        <p class="mt-1 text-base font-medium leading-snug text-ink-2">{{ $metin }}</p>
-                    </div>
-                </div>
-            @endforeach
         </div>
     </section>
 
@@ -891,7 +792,7 @@
                 <p data-reveal><span class="{{ $chip }}">SSS</span></p>
                 <h2 class="mt-5 max-w-xs {{ $h2 }}" data-reveal>Sık sorulan soruların cevapları</h2>
                 <p class="mt-4 {{ $sub }}" data-reveal>Cevabınızı bulamadınız mı?</p>
-                <a href="tel:08503052241" class="{{ $btnDark }} mt-4" data-reveal>
+                <a href="tel:{{ $siteSettings->support_phone ?: '08503052241' }}" class="{{ $btnDark }} mt-4" data-reveal>
                     <span class="{{ $btnChip }} bg-white/15 text-white">
                         <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"/></svg>
                     </span>

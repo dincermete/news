@@ -12,6 +12,7 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -35,16 +36,34 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
-            ->brandName(config('app.name'))
+            ->brandName(function (): string {
+                try {
+                    return site_setting('site_name');
+                } catch (\Throwable) {
+                    return 'Tanıtım Yazısı';
+                }
+            })
             ->databaseNotifications()
             ->userMenu(position: UserMenuPosition::Sidebar)
             ->plugin(FilamentShadcnThemePlugin::make())
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
+            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
+            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
+            ->navigationGroups([
+                NavigationGroup::make('Siparişler'),
+                NavigationGroup::make('Ödemeler'),
+                NavigationGroup::make('Müşteriler'),
+                NavigationGroup::make('Siteler'),
+                NavigationGroup::make('Ürünler'),
+                NavigationGroup::make('Kampanyalar'),
+                NavigationGroup::make('Destek'),
+                NavigationGroup::make('İçerik'),
+                NavigationGroup::make('Bildirimler'),
+                NavigationGroup::make('Sistem'),
+            ])
             ->pages([
                 Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
+            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 PublicStatsOverview::class,
                 LiveVisitorsWidget::class,

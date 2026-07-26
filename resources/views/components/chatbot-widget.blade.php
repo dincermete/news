@@ -13,7 +13,7 @@
         style="box-shadow: 0 24px 70px -12px rgb(10 11 11 / 0.35), 0 8px 24px -8px rgb(10 11 11 / 0.18);"
         data-chatbot-panel
         role="dialog"
-        aria-label="NewsTanıtım Asistan sohbet penceresi"
+        aria-label="{{ ($siteSettings->siteName() ?? 'Tanıtım Yazısı') }} Asistan sohbet penceresi"
     >
         {{-- Header --}}
         <div class="relative shrink-0 overflow-hidden bg-gradient-to-br from-accent-600 via-accent-700 to-brand-600 px-5 pb-6 pt-4 text-white">
@@ -29,7 +29,7 @@
                         </span>
                     </span>
                     <div class="min-w-0">
-                        <p class="truncate text-sm font-semibold">NewsTanıtım Asistan</p>
+                        <p class="truncate text-sm font-semibold">{{ ($siteSettings->siteName() ?? 'Tanıtım Yazısı') }} Asistan</p>
                         <p class="truncate text-[11px] text-white/70">Genellikle hemen yanıtlıyoruz</p>
                     </div>
                 </div>

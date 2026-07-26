@@ -21,7 +21,7 @@ class FakeOrderNotificationTemplateResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChatBubbleBottomCenterText;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Bildirimler';
+    protected static string|UnitEnum|null $navigationGroup = 'Kampanyalar';
 
     protected static ?string $navigationLabel = 'Sahte Sipariş Şablonları';
 
@@ -29,7 +29,19 @@ class FakeOrderNotificationTemplateResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Sahte Sipariş Şablonları';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 8;
+
+    protected static ?string $slug = 'fake-order-notification-templates';
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
+
+    public static function canAccess(): bool
+    {
+        return false;
+    }
 
     public static function form(Schema $schema): Schema
     {

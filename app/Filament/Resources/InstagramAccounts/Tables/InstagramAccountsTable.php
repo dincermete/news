@@ -17,7 +17,9 @@ class InstagramAccountsTable
             ->columns([
                 ImageColumn::make('avatar_url')
                     ->label('')
-                    ->circular(),
+                    ->disk('public')
+                    ->circular()
+                    ->defaultImageUrl(fn ($record): string => 'https://ui-avatars.com/api/?name='.urlencode(ltrim((string) $record->handle, '@')).'&background=E1306C&color=fff'),
                 TextColumn::make('handle')
                     ->label('Kullanıcı adı')
                     ->searchable()

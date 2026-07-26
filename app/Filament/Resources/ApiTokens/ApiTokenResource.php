@@ -29,7 +29,7 @@ class ApiTokenResource extends Resource
 
     protected static ?string $pluralModelLabel = 'API Anahtarları';
 
-    protected static ?int $navigationSort = 90;
+    protected static ?int $navigationSort = 2;
 
     protected static ?string $recordTitleAttribute = 'name';
 

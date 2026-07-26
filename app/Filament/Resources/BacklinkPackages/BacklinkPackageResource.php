@@ -21,15 +21,15 @@ class BacklinkPackageResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedLink;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Ürünler & Kampanyalar';
+    protected static string|UnitEnum|null $navigationGroup = 'Ürünler';
 
-    protected static ?string $navigationLabel = 'Backlink paketleri';
+    protected static ?string $navigationLabel = 'Backlink Paketleri';
 
     protected static ?string $modelLabel = 'Backlink paketi';
 
     protected static ?string $pluralModelLabel = 'Backlink paketleri';
 
-    protected static ?int $navigationSort = 7;
+    protected static ?int $navigationSort = 8;
 
     protected static ?string $recordTitleAttribute = 'name';
 

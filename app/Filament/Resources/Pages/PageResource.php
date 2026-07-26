@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 
 class PageResource extends Resource
@@ -35,6 +36,12 @@ class PageResource extends Resource
 
     protected static ?string $slug = 'pages';
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->where('is_legal', false);
+    }
+
     public static function form(Schema $schema): Schema
     {
         return PageForm::configure($schema);
@@ -43,6 +50,11 @@ class PageResource extends Resource
     public static function table(Table $table): Table
     {
         return PagesTable::configure($table);
+    }
+
+    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return ! (bool) $record->getAttribute('is_system');
     }
 
     public static function getPages(): array

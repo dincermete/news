@@ -21,15 +21,15 @@ class FooterLinkDurationOptionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedLink;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Ürünler & Kampanyalar';
+    protected static string|UnitEnum|null $navigationGroup = 'Ürünler';
 
-    protected static ?string $navigationLabel = 'Footer süreleri';
+    protected static ?string $navigationLabel = 'Footer Süreleri';
 
     protected static ?string $modelLabel = 'Footer süre seçeneği';
 
     protected static ?string $pluralModelLabel = 'Footer süre seçenekleri';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $recordTitleAttribute = 'name';
 

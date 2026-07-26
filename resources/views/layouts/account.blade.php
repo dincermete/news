@@ -11,6 +11,13 @@
         @include('partials.seo-meta', ['meta' => $meta ?? app(\App\Services\SeoMetaService::class)->forDefault()])
     @endif
 
+    @php
+        $favicon = isset($siteSettings) ? $siteSettings->faviconUrl() : null;
+    @endphp
+    @if ($favicon)
+        <link rel="icon" href="{{ $favicon }}" sizes="any">
+    @endif
+
     <script>document.documentElement.classList.add('js');</script>
 
     <link rel="preload" href="{{ asset('fonts/stack-sans-headline-latin.woff2') }}" as="font" type="font/woff2" crossorigin>

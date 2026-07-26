@@ -32,11 +32,7 @@ class SiteCatalogController extends Controller
             'filters' => $filters,
             'categories' => $categories,
             'activeSiteCount' => $stats->activeSiteCount(),
-            'meta' => [
-                ...$seo->forDefault(),
-                'title' => 'Siteler | '.config('app.name'),
-                'description' => 'Backlink ve yazı paketleri için aktif site kataloğu. Kategori, fiyat ve DA ile filtreleyin.',
-            ],
+            'meta' => $seo->forRoute('sites.index', 'Siteler | '.site_setting('site_name')),
         ]);
     }
 }

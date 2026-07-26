@@ -21,15 +21,15 @@ class SeoPackageDurationOptionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalendarDays;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Ürünler & Kampanyalar';
+    protected static string|UnitEnum|null $navigationGroup = 'Ürünler';
 
-    protected static ?string $navigationLabel = 'SEO paketi süreleri';
+    protected static ?string $navigationLabel = 'SEO Süreleri';
 
     protected static ?string $modelLabel = 'SEO paketi süre seçeneği';
 
     protected static ?string $pluralModelLabel = 'SEO paketi süre seçenekleri';
 
-    protected static ?int $navigationSort = 6;
+    protected static ?int $navigationSort = 7;
 
     protected static ?string $recordTitleAttribute = 'name';
 

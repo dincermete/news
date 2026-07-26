@@ -21,7 +21,7 @@ class LabelResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBookmark;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Tanımlar';
+    protected static string|UnitEnum|null $navigationGroup = 'Siteler';
 
     protected static ?string $navigationLabel = 'Etiketler';
 
@@ -29,7 +29,7 @@ class LabelResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Etiketler';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 4;
 
     protected static ?string $recordTitleAttribute = 'name';
 

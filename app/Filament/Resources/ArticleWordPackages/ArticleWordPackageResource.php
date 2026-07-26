@@ -21,15 +21,15 @@ class ArticleWordPackageResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Ürünler & Kampanyalar';
+    protected static string|UnitEnum|null $navigationGroup = 'Ürünler';
 
-    protected static ?string $navigationLabel = 'Kelime paketleri';
+    protected static ?string $navigationLabel = 'Kelime Paketleri';
 
     protected static ?string $modelLabel = 'Kelime paketi';
 
     protected static ?string $pluralModelLabel = 'Kelime paketleri';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 2;
 
     protected static ?string $recordTitleAttribute = 'word_count';
 

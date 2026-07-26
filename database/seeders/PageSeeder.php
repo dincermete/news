@@ -7,21 +7,144 @@ use App\Models\Page;
 use Illuminate\Database\Seeder;
 
 /**
- * CMS page skeletons for legal and marketing URLs.
+ * CMS + sistem sayfaları (SEO / içerik).
  *
  * LEGAL PAGES WARNING:
  * Mesafeli Satış Sözleşmesi and Ön Bilgilendirme Formu contain PLACEHOLDER
- * section headings only. Do NOT treat this content as real legal text.
- * Replace every "[BU BÖLÜM AVUKAT/HUKUK MÜŞAVİRİ TARAFINDAN DOLDURULACAK]"
- * block with counsel-approved copy before relying on these pages in production.
+ * section headings only.
  */
 class PageSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->seedSystemPages();
         $this->seedLegalPages();
         $this->seedMarketingPages();
         $this->seedBacklinkFaqs();
+    }
+
+    protected function seedSystemPages(): void
+    {
+        $brand = 'Tanıtım Yazısı';
+
+        $pages = [
+            [
+                'route_key' => 'home',
+                'slug' => 'anasayfa',
+                'title' => 'Anasayfa',
+                'meta_title' => $brand,
+                'meta_description' => 'Kaliteli backlink, yazı ve medya paketleri — '.$brand,
+                'meta_keywords' => 'tanıtım yazısı, backlink, basın bülteni',
+            ],
+            [
+                'route_key' => 'sites.index',
+                'slug' => 'siteler',
+                'title' => 'Siteler',
+                'meta_title' => 'Siteler | '.$brand,
+                'meta_description' => 'Haber ve blog sitelerinde tanıtım yazısı ve backlink paketleri.',
+                'meta_keywords' => 'siteler, tanıtım, backlink',
+            ],
+            [
+                'route_key' => 'press-release.index',
+                'slug' => 'basin-bulteni',
+                'title' => 'Basın Bülteni',
+                'meta_title' => 'Basın Bülteni | '.$brand,
+                'meta_description' => 'Basın bülteni dağıtım paketleri.',
+            ],
+            [
+                'route_key' => 'bundles.index',
+                'slug' => 'tanitim-paketleri',
+                'title' => 'Tanıtım Paketleri',
+                'meta_title' => 'Tanıtım Paketleri | '.$brand,
+                'meta_description' => 'Hazır tanıtım paketleri ile toplu yayın.',
+            ],
+            [
+                'route_key' => 'story.index',
+                'slug' => 'story-satis',
+                'title' => 'Story Satış',
+                'meta_title' => 'Story Satış | '.$brand,
+                'meta_description' => 'Instagram story tanıtım paketleri.',
+            ],
+            [
+                'route_key' => 'footer-links.index',
+                'slug' => 'footer-linkler',
+                'title' => 'Footer Link',
+                'meta_title' => 'Footer Link | '.$brand,
+                'meta_description' => 'Footer link paketleri.',
+            ],
+            [
+                'route_key' => 'geo.index',
+                'slug' => 'geo',
+                'title' => 'GEO',
+                'meta_title' => 'GEO (Generative Engine Optimization) Hizmeti | '.$brand,
+                'meta_description' => 'Yapay zeka arama motorlarında görünürlük (GEO) hizmetleri.',
+                'meta_keywords' => 'geo, generative engine optimization',
+            ],
+            [
+                'route_key' => 'seo-packages.index',
+                'slug' => 'seo-paketleri',
+                'title' => 'SEO Paketleri',
+                'meta_title' => 'SEO Paketleri | '.$brand,
+                'meta_description' => 'SEO paketleri ve süre seçenekleri.',
+            ],
+            [
+                'route_key' => 'backlink-packages.index',
+                'slug' => 'backlink-paketleri',
+                'title' => 'Backlink Paketleri',
+                'meta_title' => 'Backlink Paketleri | '.$brand,
+                'meta_description' => 'Backlink paketleri hakkında bilgi ve fiyatlar.',
+            ],
+            [
+                'route_key' => 'free-analysis.show',
+                'slug' => 'ucretsiz-analiz',
+                'title' => 'Ücretsiz Analiz',
+                'meta_title' => 'Ücretsiz SEO ve AI Görünürlük Analizi | '.$brand,
+                'meta_description' => 'Ücretsiz SEO ve yapay zeka görünürlük analizi talep edin.',
+            ],
+            [
+                'route_key' => 'about.show',
+                'slug' => 'hakkimizda',
+                'title' => 'Hakkımızda',
+                'meta_title' => 'Hakkımızda | '.$brand,
+                'meta_description' => $brand.'; site yazısı, basın bülteni, backlink, story satış ve SEO/GEO hizmetlerini tek panelde birleştiren dijital tanıtım platformudur.',
+                'content' => null,
+            ],
+            [
+                'route_key' => 'contact.show',
+                'slug' => 'iletisim',
+                'title' => 'İletişim',
+                'meta_title' => 'İletişim | '.$brand,
+                'meta_description' => 'Telefon, e-posta, WhatsApp ve canlı destek üzerinden '.$brand.' ekibine ulaşın.',
+                'content' => null,
+            ],
+        ];
+
+        foreach ($pages as $page) {
+            // Match route_key first, then legacy CMS rows by slug.
+            $existing = Page::query()->where('route_key', $page['route_key'])->first()
+                ?? Page::query()->where('slug', $page['slug'])->first();
+
+            $payload = [
+                'route_key' => $page['route_key'],
+                'slug' => $page['slug'],
+                'title' => $page['title'],
+                'meta_title' => $page['meta_title'],
+                'meta_description' => $page['meta_description'] ?? null,
+                'meta_keywords' => $page['meta_keywords'] ?? null,
+                'is_active' => true,
+                'is_system' => true,
+            ];
+
+            if (array_key_exists('content', $page)) {
+                $payload['content'] = $page['content'];
+            }
+
+            if ($existing !== null) {
+                $existing->fill($payload)->save();
+            } else {
+                Page::query()->create($payload);
+            }
+        }
     }
 
     protected function seedLegalPages(): void
@@ -64,6 +187,8 @@ class PageSeeder extends Seeder
                     $legalNote,
                 ),
                 'is_active' => true,
+                'is_system' => false,
+                'is_legal' => true,
             ],
         );
 
@@ -79,6 +204,98 @@ class PageSeeder extends Seeder
                     $legalNote,
                 ),
                 'is_active' => true,
+                'is_system' => false,
+                'is_legal' => true,
+            ],
+        );
+
+        Page::query()->updateOrCreate(
+            ['slug' => 'gizlilik'],
+            [
+                'title' => 'Gizlilik Politikası',
+                'meta_title' => 'Gizlilik Politikası',
+                'meta_description' => 'Gizlilik politikası (içerik admin panelden güncellenecek).',
+                'content' => '<p>Bu sayfanın içeriği henüz eklenmedi.</p>',
+                'is_active' => true,
+                'is_system' => false,
+                'is_legal' => true,
+            ],
+        );
+
+        Page::query()->updateOrCreate(
+            ['slug' => 'kvkk'],
+            [
+                'title' => 'KVKK Aydınlatma Metni',
+                'meta_title' => 'KVKK Aydınlatma Metni',
+                'meta_description' => 'Kişisel verilerin korunması aydınlatma metni.',
+                'content' => $this->buildLegalSkeleton(
+                    'KVKK Aydınlatma Metni',
+                    [
+                        'Veri Sorumlusu',
+                        'İşlenen Kişisel Veriler',
+                        'İşleme Amaçları',
+                        'Hukuki Sebepler',
+                        'Aktarım',
+                        'Saklama Süresi',
+                        'İlgili Kişi Hakları',
+                        'Başvuru Yöntemi',
+                    ],
+                    $legalNote,
+                ),
+                'is_active' => true,
+                'is_system' => false,
+                'is_legal' => true,
+            ],
+        );
+
+        Page::query()->updateOrCreate(
+            ['slug' => 'cerez-politikasi'],
+            [
+                'title' => 'Çerez Politikası',
+                'meta_title' => 'Çerez Politikası',
+                'meta_description' => 'Çerez politikası.',
+                'content' => $this->buildLegalSkeleton(
+                    'Çerez Politikası',
+                    [
+                        'Çerez Nedir?',
+                        'Kullanılan Çerez Türleri',
+                        'Çerezlerin Kullanım Amaçları',
+                        'Çerez Yönetimi',
+                        'Üçüncü Taraf Çerezler',
+                        'Güncellemeler',
+                    ],
+                    $legalNote,
+                ),
+                'is_active' => true,
+                'is_system' => false,
+                'is_legal' => true,
+            ],
+        );
+
+        Page::query()->updateOrCreate(
+            ['slug' => 'uyelik-sozlesmesi'],
+            [
+                'title' => 'Üyelik Sözleşmesi',
+                'meta_title' => 'Üyelik Sözleşmesi',
+                'meta_description' => 'Üyelik / kullanım koşulları.',
+                'content' => $this->buildLegalSkeleton(
+                    'Üyelik Sözleşmesi',
+                    [
+                        'Taraflar',
+                        'Konu',
+                        'Üyelik Koşulları',
+                        'Hesap Güvenliği',
+                        'Kullanıcı Yükümlülükleri',
+                        'Hizmetin Kullanımı',
+                        'Fikri Mülkiyet',
+                        'Fesih',
+                        'Uyuşmazlık',
+                    ],
+                    $legalNote,
+                ),
+                'is_active' => true,
+                'is_system' => false,
+                'is_legal' => true,
             ],
         );
     }
@@ -87,39 +304,17 @@ class PageSeeder extends Seeder
     {
         $marketingNote = '<p>Bu sayfanın içeriği henüz eklenmedi.</p><p><em>İçerik eklenecek — pazarlama/SEO ekibi tarafından admin panelden doldurulacak.</em></p>';
 
-        $pages = [
+        Page::query()->updateOrCreate(
+            ['slug' => 'yapay-zeka-gorunurluk'],
             [
-                'slug' => 'geo',
-                'title' => 'GEO',
-                'meta_title' => 'GEO — Generative Engine Optimization',
-                'meta_description' => 'GEO hizmetleri hakkında içerik yakında eklenecek.',
-            ],
-            [
-                'slug' => 'yapay-zeka-gorunurluk',
                 'title' => 'Yapay Zeka Görünürlük',
                 'meta_title' => 'Yapay Zeka Görünürlük',
                 'meta_description' => 'Yapay zeka görünürlük hizmetleri hakkında içerik yakında eklenecek.',
+                'content' => $marketingNote,
+                'is_active' => true,
+                'is_system' => false,
             ],
-            [
-                'slug' => 'backlink-paketleri',
-                'title' => 'Backlink Paketleri',
-                'meta_title' => 'Backlink Paketleri',
-                'meta_description' => 'Backlink paketleri hakkında içerik yakında eklenecek.',
-            ],
-        ];
-
-        foreach ($pages as $page) {
-            Page::query()->updateOrCreate(
-                ['slug' => $page['slug']],
-                [
-                    'title' => $page['title'],
-                    'meta_title' => $page['meta_title'],
-                    'meta_description' => $page['meta_description'],
-                    'content' => $marketingNote,
-                    'is_active' => true,
-                ],
-            );
-        }
+        );
     }
 
     protected function seedBacklinkFaqs(): void

@@ -55,7 +55,7 @@
             <div class="relative mx-auto flex max-w-3xl flex-col items-center px-5 pb-14 pt-16 text-center sm:px-8 lg:pb-20 lg:pt-24" data-reveal-group>
                 <p class="inline-flex items-center gap-x-2 rounded-full border border-white/15 bg-white/5 py-1 pe-3.5 ps-1 text-xs text-white/80" data-reveal>
                     <span class="rounded-full bg-brand-500 px-2.5 py-0.5 text-[10px] font-semibold text-white">Hakkımızda</span>
-                    NewsTanıtım
+                    {{ $siteSettings->siteName() }}
                 </p>
 
                 <h1 class="mt-5 font-display text-4xl font-medium leading-[1.1] sm:text-5xl" data-reveal>
@@ -82,6 +82,14 @@
         </div>
     </section>
 
+    @if (! empty($page?->content))
+        <section class="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
+            <div class="prose prose-ink max-w-none text-ink-2">
+                {!! $page->content !!}
+            </div>
+        </section>
+    @endif
+
     {{-- ================= ETKİMİZ ================= --}}
     <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
         <div class="mx-auto max-w-2xl text-center">
@@ -103,7 +111,7 @@
     <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
         <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
             <div data-reveal-group>
-                <p data-reveal><span class="{{ $chip }}">Neden NewsTanıtım</span></p>
+                <p data-reveal><span class="{{ $chip }}">Neden {{ $siteSettings->siteName() }}</span></p>
                 <h2 class="mt-5 {{ $h2 }}" data-reveal>Bu platformu neden kurduk</h2>
                 <p class="mt-4 {{ $sub }}" data-reveal>
                     Dijital tanıtım yapan herkes aynı sorunlarla karşılaşıyor: doğru siteyi bulmak, güvenilir fiyat almak ve yayını takip etmek zaman alıyor.
@@ -190,11 +198,11 @@
                         <span class="{{ $btnChip }} bg-gradient-to-b from-black to-[#363b3c] text-white">{!! $arrowIcon !!}</span>
                         Ücretsiz Başla
                     </a>
-                    <a href="tel:08503052241" class="{{ $btnGhostDark }}">
+                    <a href="tel:{{ $siteSettings->support_phone ?: '08503052241' }}" class="{{ $btnGhostDark }}">
                         <span class="{{ $btnChip }} bg-white/10 text-white">
                             <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"/></svg>
                         </span>
-                        0850 305 22 41
+                        {{ $siteSettings->support_phone_display ?: '0850 305 22 41' }}
                     </a>
                 </div>
             </div>

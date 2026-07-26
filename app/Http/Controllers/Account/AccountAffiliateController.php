@@ -20,9 +20,9 @@ class AccountAffiliateController extends Controller
 
         $referralUrl = url('/kayitol').'?ref='.$user->affiliate_code;
 
-        $shareMessage = 'NewsTanıtım\'a bu linkten ücretsiz kayıt olun: '.$referralUrl;
+        $shareMessage = site_setting('site_name').'\'a bu linkten ücretsiz kayıt olun: '.$referralUrl;
         $whatsappShareUrl = 'https://wa.me/?text='.rawurlencode($shareMessage);
-        $emailShareUrl = 'mailto:?subject='.rawurlencode('NewsTanıtım davet linki')
+        $emailShareUrl = 'mailto:?subject='.rawurlencode(site_setting('site_name').' davet linki')
             .'&body='.rawurlencode($shareMessage);
 
         $monthStart = Carbon::now()->startOfMonth();

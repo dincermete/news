@@ -24,11 +24,19 @@ class PagesTable
                     ->label('Slug')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('route_key')
+                    ->label('Route')
+                    ->toggleable()
+                    ->placeholder('—'),
                 TextColumn::make('meta_title')
                     ->label('Meta başlık')
                     ->toggleable()
                     ->limit(40)
                     ->placeholder('—'),
+                IconColumn::make('is_system')
+                    ->label('Sistem')
+                    ->boolean()
+                    ->toggleable(),
                 IconColumn::make('is_active')
                     ->label('Aktif')
                     ->boolean(),
@@ -41,6 +49,7 @@ class PagesTable
             ->defaultSort('title')
             ->filters([
                 TernaryFilter::make('is_active')->label('Aktif'),
+                TernaryFilter::make('is_system')->label('Sistem'),
             ])
             ->recordActions([
                 EditAction::make(),

@@ -34,11 +34,7 @@ class StoryCatalogController extends Controller
         return view('story.index', [
             'accounts' => $accounts,
             'q' => $q !== '' ? $q : null,
-            'meta' => [
-                ...$seo->forDefault(),
-                'title' => 'Story Satış | '.config('app.name'),
-                'description' => 'Instagram Post ve Story formatında tanıtım için uygun hesaplar.',
-            ],
+            'meta' => $seo->forRoute('story.index', 'Story Satış | '.site_setting('site_name')),
         ]);
     }
 }

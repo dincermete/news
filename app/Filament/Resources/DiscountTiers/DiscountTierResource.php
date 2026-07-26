@@ -21,15 +21,15 @@ class DiscountTierResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedReceiptPercent;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Ürünler & Kampanyalar';
+    protected static string|UnitEnum|null $navigationGroup = 'Kampanyalar';
 
-    protected static ?string $navigationLabel = 'İndirim kademeleri';
+    protected static ?string $navigationLabel = 'İndirim Kademeleri';
 
     protected static ?string $modelLabel = 'İndirim kademesi';
 
     protected static ?string $pluralModelLabel = 'İndirim kademeleri';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 2;
 
     public static function form(Schema $schema): Schema
     {

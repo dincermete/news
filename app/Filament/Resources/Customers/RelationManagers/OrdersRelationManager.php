@@ -2,6 +2,9 @@
 
 namespace App\Filament\Resources\Customers\RelationManagers;
 
+use App\Filament\Resources\Orders\OrderResource;
+use App\Models\Order;
+use Filament\Actions\ViewAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -27,6 +30,11 @@ class OrdersRelationManager extends RelationManager
                 TextColumn::make('price')->label('Fiyat')->money(fn ($record) => $record->currency?->value ?? 'TRY'),
                 TextColumn::make('created_at')->label('Tarih')->dateTime('d.m.Y H:i')->sortable(),
             ])
-            ->defaultSort('created_at', 'desc');
+            ->defaultSort('created_at', 'desc')
+            ->recordUrl(fn (Order $record): string => OrderResource::getUrl('view', ['record' => $record]))
+            ->recordActions([
+                ViewAction::make()
+                    ->url(fn (Order $record): string => OrderResource::getUrl('view', ['record' => $record])),
+            ]);
     }
 }

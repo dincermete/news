@@ -17,7 +17,7 @@ class BankAccountFactory extends Factory
         return [
             'name' => fake()->company(),
             'short_code' => mb_strtoupper(fake()->lexify('???')),
-            'account_name' => 'NewsTanıtım',
+            'account_name' => 'Tanıtım Yazısı',
             'iban' => 'TR'.fake()->numerify(str_repeat('#', 24)),
             'sort_order' => 0,
             'is_active' => true,

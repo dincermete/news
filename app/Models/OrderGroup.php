@@ -76,6 +76,11 @@ class OrderGroup extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
     public function couponRedemption(): HasOne
     {
         return $this->hasOne(CouponRedemption::class);

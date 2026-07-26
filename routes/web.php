@@ -114,6 +114,8 @@ Route::middleware('auth')->group(function (): void {
         Route::delete('/favoriler/{favorite}', [AccountFavoriteController::class, 'destroy'])->name('favorites.destroy');
         Route::get('/destek', [AccountSupportTicketController::class, 'index'])->name('support-tickets');
         Route::post('/destek', [AccountSupportTicketController::class, 'store'])->name('support-tickets.store');
+        Route::get('/destek/{ticket}', [AccountSupportTicketController::class, 'show'])->name('support-tickets.show');
+        Route::post('/destek/{ticket}/yanit', [AccountSupportTicketController::class, 'reply'])->name('support-tickets.reply');
         Route::get('/analizlerim', [AccountSeoAnalysisController::class, 'index'])->name('seo-analyses');
         Route::get('/odeme-bildirimi', AccountPaymentNotificationController::class)->name('payment-notification');
         Route::get('/cuzdan-yukle', AccountWalletTopupController::class)->name('wallet-topup');

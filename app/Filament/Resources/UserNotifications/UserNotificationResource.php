@@ -28,7 +28,17 @@ class UserNotificationResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Kullanıcı Bildirimleri';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 1;
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
+
+    public static function canAccess(): bool
+    {
+        return false;
+    }
 
     public static function form(Schema $schema): Schema
     {

@@ -29,11 +29,7 @@ class SiteBundleCatalogController extends Controller
         return view('bundles.index', [
             'bundles' => $bundles,
             'q' => $q !== '' ? $q : null,
-            'meta' => [
-                ...$seo->forDefault(),
-                'title' => 'Tanıtım Paketleri | '.config('app.name'),
-                'description' => 'Birden fazla siteyi tek pakette birleştiren hazır tanıtım paketleri.',
-            ],
+            'meta' => $seo->forRoute('bundles.index', 'Tanıtım Paketleri | '.site_setting('site_name')),
         ]);
     }
 }

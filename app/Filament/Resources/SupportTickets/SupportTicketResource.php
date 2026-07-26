@@ -2,9 +2,12 @@
 
 namespace App\Filament\Resources\SupportTickets;
 
+use App\Enums\SupportTicketStatus;
 use App\Filament\Resources\SupportTickets\Pages\ListSupportTickets;
 use App\Filament\Resources\SupportTickets\Pages\ViewSupportTicket;
 use App\Filament\Resources\SupportTickets\RelationManagers\ChatbotMessagesRelationManager;
+use App\Filament\Resources\SupportTickets\RelationManagers\MessagesRelationManager;
+use App\Filament\Resources\SupportTickets\RelationManagers\NotesRelationManager;
 use App\Filament\Resources\SupportTickets\Schemas\SupportTicketInfolist;
 use App\Filament\Resources\SupportTickets\Tables\SupportTicketsTable;
 use App\Models\SupportTicket;
@@ -21,7 +24,7 @@ class SupportTicketResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedLifebuoy;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Bildirimler';
+    protected static string|UnitEnum|null $navigationGroup = 'Destek';
 
     protected static ?string $navigationLabel = 'Destek Talepleri';
 
@@ -29,9 +32,23 @@ class SupportTicketResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Destek Talepleri';
 
-    protected static ?int $navigationSort = 6;
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'subject';
+
+    public static function getNavigationBadge(): ?string
+    {
+        $count = static::getModel()::query()
+            ->where('status', '!=', SupportTicketStatus::Closed)
+            ->count();
+
+        return $count > 0 ? (string) $count : null;
+    }
+
+    public static function getNavigationBadgeColor(): string | array | null
+    {
+        return 'warning';
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -66,6 +83,8 @@ class SupportTicketResource extends Resource
     public static function getRelations(): array
     {
         return [
+            MessagesRelationManager::class,
+            NotesRelationManager::class,
             ChatbotMessagesRelationManager::class,
         ];
     }

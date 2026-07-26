@@ -11,6 +11,13 @@
         @include('partials.seo-meta', ['meta' => $meta ?? app(\App\Services\SeoMetaService::class)->forDefault()])
     @endif
 
+    @php
+        $favicon = isset($siteSettings) ? $siteSettings->faviconUrl() : null;
+    @endphp
+    @if ($favicon)
+        <link rel="icon" href="{{ $favicon }}" sizes="any">
+    @endif
+
     {{-- Scroll-reveal başlangıç durumu yalnızca JS aktifken uygulanır (bkz. app.css) --}}
     <script>document.documentElement.classList.add('js');</script>
 

@@ -23,7 +23,7 @@ class AnnouncementResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMegaphone;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Bildirimler';
+    protected static string|UnitEnum|null $navigationGroup = 'İçerik';
 
     protected static ?string $navigationLabel = 'Duyurular';
 
@@ -31,7 +31,7 @@ class AnnouncementResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Duyurular';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $recordTitleAttribute = 'title';
 

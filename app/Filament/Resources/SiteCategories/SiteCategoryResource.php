@@ -21,7 +21,7 @@ class SiteCategoryResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTag;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Tanımlar';
+    protected static string|UnitEnum|null $navigationGroup = 'Siteler';
 
     protected static ?string $navigationLabel = 'Kategoriler';
 
@@ -29,7 +29,7 @@ class SiteCategoryResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Kategoriler';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $recordTitleAttribute = 'name';
 

@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Contracts\SmsServiceInterface;
+use App\Models\SiteSetting;
 use App\Services\CartService;
 use App\Services\CatalogCache;
 use App\Services\NetgsmService;
@@ -12,6 +13,7 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -31,6 +33,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Model::preventLazyLoading(! $this->app->environment(['production', 'testing']));
+
+        $this->app->booted(function (): void {
+            $this->applySiteSettingOverrides();
+        });
+
+        View::composer(['layouts.app', 'partials.footer', 'partials.header', 'layouts.account', 'components.chatbot-widget', 'about.index', 'contact.index', 'home', 'geo.index', 'backlink-packages.index'], function ($view): void {
+            $view->with('siteSettings', SiteSetting::current());
+        });
 
         View::composer(['layouts.app', 'partials.footer'], function ($view): void {
             $view->with('footerLinks', app(CatalogCache::class)->footerLinks());
@@ -59,5 +69,56 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute((int) config('sanctum.api_rate_limit_per_minute', 60))
                 ->by($key);
         });
+    }
+
+    private function applySiteSettingOverrides(): void
+    {
+        try {
+            if (! Schema::hasTable('site_settings')) {
+                return;
+            }
+
+            $s = SiteSetting::current();
+
+            if (filled($s->paytr_merchant_id)) {
+                config(['paytr.merchant_id' => $s->paytr_merchant_id]);
+            }
+            if (filled($s->paytr_merchant_key)) {
+                config(['paytr.merchant_key' => $s->paytr_merchant_key]);
+            }
+            if (filled($s->paytr_merchant_salt)) {
+                config(['paytr.merchant_salt' => $s->paytr_merchant_salt]);
+            }
+            config(['paytr.test_mode' => $s->paytr_test_mode ? '1' : '0']);
+
+            if (filled($s->netgsm_username)) {
+                config(['netgsm.username' => $s->netgsm_username]);
+            }
+            if (filled($s->netgsm_password)) {
+                config(['netgsm.password' => $s->netgsm_password]);
+            }
+            if (filled($s->netgsm_header)) {
+                config(['netgsm.header' => $s->netgsm_header]);
+            }
+
+            if (filled($s->openai_api_key)) {
+                config(['openai.api_key' => $s->openai_api_key]);
+            }
+            if (filled($s->openai_model)) {
+                config(['openai.model' => $s->openai_model]);
+            }
+            if (filled($s->openai_chatbot_model)) {
+                config(['openai.chatbot_model' => $s->openai_chatbot_model]);
+            }
+            if (filled($s->openai_article_model)) {
+                config(['openai.article_model' => $s->openai_article_model]);
+            }
+
+            if (filled($s->whatsapp_number)) {
+                config(['whatsapp.support_number' => $s->whatsapp_number]);
+            }
+        } catch (\Throwable) {
+            // migrations / early boot
+        }
     }
 }

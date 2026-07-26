@@ -15,11 +15,7 @@ class FreeAnalysisController extends Controller
     {
         return view('free-analysis.index', [
             'serviceTypes' => SeoAnalysisServiceType::cases(),
-            'meta' => [
-                ...$seo->forDefault(),
-                'title' => 'Ücretsiz SEO ve AI Görünürlük Analizi | '.config('app.name'),
-                'description' => 'Sitenizi analiz edelim; hizmete ve hedeflerinize göre size en uygun yol haritasını panelinizde paylaşalım.',
-            ],
+            'meta' => $seo->forRoute('free-analysis.show', 'Ücretsiz SEO ve AI Görünürlük Analizi | '.site_setting('site_name')),
         ]);
     }
 

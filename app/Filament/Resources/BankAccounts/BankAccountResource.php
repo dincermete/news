@@ -23,7 +23,9 @@ class BankAccountResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Ödemeler';
 
-    protected static ?string $navigationLabel = 'Banka hesapları';
+    protected static ?string $navigationLabel = 'Banka Hesapları';
+
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $modelLabel = 'Banka hesabı';
 

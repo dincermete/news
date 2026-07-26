@@ -21,15 +21,15 @@ class InstagramAccountResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedAtSymbol;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Ürünler & Kampanyalar';
+    protected static string|UnitEnum|null $navigationGroup = 'Ürünler';
 
-    protected static ?string $navigationLabel = 'Instagram hesapları';
+    protected static ?string $navigationLabel = 'Instagram Hesapları';
 
     protected static ?string $modelLabel = 'Instagram hesabı';
 
     protected static ?string $pluralModelLabel = 'Instagram hesapları';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 4;
 
     protected static ?string $recordTitleAttribute = 'handle';
 

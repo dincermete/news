@@ -20,7 +20,7 @@ class SiteSubmissionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedInboxArrowDown;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Envanter';
+    protected static string|UnitEnum|null $navigationGroup = 'Siteler';
 
     protected static ?string $navigationLabel = 'Site Başvuruları';
 

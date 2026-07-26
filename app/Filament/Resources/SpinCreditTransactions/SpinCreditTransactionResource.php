@@ -18,15 +18,15 @@ class SpinCreditTransactionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTicket;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Çark & Bakiye';
+    protected static string|UnitEnum|null $navigationGroup = 'Kampanyalar';
 
-    protected static ?string $navigationLabel = 'Çark kredileri';
+    protected static ?string $navigationLabel = 'Çark Kredileri';
 
     protected static ?string $modelLabel = 'Çark kredisi';
 
     protected static ?string $pluralModelLabel = 'Çark kredileri';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 6;
 
     protected static ?string $recordTitleAttribute = 'id';
 

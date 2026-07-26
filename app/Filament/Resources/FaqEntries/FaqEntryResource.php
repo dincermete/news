@@ -21,7 +21,7 @@ class FaqEntryResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQuestionMarkCircle;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Bildirimler';
+    protected static string|UnitEnum|null $navigationGroup = 'Destek';
 
     protected static ?string $navigationLabel = 'SSS';
 
@@ -29,7 +29,7 @@ class FaqEntryResource extends Resource
 
     protected static ?string $pluralModelLabel = 'SSS';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 4;
 
     protected static ?string $recordTitleAttribute = 'question_topic';
 

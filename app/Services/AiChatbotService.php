@@ -78,6 +78,12 @@ class AiChatbotService
                 'chatbot_conversation_id' => $conversation->id,
             ]);
 
+            $ticket->messages()->create([
+                'user_id' => $conversation->user_id,
+                'body' => $context,
+                'is_staff' => false,
+            ]);
+
             $reply = $cleanReply !== ''
                 ? $cleanReply
                 : 'Bu konuda size canlı destek üzerinden yardımcı olalım.';

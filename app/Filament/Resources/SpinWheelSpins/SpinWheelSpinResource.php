@@ -18,15 +18,15 @@ class SpinWheelSpinResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowPath;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Çark & Bakiye';
+    protected static string|UnitEnum|null $navigationGroup = 'Kampanyalar';
 
-    protected static ?string $navigationLabel = 'Çark çevirileri';
+    protected static ?string $navigationLabel = 'Çark Çevirileri';
 
     protected static ?string $modelLabel = 'Çark çevirisi';
 
     protected static ?string $pluralModelLabel = 'Çark çevirileri';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 5;
 
     protected static ?string $recordTitleAttribute = 'id';
 

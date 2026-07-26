@@ -22,13 +22,13 @@ class OrderGroupResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Siparişler';
 
-    protected static ?string $navigationLabel = 'Sipariş grupları';
+    protected static ?string $navigationLabel = 'Sipariş Grupları';
 
     protected static ?string $modelLabel = 'Sipariş grubu';
 
     protected static ?string $pluralModelLabel = 'Sipariş grupları';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 2;
 
     public static function form(Schema $schema): Schema
     {

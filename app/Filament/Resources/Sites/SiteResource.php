@@ -21,7 +21,7 @@ class SiteResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedGlobeAlt;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Envanter';
+    protected static string|UnitEnum|null $navigationGroup = 'Siteler';
 
     protected static ?string $navigationLabel = 'Siteler';
 

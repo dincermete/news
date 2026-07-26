@@ -2,9 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Enums\CustomerStatus;
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -20,11 +23,18 @@ class DatabaseSeeder extends Seeder
             BankAccountSeeder::class,
             ArticleWordPackageSeeder::class,
             PageSeeder::class,
+            DemoCatalogSeeder::class,
         ]);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        User::query()->updateOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test User',
+                'role' => UserRole::Admin,
+                'status' => CustomerStatus::Active,
+                'email_verified_at' => now(),
+                'password' => Hash::make('password'),
+            ],
+        );
     }
 }

@@ -50,11 +50,7 @@ class PressReleaseCatalogController extends Controller
             'q' => $q !== '' ? $q : null,
             'kategori' => $kategori,
             'sort' => $sort,
-            'meta' => [
-                ...$seo->forDefault(),
-                'title' => 'Basın Bülteni | '.config('app.name'),
-                'description' => 'Haber sitelerinde basın bülteni yayınlama fırsatları.',
-            ],
+            'meta' => $seo->forRoute('press-release.index', 'Basın Bülteni | '.site_setting('site_name')),
         ]);
     }
 }

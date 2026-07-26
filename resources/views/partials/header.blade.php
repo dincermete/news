@@ -2,36 +2,106 @@
     $cartCount = (int) ($cartCount ?? 0);
     $navLink = 'rounded-full px-3.5 py-2 text-[13px] font-medium text-ink-2 transition hover:bg-ink/5 hover:text-ink';
     $navLinkActive = 'rounded-full bg-ink/5 px-3.5 py-2 text-[13px] font-medium text-ink';
+    $drawerLink = 'flex items-center justify-between gap-3 rounded-2xl px-4 py-3.5 text-[15px] font-medium transition';
+    $phone = $siteSettings->support_phone ?: '08503052241';
+    $phoneDisplay = $siteSettings->support_phone_display ?: '0850 305 22 41';
+
+    $primaryNav = [
+        ['label' => 'GEO', 'url' => route('geo.index'), 'active' => request()->routeIs('geo.*')],
+        ['label' => 'Backlink Paketleri', 'url' => route('backlink-packages.index'), 'active' => request()->routeIs('backlink-packages.*')],
+        ['label' => 'Siteler', 'url' => route('sites.index'), 'active' => request()->routeIs('sites.*')],
+        ['label' => 'Basın Bülteni', 'url' => route('press-release.index'), 'active' => request()->routeIs('press-release.*')],
+        ['label' => 'Tanıtım Paketleri', 'url' => route('bundles.index'), 'active' => request()->routeIs('bundles.*')],
+    ];
+
+    $serviceNav = [
+        ['label' => 'Story Satış', 'url' => route('story.index'), 'active' => request()->routeIs('story.*')],
+        ['label' => 'Footer Link', 'url' => route('footer-links.index'), 'active' => request()->routeIs('footer-links.*')],
+        ['label' => 'SEO Paketleri', 'url' => route('seo-packages.index'), 'active' => request()->routeIs('seo-packages.*')],
+        ['label' => 'Ücretsiz Analiz', 'url' => route('free-analysis.show'), 'active' => request()->routeIs('free-analysis.*')],
+    ];
+
+    $companyNav = [
+        ['label' => 'Hakkımızda', 'url' => route('about.show'), 'active' => request()->routeIs('about.*')],
+        ['label' => 'İletişim', 'url' => route('contact.show'), 'active' => request()->routeIs('contact.*')],
+    ];
+
+    $servicesActive = collect($serviceNav)->contains(fn (array $item): bool => $item['active']);
 @endphp
 
-<header class="sticky top-0 z-40">
+<header
+    class="sticky top-0 z-40"
+    x-data="{ mobileOpen: false }"
+    x-init="$watch('mobileOpen', (open) => document.documentElement.classList.toggle('overflow-hidden', open))"
+    @keydown.escape.window="mobileOpen = false"
+>
     @include('components.announcement-bar')
 
     <div class="border-b border-ink/5 bg-white/90 backdrop-blur-md">
         <nav class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8" aria-label="Ana menü">
             <a href="{{ route('home') }}" class="inline-flex shrink-0 items-center gap-x-2 focus:outline-hidden">
-                <span class="inline-flex size-8 items-center justify-center rounded-xl bg-gradient-to-br from-accent-500 to-accent-700 text-white">
-                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                    </svg>
-                </span>
-                <span class="font-display text-lg font-semibold tracking-tight text-ink">
-                    NewsTanıtım
-                </span>
+                @if ($siteSettings->logoUrl())
+                    <img src="{{ $siteSettings->logoUrl() }}" alt="{{ $siteSettings->siteName() }}" class="h-8 w-auto">
+                @else
+                    <span class="inline-flex size-8 items-center justify-center rounded-xl bg-gradient-to-br from-accent-500 to-accent-700 text-white">
+                        <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                        </svg>
+                    </span>
+                    <span class="font-display text-lg font-semibold tracking-tight text-ink">
+                        {{ $siteSettings->siteName() }}
+                    </span>
+                @endif
             </a>
 
-            <div class="hidden items-center gap-x-1 lg:flex" role="navigation">
-                <a href="{{ route('home') }}" @class([request()->routeIs('home') ? $navLinkActive : $navLink])>Anasayfa</a>
-                <a href="{{ route('sites.index') }}" @class([request()->routeIs('sites.*') ? $navLinkActive : $navLink])>Tüm Siteler</a>
-                <a href="{{ route('press-release.index') }}" @class([request()->routeIs('press-release.*') ? $navLinkActive : $navLink])>Basın Bülteni</a>
-                <a href="{{ route('bundles.index') }}" @class([request()->routeIs('bundles.*') ? $navLinkActive : $navLink])>Tanıtım Paketleri</a>
-                <a href="{{ route('story.index') }}" @class([request()->routeIs('story.*') ? $navLinkActive : $navLink])>Story Satış</a>
-                <a href="{{ route('footer-links.index') }}" @class([request()->routeIs('footer-links.*') ? $navLinkActive : $navLink])>Footer Link</a>
+            <div class="hidden min-w-0 flex-1 items-center justify-center gap-x-0.5 lg:flex xl:gap-x-1" role="navigation">
+                @foreach ($primaryNav as $item)
+                    <a href="{{ $item['url'] }}" @class([$item['active'] ? $navLinkActive : $navLink, 'shrink-0 whitespace-nowrap'])>{{ $item['label'] }}</a>
+                @endforeach
+
+                <div
+                    class="relative shrink-0"
+                    x-data="{ open: false }"
+                    @keydown.escape.window="open = false"
+                >
+                    <button
+                        type="button"
+                        @click="open = !open"
+                        @class([
+                            $servicesActive ? $navLinkActive : $navLink,
+                            'inline-flex shrink-0 items-center gap-x-1.5 whitespace-nowrap',
+                        ])
+                        :aria-expanded="open.toString()"
+                        aria-haspopup="true"
+                    >
+                        Hizmetler
+                        <svg class="size-3.5 shrink-0 opacity-60 transition" :class="open && 'rotate-180'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+                    </button>
+
+                    <div
+                        x-show="open"
+                        x-cloak
+                        x-transition
+                        @click.outside="open = false"
+                        class="absolute start-1/2 z-50 mt-3 w-72 -translate-x-1/2 rounded-2xl border border-ink/10 bg-white p-2 shadow-pop"
+                    >
+                        @foreach ($serviceNav as $item)
+                            <a
+                                href="{{ $item['url'] }}"
+                                @click="open = false"
+                                @class([
+                                    'block rounded-xl px-4 py-2.5 text-sm font-medium whitespace-nowrap transition',
+                                    $item['active'] ? 'bg-ink/5 text-ink' : 'text-ink-2 hover:bg-ink/5 hover:text-ink',
+                                ])
+                            >{{ $item['label'] }}</a>
+                        @endforeach
+                    </div>
+                </div>
             </div>
 
-            <div class="flex items-center gap-x-1 sm:gap-x-1.5">
+            <div class="flex shrink-0 items-center gap-x-1 sm:gap-x-1.5">
                 <div
-                    class="relative"
+                    class="relative hidden sm:block"
                     x-data="{ open: false }"
                     @keydown.escape.window="open = false"
                     x-init="$watch('open', (value) => { if (value) $nextTick(() => $refs.headerSearchInput?.focus()) })"
@@ -142,9 +212,9 @@
 
                 <a
                     href="{{ route('cart.index') }}"
-                    class="group relative ms-1 inline-flex items-center gap-x-2 rounded-2xl bg-ink px-5 py-2.5 text-xs font-medium text-white transition hover:bg-black hover:scale-[1.03] active:scale-[0.98] focus:outline-hidden"
+                    class="group relative ms-1 inline-flex items-center gap-x-2 rounded-2xl bg-ink px-3 py-2.5 text-xs font-medium text-white transition hover:bg-black hover:scale-[1.03] active:scale-[0.98] focus:outline-hidden sm:px-5"
                 >
-                    Sepet
+                    <span class="hidden sm:inline">Sepet</span>
                     <svg class="size-3.5 shrink-0 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5 19.5 4.5m0 0H8.25m11.25 0v11.25" /></svg>
                     <span class="absolute -end-1.5 -top-1.5 inline-flex size-4 items-center justify-center rounded-full bg-brand-500 text-[10px] font-bold text-white">
                         {{ $cartCount }}
@@ -153,37 +223,147 @@
 
                 <button
                     type="button"
-                    class="hs-collapse-toggle inline-flex size-9 items-center justify-center rounded-full border border-ink/10 text-ink transition hover:bg-ink/5 lg:hidden"
-                    id="hs-navbar-collapse"
-                    aria-expanded="false"
-                    aria-controls="hs-navbar"
-                    aria-label="Menü"
-                    data-hs-collapse="#hs-navbar"
+                    class="inline-flex size-9 items-center justify-center rounded-full border border-ink/10 text-ink transition hover:bg-ink/5 lg:hidden"
+                    @click="mobileOpen = true"
+                    :aria-expanded="mobileOpen.toString()"
+                    aria-controls="mobile-nav-drawer"
+                    aria-label="Menüyü aç"
                 >
-                    <svg class="hs-collapse-open:hidden size-4 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                    </svg>
-                    <svg class="hs-collapse-open:block hidden size-4 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
         </nav>
+    </div>
+
+    {{-- Mobile side drawer --}}
+    <div
+        class="lg:hidden"
+        x-cloak
+        x-show="mobileOpen"
+        x-transition.opacity.duration.200ms
+        role="dialog"
+        aria-modal="true"
+        aria-label="Mobil menü"
+    >
+        <div
+            class="fixed inset-0 z-[60] bg-ink/40 backdrop-blur-[2px]"
+            @click="mobileOpen = false"
+            aria-hidden="true"
+        ></div>
 
         <div
-            id="hs-navbar"
-            class="hs-collapse hidden overflow-hidden border-t border-ink/5 transition-[height] duration-200 lg:hidden"
-            aria-labelledby="hs-navbar-collapse"
-            role="region"
+            id="mobile-nav-drawer"
+            class="fixed inset-y-0 end-0 z-[70] flex w-[min(100vw-2.5rem,22rem)] flex-col bg-white shadow-pop"
+            x-show="mobileOpen"
+            x-transition:enter="transform transition ease-out duration-300"
+            x-transition:enter-start="translate-x-full"
+            x-transition:enter-end="translate-x-0"
+            x-transition:leave="transform transition ease-in duration-200"
+            x-transition:leave-start="translate-x-0"
+            x-transition:leave-end="translate-x-full"
+            @click.stop
         >
-            <div class="mx-auto flex max-w-6xl flex-col gap-0.5 px-4 py-2 sm:px-6">
-                <a href="{{ route('home') }}" class="rounded-xl px-3 py-2 text-sm text-ink-2 transition hover:bg-ink/5 hover:text-ink">Anasayfa</a>
-                <a href="{{ route('sites.index') }}" class="rounded-xl px-3 py-2 text-sm text-ink-2 transition hover:bg-ink/5 hover:text-ink">Tüm Siteler</a>
-                <a href="{{ route('press-release.index') }}" class="rounded-xl px-3 py-2 text-sm text-ink-2 transition hover:bg-ink/5 hover:text-ink">Basın Bülteni</a>
-                <a href="{{ route('bundles.index') }}" class="rounded-xl px-3 py-2 text-sm text-ink-2 transition hover:bg-ink/5 hover:text-ink">Tanıtım Paketleri</a>
-                <a href="{{ route('story.index') }}" class="rounded-xl px-3 py-2 text-sm text-ink-2 transition hover:bg-ink/5 hover:text-ink">Story Satış</a>
-                <a href="{{ route('footer-links.index') }}" class="rounded-xl px-3 py-2 text-sm text-ink-2 transition hover:bg-ink/5 hover:text-ink">Footer Link</a>
-                <a href="tel:08503052241" class="rounded-xl px-3 py-2 text-sm font-medium text-ink transition hover:bg-ink/5">0850 305 22 41</a>
+            <div class="flex items-center justify-between gap-3 border-b border-ink/5 px-4 py-3.5">
+                <div class="min-w-0">
+                    <p class="truncate font-display text-base font-semibold text-ink">{{ $siteSettings->siteName() }}</p>
+                    <p class="text-[11px] font-medium text-ink-3">Menü</p>
+                </div>
+                <button
+                    type="button"
+                    class="inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-ink/10 text-ink transition hover:bg-ink/5"
+                    @click="mobileOpen = false"
+                    aria-label="Menüyü kapat"
+                >
+                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto overscroll-contain px-3 py-4">
+                <form method="get" action="{{ route('sites.index') }}" class="mb-5 flex items-center gap-2 rounded-2xl border border-ink/10 bg-paper px-3 py-2" role="search">
+                    <svg class="size-4 shrink-0 text-ink-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
+                    <input
+                        type="search"
+                        name="q"
+                        placeholder="Site ara…"
+                        class="w-full border-0 bg-transparent p-0 text-sm text-ink placeholder:text-ink-3 focus:ring-0"
+                        aria-label="Site ara"
+                    >
+                </form>
+
+                <p class="px-4 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-3">Katalog</p>
+                <div class="mb-5 space-y-0.5">
+                    @foreach ($primaryNav as $item)
+                        <a
+                            href="{{ $item['url'] }}"
+                            @click="mobileOpen = false"
+                            @class([
+                                $drawerLink,
+                                $item['active'] ? 'bg-ink text-white' : 'text-ink hover:bg-ink/5',
+                            ])
+                        >
+                            <span>{{ $item['label'] }}</span>
+                            <svg class="size-3.5 opacity-40" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+                        </a>
+                    @endforeach
+                </div>
+
+                <p class="px-4 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-3">Hizmetler</p>
+                <div class="mb-5 space-y-0.5">
+                    @foreach ($serviceNav as $item)
+                        <a
+                            href="{{ $item['url'] }}"
+                            @click="mobileOpen = false"
+                            @class([
+                                $drawerLink,
+                                $item['active'] ? 'bg-ink text-white' : 'text-ink hover:bg-ink/5',
+                            ])
+                        >
+                            <span>{{ $item['label'] }}</span>
+                            <svg class="size-3.5 opacity-40" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+                        </a>
+                    @endforeach
+                </div>
+
+                <p class="px-4 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-3">Kurumsal</p>
+                <div class="space-y-0.5">
+                    @foreach ($companyNav as $item)
+                        <a
+                            href="{{ $item['url'] }}"
+                            @click="mobileOpen = false"
+                            @class([
+                                $drawerLink,
+                                $item['active'] ? 'bg-ink text-white' : 'text-ink hover:bg-ink/5',
+                            ])
+                        >
+                            <span>{{ $item['label'] }}</span>
+                            <svg class="size-3.5 opacity-40" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="border-t border-ink/5 bg-paper p-4">
+                <a
+                    href="tel:{{ $phone }}"
+                    class="mb-2 flex items-center justify-center gap-2 rounded-2xl border border-ink/10 bg-white px-4 py-3 text-sm font-semibold text-ink"
+                >
+                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"/></svg>
+                    {{ $phoneDisplay }}
+                </a>
+                <a
+                    href="{{ route('cart.index') }}"
+                    @click="mobileOpen = false"
+                    class="flex items-center justify-center gap-2 rounded-2xl bg-ink px-4 py-3 text-sm font-semibold text-white"
+                >
+                    Sepete git
+                    @if ($cartCount > 0)
+                        <span class="inline-flex min-w-5 items-center justify-center rounded-full bg-brand-500 px-1.5 text-[11px]">{{ $cartCount }}</span>
+                    @endif
+                </a>
             </div>
         </div>
     </div>

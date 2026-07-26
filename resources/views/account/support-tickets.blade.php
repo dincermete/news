@@ -80,17 +80,22 @@
             @else
                 <ul class="divide-y divide-ink/5">
                     @foreach ($tickets as $ticket)
-                        <li class="px-5 py-4">
-                            <div class="flex flex-wrap items-start justify-between gap-3">
-                                <div class="min-w-0">
-                                    <p class="text-sm font-semibold text-ink">{{ $ticket->subject }}</p>
-                                    <p class="mt-1 line-clamp-2 text-xs text-ink-2">{{ $ticket->body }}</p>
+                        <li>
+                            <a href="{{ route('account.support-tickets.show', $ticket) }}" class="block px-5 py-4 transition hover:bg-paper/60">
+                                <div class="flex flex-wrap items-start justify-between gap-3">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-semibold text-ink">{{ $ticket->subject }}</p>
+                                        <p class="mt-1 line-clamp-2 text-xs text-ink-2">{{ $ticket->body }}</p>
+                                    </div>
+                                    <span class="shrink-0 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold {{ $tone($ticket->status?->getColor()) }}">
+                                        {{ $ticket->status === \App\Enums\SupportTicketStatus::InProgress ? 'Yanıtlandı' : $ticket->status?->getLabel() }}
+                                    </span>
                                 </div>
-                                <span class="shrink-0 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold {{ $tone($ticket->status?->getColor()) }}">
-                                    {{ $ticket->status === \App\Enums\SupportTicketStatus::InProgress ? 'Yanıtlandı' : $ticket->status?->getLabel() }}
-                                </span>
-                            </div>
-                            <p class="mt-2 text-[11px] font-medium text-ink-3">{{ $ticket->created_at?->format('d.m.Y H:i') }}</p>
+                                <p class="mt-2 text-[11px] font-medium text-ink-3">
+                                    {{ $ticket->created_at?->format('d.m.Y H:i') }}
+                                    · {{ $ticket->messages_count }} mesaj
+                                </p>
+                            </a>
                         </li>
                     @endforeach
                 </ul>

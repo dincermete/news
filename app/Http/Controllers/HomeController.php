@@ -68,7 +68,7 @@ class HomeController extends Controller
             ->get(['id', 'question_topic', 'answer']);
 
         return view('home', [
-            'meta' => $seo->forDefault(),
+            'meta' => $seo->forRoute('home'),
             'stats' => $stats->all(),
             'sections' => $sections,
             'categories' => $categories,

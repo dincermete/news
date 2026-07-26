@@ -21,7 +21,7 @@ class FakeOrderNotificationNameResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Bildirimler';
+    protected static string|UnitEnum|null $navigationGroup = 'Kampanyalar';
 
     protected static ?string $navigationLabel = 'Sahte Sipariş İsimleri';
 
@@ -29,9 +29,19 @@ class FakeOrderNotificationNameResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Sahte Sipariş İsimleri';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 9;
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
+
+    public static function canAccess(): bool
+    {
+        return false;
+    }
 
     public static function form(Schema $schema): Schema
     {

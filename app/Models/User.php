@@ -67,9 +67,22 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::deleting(function (User $user): bool {
+            $authId = auth()->id();
+
+            if ($authId !== null && (int) $authId === (int) $user->getKey()) {
+                return false;
+            }
+
+            return true;
+        });
+    }
+
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->role->isStaff();
+        return $this->role->isStaff() && ! $this->isSuspended();
     }
 
     public function isAdmin(): bool

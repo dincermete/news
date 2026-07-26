@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Jobs\SendBulkMailJob;
 use App\Jobs\SendSmsJob;
 use App\Models\User;
+use App\Models\UserNotification;
 use BackedEnum;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
@@ -25,11 +26,11 @@ class SendBulkMessage extends Page
 
     protected static string|UnitEnum|null $navigationGroup = 'Bildirimler';
 
-    protected static ?string $navigationLabel = 'Toplu Mesaj Gönder';
+    protected static ?string $navigationLabel = 'Toplu Mesaj';
 
     protected static ?string $title = 'Toplu Mesaj Gönder';
 
-    protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 2;
 
     protected string $view = 'filament.pages.send-bulk-message';
 
@@ -47,7 +48,7 @@ class SendBulkMessage extends Page
         'selection_mode' => 'selected',
         'user_ids' => [],
         'role_filter' => null,
-        'channel' => 'mail',
+        'channel' => 'notification',
         'subject' => null,
         'message' => null,
     ];
@@ -88,18 +89,19 @@ class SendBulkMessage extends Page
                 Section::make('Mesaj')
                     ->schema([
                         Select::make('channel')
-                            ->label('Kanal')
+                            ->label('Bildirim kanalı')
                             ->options([
-                                'sms' => 'SMS',
+                                'notification' => 'Site bildirimi',
                                 'mail' => 'E-posta',
+                                'sms' => 'SMS',
                             ])
                             ->required()
                             ->live(),
                         TextInput::make('subject')
-                            ->label('Konu')
+                            ->label('Konu / Başlık')
                             ->maxLength(255)
-                            ->visible(fn (Get $get): bool => $get('channel') === 'mail')
-                            ->required(fn (Get $get): bool => $get('channel') === 'mail'),
+                            ->visible(fn (Get $get): bool => in_array($get('channel'), ['mail', 'notification'], true))
+                            ->required(fn (Get $get): bool => in_array($get('channel'), ['mail', 'notification'], true)),
                         Textarea::make('message')
                             ->label('Mesaj metni')
                             ->required()
@@ -143,6 +145,17 @@ class SendBulkMessage extends Page
                 continue;
             }
 
+            if ($channel === 'notification') {
+                UserNotification::query()->create([
+                    'user_id' => $user->id,
+                    'title' => (string) ($state['subject'] ?? 'Bildirim'),
+                    'body' => $message,
+                ]);
+                $queued++;
+
+                continue;
+            }
+
             SendBulkMailJob::dispatch(
                 $user,
                 (string) ($state['subject'] ?? 'Bildirim'),
@@ -152,7 +165,7 @@ class SendBulkMessage extends Page
         }
 
         Notification::make()
-            ->title('Mesajlar kuyruğa alındı')
+            ->title($channel === 'notification' ? 'Bildirimler oluşturuldu' : 'Mesajlar kuyruğa alındı')
             ->body("Gönderim: {$queued}".($skipped > 0 ? ", atlanan (telefonsuz): {$skipped}" : ''))
             ->success()
             ->send();

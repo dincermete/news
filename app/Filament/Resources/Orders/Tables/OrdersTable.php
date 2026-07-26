@@ -7,9 +7,11 @@ use App\Enums\OrderStatus;
 use App\Enums\UserRole;
 use App\Filament\Resources\Orders\Actions\OrderStatusActions;
 use App\Models\Order;
+use App\Filament\Resources\Orders\OrderResource;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -88,7 +90,9 @@ class OrdersTable
                     ->searchable()
                     ->preload(),
             ])
+            ->recordUrl(fn (Order $record): string => OrderResource::getUrl('view', ['record' => $record]))
             ->recordActions([
+                ViewAction::make(),
                 EditAction::make(),
                 ...OrderStatusActions::make(),
             ])
