@@ -15,7 +15,6 @@ class OrderPresentation
     {
         return $order->site?->domain
             ?? $order->siteBundle?->name
-            ?? $order->instagramAccount?->handle
             ?? $order->seoPackage?->name
             ?? $order->backlinkPackage?->name
             ?? ($order->walletTopupPackage

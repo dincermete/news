@@ -43,15 +43,4 @@ class CartItemFactory extends Factory
         ]);
     }
 
-    public function story(): static
-    {
-        return $this->state(fn (array $attributes): array => [
-            'product_type' => ProductType::Story,
-            'site_id' => null,
-            'content_payload' => [
-                'target_url' => fake()->url(),
-                'image_path' => 'stories/sample.jpg',
-            ],
-        ]);
-    }
 }

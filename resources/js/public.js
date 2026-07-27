@@ -84,6 +84,55 @@ document.addEventListener('alpine:init', () => {
         },
     }));
 
+    Alpine.data('autoSlider', (options = {}) => ({
+        auto: options.auto ?? false,
+        delay: options.delay ?? 4500,
+        timer: null,
+        init() {
+            if (!this.auto || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                return;
+            }
+            this.play();
+            this.$refs.track.addEventListener('mouseenter', () => this.pause());
+            this.$refs.track.addEventListener('mouseleave', () => this.play());
+            this.$refs.track.addEventListener('touchstart', () => this.pause(), { passive: true });
+        },
+        step() {
+            const track = this.$refs.track;
+            const first = track.firstElementChild;
+            if (!first) {
+                return 0;
+            }
+            const gap = parseFloat(getComputedStyle(track).columnGap || '0');
+
+            return first.getBoundingClientRect().width + gap;
+        },
+        next() {
+            const track = this.$refs.track;
+            const maxScroll = track.scrollWidth - track.clientWidth;
+            track.scrollTo({
+                left: track.scrollLeft >= maxScroll - 4 ? 0 : track.scrollLeft + this.step(),
+                behavior: 'smooth',
+            });
+        },
+        prev() {
+            const track = this.$refs.track;
+            const maxScroll = track.scrollWidth - track.clientWidth;
+            track.scrollTo({
+                left: track.scrollLeft <= 4 ? maxScroll : track.scrollLeft - this.step(),
+                behavior: 'smooth',
+            });
+        },
+        play() {
+            this.pause();
+            this.timer = setInterval(() => this.next(), this.delay);
+        },
+        pause() {
+            clearInterval(this.timer);
+            this.timer = null;
+        },
+    }));
+
     Alpine.data('fakeOrderToast', (endpoint) => ({
         endpoint,
         visible: false,
@@ -153,10 +202,123 @@ window.addEventListener('load', () => {
  | [data-reveal]        : görünüme girince fade + slide-up (CSS'te gizli başlar)
  | [data-reveal-group]  : çocuk [data-reveal]'ları sırayla (stagger) oynatır
  | [data-countup]       : sayıyı 0'dan hedefe sayar (data-countup="2623")
+ | [data-typewriter]    : input placeholder typewriter (JSON dizi)
  | [data-step-card]     : süreç kartı görünüme girince "aktif" (koyu) stile döner
  | [data-order-stack]   : sipariş kartlarını slot'lar arasında layout-style döndürür
  */
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function initTypewriterPlaceholders() {
+    document.querySelectorAll('[data-typewriter]').forEach((input) => {
+        let words = [];
+
+        try {
+            words = JSON.parse(input.getAttribute('data-typewriter') || '[]');
+        } catch {
+            words = [];
+        }
+
+        if (!Array.isArray(words) || words.length === 0) {
+            return;
+        }
+
+        const prefix = input.getAttribute('data-typewriter-prefix') || '';
+        let wordIndex = 0;
+        let charIndex = 0;
+        let deleting = false;
+        let paused = false;
+        let timer = null;
+
+        const stop = () => {
+            paused = true;
+            if (timer) {
+                clearTimeout(timer);
+                timer = null;
+            }
+        };
+
+        const tick = () => {
+            if (paused || document.activeElement === input || input.value.trim() !== '') {
+                return;
+            }
+
+            const word = words[wordIndex];
+
+            if (!deleting) {
+                charIndex += 1;
+                input.placeholder = prefix + word.slice(0, charIndex);
+
+                if (charIndex >= word.length) {
+                    timer = setTimeout(() => {
+                        deleting = true;
+                        tick();
+                    }, 1600);
+
+                    return;
+                }
+
+                timer = setTimeout(tick, 70);
+
+                return;
+            }
+
+            charIndex -= 1;
+            input.placeholder = prefix + word.slice(0, Math.max(charIndex, 0));
+
+            if (charIndex <= 0) {
+                deleting = false;
+                wordIndex = (wordIndex + 1) % words.length;
+                timer = setTimeout(tick, 320);
+
+                return;
+            }
+
+            timer = setTimeout(tick, 40);
+        };
+
+        const start = () => {
+            if (document.activeElement === input || input.value.trim() !== '') {
+                return;
+            }
+
+            paused = false;
+            if (!timer) {
+                tick();
+            }
+        };
+
+        input.addEventListener('focus', () => {
+            stop();
+            input.placeholder = '';
+        });
+
+        input.addEventListener('blur', () => {
+            if (input.value.trim() === '') {
+                start();
+            }
+        });
+
+        input.addEventListener('input', () => {
+            if (input.value.trim() !== '') {
+                stop();
+                input.placeholder = '';
+            } else if (document.activeElement !== input) {
+                start();
+            }
+        });
+
+        if (prefersReducedMotion) {
+            input.placeholder = prefix + words[0];
+
+            return;
+        }
+
+        input.placeholder = prefix;
+        start();
+    });
+}
+
+initTypewriterPlaceholders();
 
 if (!prefersReducedMotion) {
     const springEase = [0.22, 0.61, 0.36, 1];
@@ -414,7 +576,7 @@ if (!prefersReducedMotion) {
 
         words.forEach((word, i) => {
             word.style.opacity = i === 0 ? 1 : 0;
-            word.style.transform = i === 0 ? 'translateY(0%)' : 'translateY(100%)';
+            word.style.transform = i === 0 ? 'translate(-50%, 0%)' : 'translate(-50%, 100%)';
         });
 
         setInterval(() => {
@@ -427,15 +589,15 @@ if (!prefersReducedMotion) {
 
             animate(
                 current,
-                { opacity: 0, transform: 'translateY(-100%)' },
+                { opacity: 0, transform: 'translate(-50%, -100%)' },
                 { duration: 0.4, easing: [0.33, 1, 0.68, 1] },
             );
 
-            next.style.transform = 'translateY(100%)';
+            next.style.transform = 'translate(-50%, 100%)';
 
             animate(
                 next,
-                { opacity: 1, transform: 'translateY(0%)' },
+                { opacity: 1, transform: 'translate(-50%, 0%)' },
                 { duration: 0.4, easing: [0.33, 1, 0.68, 1] },
             );
         }, 2400);

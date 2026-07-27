@@ -9,8 +9,6 @@ use App\Models\ArticleWordPackage;
 use App\Models\BacklinkPackage;
 use App\Models\CartItem;
 use App\Models\FooterLinkDurationOption;
-use App\Models\InstagramAccount;
-use App\Models\InstagramStoryPrice;
 use App\Models\SeoPackage;
 use App\Models\SeoPackageDurationOption;
 use App\Models\Site;
@@ -34,7 +32,7 @@ class CartController extends Controller
     public function index(Request $request): View
     {
         $cart = $this->carts->resolveOrCreateCart($request);
-        $cart->load(['items.site', 'items.articleWordPackage', 'items.siteBundle', 'items.footerLinkDurationOption', 'items.instagramAccount', 'items.instagramStoryPrice', 'items.seoPackage', 'items.seoPackageDurationOption', 'items.backlinkPackage']);
+        $cart->load(['items.site', 'items.articleWordPackage', 'items.siteBundle', 'items.footerLinkDurationOption', 'items.seoPackage', 'items.seoPackageDurationOption', 'items.backlinkPackage']);
 
         $summary = $this->carts->summarize($cart, $this->carts->rememberedCoupon());
 
@@ -77,14 +75,6 @@ class CartController extends Controller
             'footer_link_duration_option_id' => [
                 'nullable', 'integer', 'exists:footer_link_duration_options,id',
                 Rule::requiredIf(fn (): bool => $request->input('product_type') === ProductType::FooterLink->value),
-            ],
-            'instagram_account_id' => [
-                'nullable', 'integer', 'exists:instagram_accounts,id',
-                Rule::requiredIf(fn (): bool => $request->input('product_type') === ProductType::Story->value),
-            ],
-            'instagram_story_price_id' => [
-                'nullable', 'integer', 'exists:instagram_story_prices,id',
-                Rule::requiredIf(fn (): bool => $request->input('product_type') === ProductType::Story->value),
             ],
             'seo_package_id' => [
                 'nullable', 'integer', 'exists:seo_packages,id',
@@ -134,11 +124,6 @@ class CartController extends Controller
                 $cart,
                 Site::query()->findOrFail($data['site_id']),
                 FooterLinkDurationOption::query()->findOrFail($data['footer_link_duration_option_id']),
-            ),
-            ProductType::Story => $this->carts->addStory(
-                $cart,
-                InstagramAccount::query()->findOrFail($data['instagram_account_id']),
-                InstagramStoryPrice::query()->findOrFail($data['instagram_story_price_id']),
             ),
             ProductType::SeoPackage => $this->carts->addSeoPackage(
                 $cart,

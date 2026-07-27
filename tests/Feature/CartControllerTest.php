@@ -7,14 +7,11 @@ use App\Enums\ContentMode;
 use App\Enums\Currency;
 use App\Enums\ProductType;
 use App\Enums\SiteStatus;
-use App\Enums\StoryFormat;
 use App\Models\ArticleWordPackage;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Coupon;
 use App\Models\FooterLinkDurationOption;
-use App\Models\InstagramAccount;
-use App\Models\InstagramStoryPrice;
 use App\Models\Site;
 use App\Models\SiteBundle;
 use App\Models\User;
@@ -156,33 +153,6 @@ class CartControllerTest extends TestCase
             'footer_link_duration_option_id' => $option->id,
             'product_type' => ProductType::FooterLink->value,
             'price' => 350,
-        ]);
-    }
-
-    public function test_authenticated_user_can_add_story(): void
-    {
-        $user = User::factory()->create();
-        $account = InstagramAccount::factory()->create(['status' => SiteStatus::Active]);
-        $storyPrice = InstagramStoryPrice::factory()->create([
-            'instagram_account_id' => $account->id,
-            'format' => StoryFormat::Post,
-            'price' => 4500,
-            'is_active' => true,
-        ]);
-
-        $this->actingAs($user)
-            ->post(route('cart.add'), [
-                'product_type' => 'story',
-                'instagram_account_id' => $account->id,
-                'instagram_story_price_id' => $storyPrice->id,
-            ])
-            ->assertRedirect(route('cart.index'));
-
-        $this->assertDatabaseHas(CartItem::class, [
-            'instagram_account_id' => $account->id,
-            'instagram_story_price_id' => $storyPrice->id,
-            'product_type' => ProductType::Story->value,
-            'price' => 4500,
         ]);
     }
 

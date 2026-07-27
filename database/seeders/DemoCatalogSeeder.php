@@ -6,13 +6,10 @@ use App\Enums\CouponType;
 use App\Enums\Currency;
 use App\Enums\SiteStatus;
 use App\Enums\SpinPrizeType;
-use App\Enums\StoryFormat;
 use App\Models\Coupon;
 use App\Models\DiscountTier;
 use App\Models\FooterLink;
 use App\Models\FooterLinkDurationOption;
-use App\Models\InstagramAccount;
-use App\Models\InstagramStoryPrice;
 use App\Models\BacklinkPackage;
 use App\Models\Label;
 use App\Models\Page;
@@ -45,7 +42,6 @@ class DemoCatalogSeeder extends Seeder
 
         $this->seedSiteBundles($sites);
         $this->seedFooterLinkDurationOptions();
-        $this->seedInstagramAccounts();
         $this->seedSeoPackages();
         $this->seedBacklinkPackages();
         $this->seedDiscountTiers();
@@ -198,30 +194,6 @@ class DemoCatalogSeeder extends Seeder
 
             $bundle->sites()->sync(
                 $sites->random(min(8, $sites->count()))->pluck('id')->all(),
-            );
-        }
-    }
-
-    protected function seedInstagramAccounts(): void
-    {
-        for ($i = 1; $i <= 30; $i++) {
-            $account = InstagramAccount::query()->updateOrCreate(
-                ['handle' => '@demo_story_'.$i],
-                [
-                    'name' => 'Demo Hesap '.$i,
-                    'follower_count' => fake()->numberBetween(5_000, 500_000),
-                    'status' => SiteStatus::Active,
-                ],
-            );
-
-            InstagramStoryPrice::query()->updateOrCreate(
-                ['instagram_account_id' => $account->id, 'format' => StoryFormat::Post],
-                ['price' => fake()->randomFloat(2, 3000, 8000), 'currency' => 'TRY', 'is_active' => true],
-            );
-
-            InstagramStoryPrice::query()->updateOrCreate(
-                ['instagram_account_id' => $account->id, 'format' => StoryFormat::Story],
-                ['price' => fake()->randomFloat(2, 1000, 5000), 'currency' => 'TRY', 'is_active' => true],
             );
         }
     }

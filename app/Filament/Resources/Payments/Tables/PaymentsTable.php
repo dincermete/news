@@ -24,6 +24,7 @@ class PaymentsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['order.user', 'orderGroup.user']))
             ->columns([
                 TextColumn::make('id')
                     ->label('#')

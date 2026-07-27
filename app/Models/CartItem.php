@@ -18,8 +18,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'site_bundle_id',
     'footer_link_duration_option_id',
     'article_word_package_id',
-    'instagram_account_id',
-    'instagram_story_price_id',
     'seo_package_id',
     'seo_package_duration_option_id',
     'backlink_package_id',
@@ -89,16 +87,6 @@ class CartItem extends Model
     public function articleWordPackage(): BelongsTo
     {
         return $this->belongsTo(ArticleWordPackage::class);
-    }
-
-    public function instagramAccount(): BelongsTo
-    {
-        return $this->belongsTo(InstagramAccount::class);
-    }
-
-    public function instagramStoryPrice(): BelongsTo
-    {
-        return $this->belongsTo(InstagramStoryPrice::class);
     }
 
     public function seoPackage(): BelongsTo

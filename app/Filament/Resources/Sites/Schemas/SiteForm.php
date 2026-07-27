@@ -10,6 +10,7 @@ use App\Support\SiteSeoMetrics;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -73,6 +74,19 @@ class SiteForm
                                         ->label('News onaylı')
                                         ->default(false)
                                         ->inline(false),
+                                    Toggle::make('is_google_indexed')
+                                        ->label('Google Index')
+                                        ->default(true)
+                                        ->inline(false),
+                                    FileUpload::make('logo_path')
+                                        ->label('Site logosu')
+                                        ->image()
+                                        ->disk('public')
+                                        ->directory('site-logos')
+                                        ->imageEditor()
+                                        ->imageEditorAspectRatios(['40:9'])
+                                        ->helperText('Yatay marka logosu, 40:9 en-boy oranında (ör. 800×180px). Yüklenmezse site favicon\'u otomatik gösterilir.')
+                                        ->columnSpanFull(),
                                 ]),
                             ]),
                         Tab::make('Fiyat & Kapasite')
@@ -109,6 +123,16 @@ class SiteForm
                                         ->label('Haftalık kapasite')
                                         ->numeric()
                                         ->minValue(0),
+                                    TextInput::make('max_link_count')
+                                        ->label('Max link çıkışı')
+                                        ->numeric()
+                                        ->minValue(0)
+                                        ->helperText('Bir yazı içinde izin verilen azami link sayısı.'),
+                                    TextInput::make('estimated_delivery')
+                                        ->label('Tahmini teslimat')
+                                        ->maxLength(255)
+                                        ->placeholder('Ör. 1-2 gün')
+                                        ->helperText('Katalog tablosunda gösterilecek serbest metin.'),
                                 ]),
                             ]),
                         Tab::make('SEO Metrikleri')

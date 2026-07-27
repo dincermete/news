@@ -28,7 +28,6 @@
             : null,
         $record->footerLinkDurationOption?->name,
         $record->seoPackageDurationOption?->name,
-        $record->instagramStoryPrice?->format?->getLabel(),
     ])->filter()->values();
     $initials = Str::of($record->user?->name ?? '?')
         ->explode(' ')

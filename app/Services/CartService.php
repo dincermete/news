@@ -15,8 +15,6 @@ use App\Models\Coupon;
 use App\Models\DiscountTier;
 use App\Models\FooterLinkDurationOption;
 use App\Models\BacklinkPackage;
-use App\Models\InstagramAccount;
-use App\Models\InstagramStoryPrice;
 use App\Models\SeoPackage;
 use App\Models\SeoPackageDurationOption;
 use App\Models\Site;
@@ -215,32 +213,6 @@ class CartService
         ]);
     }
 
-    public function addStory(Cart $cart, InstagramAccount $account, InstagramStoryPrice $storyPrice): CartItem
-    {
-        if ($account->status !== SiteStatus::Active) {
-            throw ValidationException::withMessages([
-                'instagram_account_id' => 'Bu hesap sepete eklenemez.',
-            ]);
-        }
-
-        if (! $storyPrice->is_active || (int) $storyPrice->instagram_account_id !== (int) $account->id) {
-            throw ValidationException::withMessages([
-                'instagram_story_price_id' => 'Geçerli bir story fiyatı seçin.',
-            ]);
-        }
-
-        return CartItem::query()->create([
-            'cart_id' => $cart->id,
-            'product_type' => ProductType::Story,
-            'instagram_account_id' => $account->id,
-            'instagram_story_price_id' => $storyPrice->id,
-            'content_mode' => ContentMode::None,
-            'content_payload' => null,
-            'price' => round((float) $storyPrice->price, 2),
-            'currency' => $storyPrice->currency,
-        ]);
-    }
-
     public function addSeoPackage(Cart $cart, SeoPackage $package, SeoPackageDurationOption $option): CartItem
     {
         if ($package->status !== SiteStatus::Active) {
@@ -340,7 +312,6 @@ class CartService
     {
         return match ($item->product_type) {
             ProductType::FooterLink => $this->updateFooterLinkContent($item, $data),
-            ProductType::Story => $this->updateStoryContent($item, $data),
             ProductType::SeoPackage, ProductType::BacklinkPackage => $this->updateKeywordTargetingContent($item, $data),
             default => $this->updateArticleLikeContent($item, $data),
         };
@@ -438,30 +409,6 @@ class CartService
         ])->save();
 
         return $item->fresh(['site', 'footerLinkDurationOption']) ?? $item;
-    }
-
-    protected function updateStoryContent(CartItem $item, array $data): CartItem
-    {
-        $payload = is_array($item->content_payload) ? $item->content_payload : [];
-
-        $payload['target_url'] = filled($data['target_url'] ?? null)
-            ? (string) $data['target_url']
-            : ($payload['target_url'] ?? null);
-        $payload['note'] = filled($data['note'] ?? null)
-            ? (string) $data['note']
-            : ($payload['note'] ?? null);
-
-        if (isset($data['image']) && $data['image'] !== null) {
-            $payload['image_path'] = $data['image']->store('cart-content/'.$item->id, 'local');
-        }
-
-        $item->forceFill([
-            'content_mode' => ContentMode::None,
-            'content_payload' => $payload,
-            'configured_at' => (filled($payload['target_url'] ?? null) || filled($payload['image_path'] ?? null)) ? now() : null,
-        ])->save();
-
-        return $item->fresh(['instagramAccount', 'instagramStoryPrice']) ?? $item;
     }
 
     /**

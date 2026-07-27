@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    // client_id / client_secret are filled at runtime from Site Ayarları (see AppServiceProvider::applySiteSettingOverrides)
+    'google' => [
+        'client_id' => null,
+        'client_secret' => null,
+        'redirect' => null,
+    ],
+
 ];

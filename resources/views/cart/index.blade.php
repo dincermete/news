@@ -21,16 +21,16 @@
 @section('content')
     {{-- ================= HERO ================= --}}
     <section class="px-2 pt-2 sm:px-3">
-        <div class="panel-dark relative overflow-hidden rounded-3xl text-white">
+        <div class="panel-light relative overflow-hidden rounded-3xl text-ink">
             <div class="relative mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-5 py-9 sm:px-8" data-reveal-group>
                 <div data-reveal>
-                    <p class="inline-flex items-center gap-x-2 rounded-full border border-white/15 bg-white/5 py-1 pe-3.5 ps-1 text-xs text-white/80">
+                    <p class="inline-flex items-center gap-x-2 rounded-full border border-ink/10 bg-white py-1 pe-3.5 ps-1 text-xs text-ink-2 shadow-soft">
                         <span class="rounded-full bg-brand-500 px-2.5 py-0.5 text-[10px] font-semibold text-white">Sepet</span>
                         {{ $cart->items->count() }} ürün
                     </p>
                     <h1 class="mt-4 font-display text-3xl font-medium leading-tight sm:text-4xl">Sepetiniz</h1>
                 </div>
-                <a href="{{ route('sites.index') }}" class="group inline-flex items-center gap-x-2 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-medium text-white transition hover:bg-white/10" data-reveal>
+                <a href="{{ route('sites.index') }}" class="group inline-flex items-center gap-x-2 rounded-2xl border border-ink/10 bg-white px-5 py-3 text-sm font-medium text-ink transition hover:bg-paper-2" data-reveal>
                     <svg class="size-3.5 transition group-hover:-translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/></svg>
                     Kataloğa dön
                 </a>
@@ -95,7 +95,6 @@
                                 @php
                                     $title = $item->site?->domain
                                         ?? $item->siteBundle?->name
-                                        ?? $item->instagramAccount?->handle
                                         ?? $item->seoPackage?->name
                                         ?? $item->backlinkPackage?->name
                                         ?? $item->product_type?->getLabel()
@@ -106,9 +105,7 @@
                                     <div class="flex flex-wrap items-center justify-between gap-3">
                                         <div class="flex min-w-0 items-center gap-x-3">
                                             @if ($item->site)
-                                                <x-site-favicon :domain="$item->site->domain" :size="40" class="shrink-0 rounded-xl" />
-                                            @elseif ($item->instagramAccount)
-                                                <x-instagram-avatar :account="$item->instagramAccount" :size="40" class="shrink-0" />
+                                                <x-site-logo :site="$item->site" :height="40" class="shrink-0 rounded-xl" />
                                             @else
                                                 <span class="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-teal-100 text-teal-600">
                                                     <svg class="size-4.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>
@@ -183,9 +180,6 @@
                                             @switch($item->product_type)
                                                 @case(\App\Enums\ProductType::FooterLink)
                                                     @include('cart.partials.footer-link-editor', ['item' => $item])
-                                                    @break
-                                                @case(\App\Enums\ProductType::Story)
-                                                    @include('cart.partials.story-editor', ['item' => $item])
                                                     @break
                                                 @case(\App\Enums\ProductType::SeoPackage)
                                                 @case(\App\Enums\ProductType::BacklinkPackage)

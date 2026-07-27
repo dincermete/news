@@ -60,6 +60,7 @@ class FooterLinkCatalogController extends Controller
             'kategori' => $kategori,
             'sort' => $sort,
             'meta' => $seo->forRoute('footer-links.index', 'Footer Link | '.site_setting('site_name')),
+            'favoritedSiteIds' => auth()->user()?->favorites()->pluck('site_id')->all() ?? [],
         ]);
     }
 }

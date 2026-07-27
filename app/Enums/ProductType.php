@@ -10,7 +10,6 @@ enum ProductType: string implements HasLabel
     case PressRelease = 'press_release';
     case FooterLink = 'footer_link';
     case Bundle = 'bundle';
-    case Story = 'story';
     case SeoPackage = 'seo_package';
     case BacklinkPackage = 'backlink_package';
     case Balance = 'balance';
@@ -22,7 +21,6 @@ enum ProductType: string implements HasLabel
             self::PressRelease => 'Basın Bülteni',
             self::FooterLink => 'Footer link',
             self::Bundle => 'Paket',
-            self::Story => 'Story',
             self::SeoPackage => 'SEO Paketi',
             self::BacklinkPackage => 'Backlink Paketi',
             self::Balance => 'Bakiye Paketi',

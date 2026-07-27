@@ -51,13 +51,7 @@
         ['key' => 'oneri', 'label' => 'Sohbet asistanı', 'title' => 'Bütçenize göre site önerisi', 'text' => 'Sağ alttaki sohbet asistanına bütçenizi ve hedef kelimenizi yazın; katalogdaki gerçek sitelerden en uygun seçkiyi anında önersin.', 'benefits' => ['Bütçeye göre gerçek site önerileri', 'Sık sorulan sorulara anında yanıt', 'Gerekirse canlı destek ekibine yönlendirir']],
     ];
 
-    $counters = [
-        ['value' => $stats['active_sites'], 'suffix' => '+', 'title' => 'Aktif haber sitesi', 'text' => 'Onaylı, DA/PA verisi güncel katalog.', 'chip' => 'from-[#67a429] to-[#aee576]'],
-        ['value' => $stats['published_orders'], 'suffix' => '+', 'title' => 'Yayınlanmış yazı', 'text' => 'Tek panelden yayına alınan içerik.', 'chip' => 'from-[#f045aa] to-[#eeaad2]'],
-        ['value' => $stats['customers'], 'suffix' => '+', 'title' => 'Memnun müşteri', 'text' => 'Ajanslar, markalar ve girişimler.', 'chip' => 'from-[#674cd0] to-[#a8a8ff]'],
-    ];
-
-    $roles = ['Ajanslar', 'SEO Uzmanları', 'E-Ticaret', 'Girişimler', 'Markalar', 'Freelancerlar', 'Daha fazlası+'];
+    $money = fn (float $amount, string $currency): string => number_format($amount, 2, ',', '.').($currency === 'TRY' ? '₺' : '$');
 
     $moneyShort = function (?float $amount, string $suffix = ''): string {
         if ($amount === null || $amount <= 0.0) {
@@ -71,19 +65,10 @@
         ['name' => 'Site Yazısı', 'text' => 'Katalogdan kategori, fiyat ve DA/PA\'ya göre site seçip tanıtım yazınızı yayınlayın.', 'price' => $moneyShort($productPrices['site_article']), 'suffix' => '\'den başlayan', 'url' => route('sites.index'), 'icon' => 'M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25M16.5 7.5V18a2.25 2.25 0 0 0 2.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 0 0 2.25 2.25h13.5'],
         ['name' => 'Basın Bülteni', 'text' => 'Haber sitelerinde basın bülteninizi yayınlayın, geniş kitlelere ulaşın.', 'price' => $moneyShort($productPrices['press_release']), 'suffix' => '\'den başlayan', 'url' => route('press-release.index'), 'icon' => 'M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 1 1 0-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783'],
         ['name' => 'Footer Link', 'text' => 'Seçtiğiniz sitenin footer\'ında kalıcı veya süreli link yerleşimi alın.', 'price' => 'Katalog fiyatı', 'suffix' => '', 'url' => route('footer-links.index'), 'icon' => 'M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244'],
-        ['name' => 'Story Satış', 'text' => 'Instagram hesaplarında Post veya Story olarak markanızı duyurun.', 'price' => 'Hesaba özel fiyat', 'suffix' => '', 'url' => route('story.index'), 'icon' => 'M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169'],
         ['name' => 'Tanıtım Paketleri', 'text' => 'Birden fazla siteyi tek pakette, tek işlemle satın alın.', 'price' => $moneyShort($productPrices['bundle']), 'suffix' => '\'den başlayan', 'url' => route('bundles.index'), 'icon' => 'M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 0 0 .75-1.653v-2.882a2.25 2.25 0 0 0-.596-1.6'],
         ['name' => 'SEO Paketleri', 'text' => 'SEO, GEO ve AEO\'yu tek pakette birleştiren aylık büyüme paketleri.', 'price' => $moneyShort($productPrices['seo_package']), 'suffix' => '/ay\'dan başlayan', 'url' => route('seo-packages.index'), 'icon' => 'M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25'],
         ['name' => 'Backlink Paketleri', 'text' => 'Yüksek otoriteli kaynaklardan doğal anchor dağılımıyla kalıcı backlink.', 'price' => $moneyShort($productPrices['backlink_package']), 'suffix' => '\'den başlayan', 'url' => route('backlink-packages.index'), 'icon' => 'M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22'],
         ['name' => 'GEO', 'text' => 'ChatGPT, Gemini ve Perplexity gibi AI motorlarında kaynak gösterilin.', 'price' => 'Ücretsiz analiz', 'suffix' => '', 'url' => route('geo.index'), 'icon' => 'M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z'],
-    ];
-
-    $testimonials = [
-        ['quote' => 'İşlerin ve bütçenin nerede durduğunu artık her an net görebiliyorum.', 'name' => 'Murat K.', 'role' => 'E-Ticaret Yöneticisi, İstanbul'],
-        ['quote' => 'Ekibimiz sürekli yazışmadan da hizalı kalıyor. Panel her gün net bir görünüm veriyor. Yeni başlayan arkadaşlar süreci günler içinde kavradı; ayrıca bir eğitim gerekmedi.', 'name' => 'Elif S.', 'role' => 'SEO Uzmanı, Ankara'],
-        ['quote' => 'Üç ayrı aracı tek platformla değiştirdik. Sipariş takibi ve site görünürlüğü nihayet mantıklı.', 'name' => 'Baran T.', 'role' => 'Ajans Kurucusu, İzmir'],
-        ['quote' => 'İlk kez yayınların ve harcamaların nerede durduğunu tek ekranda görebiliyorum.', 'name' => 'Zeynep A.', 'role' => 'Pazarlama Direktörü, Bursa'],
-        ['quote' => 'Birden çok müşteriyi bağlam kaybetmeden yönetiyorum. Notlar, siparişler ve raporlar birbirine bağlı. Kaçan güncelleme neredeyse kalmadı; her şey tek yerde yaşıyor.', 'name' => 'Onur D.', 'role' => 'Müşteri Ekibi Lideri, Antalya'],
     ];
 
     $fallbackFaqs = [
@@ -100,10 +85,10 @@
 
     // Worklane bileşen stilleri
     $chip = 'inline-flex items-center rounded-[10px] border border-ink/5 bg-white px-3.5 py-2 text-sm font-medium text-ink shadow-soft';
-    $h2 = 'font-display text-3xl font-medium leading-[1.2] tracking-[-0.01em] text-ink sm:text-[44px] lg:text-[52px]';
+    $h2 = 'font-display text-3xl font-medium leading-[1.2] tracking-[-0.01em] text-ink sm:text-[36px] lg:text-[42px]';
     $sub = 'text-lg font-medium leading-relaxed text-ink-2';
     $btnWhite = 'group inline-flex items-center gap-x-3 rounded-2xl bg-gradient-to-b from-white to-[#c9c9c9] p-1 pe-4 text-sm font-medium text-ink transition hover:scale-[1.03] active:scale-[0.98]';
-    $btnGhostDark = 'group inline-flex items-center gap-x-3 rounded-2xl border border-white/15 bg-white/5 p-1 pe-4 text-sm font-medium text-white transition hover:bg-white/10 hover:scale-[1.03] active:scale-[0.98]';
+    $btnGhostDark = 'group inline-flex items-center gap-x-3 rounded-2xl border border-ink/10 bg-white p-1 pe-4 text-sm font-medium text-ink transition hover:bg-paper-2 hover:scale-[1.03] active:scale-[0.98]';
     $btnDark = 'group inline-flex items-center gap-x-3 rounded-2xl bg-gradient-to-b from-black to-[#363b3c] p-1 pe-4 text-sm font-medium text-white transition hover:scale-[1.03] active:scale-[0.98]';
     $btnChip = 'inline-flex size-8 items-center justify-center rounded-xl';
     $arrowIcon = '<svg class="size-3.5 transition group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>';
@@ -112,99 +97,260 @@
 @section('content')
     {{-- ================= HERO ================= --}}
     <section class="px-2 pt-2 sm:px-3">
-        <div class="panel-dark relative overflow-hidden rounded-3xl text-white">
-            <div class="relative mx-auto max-w-6xl px-5 pb-14 pt-16 sm:px-8 lg:pb-20 lg:pt-24" data-reveal-group>
-                <div class="lg:max-w-3xl">
-                    <p class="inline-flex items-center gap-x-2 rounded-full border border-white/15 bg-white/5 py-1 pe-3.5 ps-1 text-xs text-white/80" data-reveal>
+        <div class="panel-light relative overflow-hidden rounded-3xl text-ink">
+            <div class="relative mx-auto max-w-6xl px-5 pt-16 sm:px-8  lg:pt-20" data-reveal-group>
+                <div class="grid gap-10 lg:grid-cols-[1fr_auto] lg:items-end">
+                    <div class="lg:max-w-md xl:max-w-xl pb-14 lg:pb-20">
+                    <p class="inline-flex items-center gap-x-2 rounded-full border border-ink/10 bg-white py-1 pe-3.5 ps-1 text-xs text-ink-2 shadow-soft" data-reveal>
                         <span class="rounded-full bg-brand-500 px-2.5 py-0.5 text-[10px] font-semibold text-white">Yeni</span>
                         Daha akıllı tanıtım yönetimi
                     </p>
 
-                    <h1 class="mt-5 font-display text-4xl font-medium leading-[1.1] sm:text-5xl lg:text-[3.6rem]" data-reveal>
-                        Markanızın tüm
-                        <div class="relative inline-block rotor-wrapper ml-4">
-                            <span class="rotor-measure"></span>
-
-                            <span class="word-rotor" data-word-rotor>
-                                @foreach ($rotorWords as $word)
-                                    <span style="background-image: {{ $word['gradient'] }}">{{ $word['text'] }}</span>
-                                @endforeach
-                            </span>
-
-                            <span class="rotor-border tl"></span>
-                            <span class="rotor-border tr"></span>
-                            <span class="rotor-border bl"></span>
-                            <span class="rotor-border br"></span>
-                        </div>                        
-                        <br>
-                        tek panelde toplansın
+                    <h1 class="mt-5 font-display text-4xl font-medium leading-[1.1] sm:text-5xl lg:text-[3.6rem]">
+                    Tanıtım Yazınız Haber Sitelerinde Yerini Alsın
                     </h1>
 
-                    <p class="mt-5 max-w-md text-lg font-medium leading-relaxed text-white/65" data-reveal>
+                    <p class="mt-5 max-w-md text-lg font-medium leading-relaxed text-ink-2" data-reveal>
                         Site aramayı, pazarlığı ve link kovalamayı bırakın. Tanıtım yazısı, basın bülteni ve backlink tek yerde.
                     </p>
 
-                    <div class="mt-8 flex flex-wrap items-center gap-3" data-reveal>
-                        <a href="{{ route('sites.index') }}" class="{{ $btnWhite }}">
-                            <span class="{{ $btnChip }} bg-gradient-to-b from-black to-[#363b3c] text-white">{!! $arrowIcon !!}</span>
-                            Hemen Başla
-                        </a>
-                        <a href="{{ url('/backlink-paketleri') }}" class="{{ $btnGhostDark }}">
-                            <span class="{{ $btnChip }} bg-white/10 text-white">
-                                <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.14v14l11-7-11-7Z"/></svg>
-                            </span>
-                            Paketleri İncele
-                        </a>
+                    <form method="get" action="{{ route('sites.index') }}" class="mt-7 flex w-full max-w-md items-center gap-2 rounded-full border border-ink/10 bg-white p-1.5 shadow-pop" role="search" data-reveal>
+                        <svg class="ms-3 size-4 shrink-0 text-ink-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+                        <input
+                            type="search"
+                            name="q"
+                            placeholder=""
+                            class="w-full border-0 bg-transparent p-0 py-2.5 text-sm text-ink placeholder:text-ink-3 focus:ring-0"
+                            aria-label="Site ara"
+                            data-typewriter='["mynet.com","milliyet.com.tr","hurriyet.com.tr","ntv.com.tr","sabah.com.tr"]'
+                            data-typewriter-prefix="Örn. "
+                            autocomplete="off"
+                        >
+                        <button type="submit" class="inline-flex shrink-0 items-center gap-x-1.5 rounded-full bg-gradient-to-b from-black to-[#363b3c] px-5 py-2.5 text-sm font-semibold text-white transition hover:scale-[1.03] active:scale-[0.98]">
+                            Ara
+                            <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
+                        </button>
+                    </form>
+      
                     </div>
-                    <p class="mt-4 text-xs text-white/45" data-reveal>Kayıt ücretsiz. Kart bilgisi gerekmez.</p>
 
-                    <div class="mt-10 flex flex-wrap items-center gap-x-10 gap-y-5" data-reveal>
-                        <div>
-                            <p class="flex items-center gap-x-1.5">
-                                <svg class="size-4 text-amber-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd"/></svg>
-                                <span class="font-display text-2xl font-semibold">4.8</span>
-                                <span class="text-sm text-white/50">/5.0</span>
-                            </p>
-                            <p class="mt-1 text-xs text-white/50">{{ $fmt($stats['customers']) }}+ müşteri değerlendirmesi</p>
-                        </div>
-                        <div>
-                            <p class="flex items-center gap-x-1.5">
-                                <svg class="size-4 text-accent-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0 0c1.657 0 3-4.03 3-9s-1.343-9-3-9-3 4.03-3 9 1.343 9 3 9Zm-8.716-6.747h17.432M3.284 9.747h17.432"/></svg>
-                                <span class="font-display text-2xl font-semibold tabular-nums" data-odometer="{{ $stats['active_sites'] }}" data-odometer-suffix="+">{{ $fmt($stats['active_sites']) }}+</span>
-                            </p>
-                            <p class="mt-1 text-xs text-white/50">Katalogda aktif haber sitesi</p>
-                        </div>
+                    <div class="relative mx-auto hidden shrink-0 lg:block lg:h-[380px] lg:w-[280px] xl:h-[460px] xl:w-[360px]" data-reveal>
+                        <div class="pointer-events-none absolute -top-6 start-1/2 h-48 w-48 -translate-x-1/2 rounded-full bg-accent-500/25 blur-3xl" aria-hidden="true"></div>
+                        <div class="pointer-events-none absolute bottom-0 start-1/2 h-24 w-56 -translate-x-1/2 rounded-full bg-brand-500/20 blur-3xl" aria-hidden="true"></div>
+
+                        <span class="absolute -start-4 top-2 z-20 rotate-[-6deg]">
+                            <span class="float-badge flex rounded-2xl border border-ink/5 bg-white p-3 shadow-pop" style="animation-delay:.2s">
+                                <img src="{{ asset('images/hero/logo-hurriyet.png') }}" alt="Hürriyet" class="h-8 w-auto">
+                            </span>
+                        </span>
+                        <span class="absolute end-2 top-14 z-20 rotate-[5deg]">
+                            <span class="float-badge flex rounded-2xl border border-ink/5 bg-white p-3 shadow-pop" style="animation-delay:1s">
+                                <img src="{{ asset('images/hero/logo-ntv.png') }}" alt="NTV" class="h-8 w-auto">
+                            </span>
+                        </span>
+                        <span class="absolute -start-6 top-[44%] z-20 -rotate-3">
+                            <span class="float-badge flex rounded-2xl border border-ink/5 bg-white p-3 shadow-pop" style="animation-delay:1.6s">
+                                <img src="{{ asset('images/hero/logo-mynet.png') }}" alt="Mynet" class="h-8 w-auto">
+                            </span>
+                        </span>
+                        <span class="absolute end-[-10px] top-[56%] z-20 rotate-6">
+                            <span class="float-badge flex rounded-2xl border border-ink/5 bg-white p-3 shadow-pop" style="animation-delay:.6s">
+                                <img src="{{ asset('images/hero/logo-milliyet.png') }}" alt="Milliyet" class="h-8 w-auto">
+                            </span>
+                        </span>
+                        <span class="absolute start-[20%] bottom-4 z-20 rotate-3">
+                            <span class="float-badge flex rounded-2xl border border-ink/5 bg-white p-3 shadow-pop" style="animation-delay:1.3s">
+                                <img src="{{ asset('images/hero/logo-sabah.png') }}" alt="Sabah" class="h-8 w-auto">
+                            </span>
+                        </span>
+
+                        <img src="{{ asset('images/hero/person.png') }}" alt="" aria-hidden="true" class="absolute inset-x-0 bottom-0 z-10 mx-auto h-full w-auto object-contain object-bottom">
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="mx-auto max-w-7xl rounded-b-[20px] bg-paper overflow-hidden">
-            <div class="mx-auto flex max-w-6xl flex-col items-center gap-5 px-5 py-[30px] sm:px-8 lg:flex-row lg:gap-10">
-                <p class="shrink-0 text-center font-display text-[22px] font-semibold leading-[1.25] text-ink lg:max-w-[190px] lg:text-start">Türkiye çapında ekipler güveniyor</p>
-                @if ($marqueeDomains->isNotEmpty())
-                    <div class="relative min-w-0 flex-1 overflow-hidden">
-                        <div class="marquee-track items-center gap-10 pe-10" style="--marquee-duration: 36s">
-                            @foreach ([0, 1] as $copy)
-                                @foreach ($marqueeDomains as $domain)
-                                    <a
-                                        href="{{ route('sites.show', $domain) }}"
-                                        @if ($copy === 1) aria-hidden="true" tabindex="-1" @endif
-                                        class="inline-flex h-5 shrink-0 items-center gap-x-2 text-sm font-semibold text-ink-3 grayscale transition hover:text-ink hover:grayscale-0"
-                                    >
-                                        <x-site-favicon :domain="$domain" :size="16" class="shrink-0 opacity-60" />
-                                        {{ $domain }}
-                                    </a>
-                                @endforeach
+        <div class="mx-auto max-w-4xl rounded-[20px] mt-2 bg-paper overflow-hidden">
+            <div class="relative min-w-0 flex-1 overflow-hidden px-4 py-4 sm:px-8">
+            <h2 class="mx-auto flex max-w-full flex-nowrap items-baseline justify-center gap-x-2 text-center font-display text-base font-medium leading-[1.15] tracking-[-0.02em] text-zinc-700 sm:gap-x-3 sm:text-xl lg:text-2xl" data-reveal>
+                    <span class="shrink-0 whitespace-nowrap">Markanızın tüm</span>
+                    <span class="relative inline-block shrink-0 rotor-wrapper align-baseline">
+                        <span class="rotor-measure"></span>
+
+                        <span class="word-rotor" data-word-rotor>
+                            @foreach ($rotorWords as $word)
+                                <span style="background-image: {{ $word['gradient'] }}">{{ $word['text'] }}</span>
                             @endforeach
-                        </div>
-                        {{-- Kenar solmaları (şablondaki 120px degrade maskeler) --}}
-                        <span class="pointer-events-none absolute inset-y-0 start-0 w-[120px] bg-gradient-to-r from-paper to-transparent" aria-hidden="true"></span>
-                        <span class="pointer-events-none absolute inset-y-0 end-0 w-[120px] bg-gradient-to-l from-paper to-transparent" aria-hidden="true"></span>
-                    </div>
-                @endif
+                        </span>
+
+                        <span class="rotor-border tl"></span>
+                        <span class="rotor-border tr"></span>
+                        <span class="rotor-border bl"></span>
+                        <span class="rotor-border br"></span>
+                    </span>
+                    <span class="shrink-0 whitespace-nowrap">tek panelde toplansın</span>
+                </h2>
+                {{-- Kenar solmaları --}}
+                <span class="pointer-events-none absolute inset-y-0 start-0 w-[80px] bg-gradient-to-r from-paper to-transparent sm:w-[120px]" aria-hidden="true"></span>
+                <span class="pointer-events-none absolute inset-y-0 end-0 w-[80px] bg-gradient-to-l from-paper to-transparent sm:w-[120px]" aria-hidden="true"></span>
             </div>
         </div>
+    </section>
+
+    {{-- ================= EN YENİ SİTELER / BU AYIN ENLERİ ================= --}}
+    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group x-data="{ siteTab: 'newest' }">
+        <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+            <div class="max-w-xl">
+                <p data-reveal><span class="{{ $chip }}">Katalog</span></p>
+                <h2 class="mt-5 {{ $h2 }}" data-reveal>En yeni siteler, bu ayın enleri</h2>
+            </div>
+            <div class="inline-flex w-fit shrink-0 items-center gap-1 rounded-full bg-paper p-1" data-reveal>
+                <button
+                    type="button"
+                    @click="siteTab = 'newest'"
+                    :class="siteTab === 'newest' ? 'bg-white text-ink shadow-soft' : 'text-ink-2'"
+                    class="rounded-full px-4 py-2 text-sm font-semibold transition"
+                >En Yeni Siteler</button>
+                <button
+                    type="button"
+                    @click="siteTab = 'best'"
+                    :class="siteTab === 'best' ? 'bg-white text-ink shadow-soft' : 'text-ink-2'"
+                    class="rounded-full px-4 py-2 text-sm font-semibold transition"
+                >Bu Ayın Enleri</button>
+            </div>
+        </div>
+
+        <div class="mt-10" data-reveal>
+            <div x-show="siteTab === 'newest'">
+                <x-site-table :sites="$newestSites" :favoritedSiteIds="$favoritedSiteIds" />
+            </div>
+            <div x-show="siteTab === 'best'" x-cloak>
+                <x-site-table :sites="$bestSellerSites" :favoritedSiteIds="$favoritedSiteIds" />
+            </div>
+        </div>
+
+        <div class="mt-6 text-center" data-reveal>
+            <a href="{{ route('sites.index') }}" class="inline-flex items-center gap-x-1.5 text-sm font-semibold text-ink-2 transition hover:text-ink">
+                Tüm siteleri gör
+                <svg class="size-3.5 transition group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
+            </a>
+        </div>
+    </section>
+
+    {{-- ================= POPÜLER PAKETLER (Tanıtım Paketleri) ================= --}}
+    @if ($featuredBundles->isNotEmpty())
+        <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group x-data="autoSlider()">
+            <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+                <div class="max-w-xl">
+                    <p data-reveal><span class="{{ $chip }}">Popüler Paketler</span></p>
+                    <h2 class="mt-5 {{ $h2 }}" data-reveal>Birden fazla siteyi tek pakette alın</h2>
+                </div>
+                <div class="flex shrink-0 items-center gap-2" data-reveal>
+                    <button type="button" @click="prev()" class="inline-flex size-10 items-center justify-center rounded-full border border-ink/10 bg-white text-ink-2 shadow-soft transition hover:text-ink" aria-label="Önceki paketler">
+                        <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
+                    </button>
+                    <button type="button" @click="next()" class="inline-flex size-10 items-center justify-center rounded-full border border-ink/10 bg-white text-ink-2 shadow-soft transition hover:text-ink" aria-label="Sonraki paketler">
+                        <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+                    </button>
+                    <a href="{{ route('bundles.index') }}" class="{{ $btnDark }}">
+                        <span class="{{ $btnChip }} bg-white/15 text-white">{!! $arrowIcon !!}</span>
+                        Tüm Paketler
+                    </a>
+                </div>
+            </div>
+
+            <ul x-ref="track" class="no-scrollbar mt-10 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-2 pt-3" data-reveal>
+                @foreach ($featuredBundles as $bundle)
+                    <li class="w-full shrink-0 snap-start sm:w-[calc((100%-20px)/2)] lg:w-[calc((100%-40px)/3)]">
+                        <x-bundle-card :bundle="$bundle" />
+                    </li>
+                @endforeach
+            </ul>
+        </section>
+    @endif
+
+    {{-- ================= BACKLINK PAKETLERİ ================= --}}
+    @if ($featuredBacklinkPackages->isNotEmpty())
+        <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group x-data="autoSlider()">
+            <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+                <div class="max-w-xl">
+                    <p data-reveal><span class="{{ $chip }}">Backlink Paketleri</span></p>
+                    <h2 class="mt-5 {{ $h2 }}" data-reveal>Otoriteyi büyüten backlink paketleri</h2>
+                </div>
+                <div class="flex shrink-0 items-center gap-2" data-reveal>
+                    <button type="button" @click="prev()" class="inline-flex size-10 items-center justify-center rounded-full border border-ink/10 bg-white text-ink-2 shadow-soft transition hover:text-ink" aria-label="Önceki paketler">
+                        <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
+                    </button>
+                    <button type="button" @click="next()" class="inline-flex size-10 items-center justify-center rounded-full border border-ink/10 bg-white text-ink-2 shadow-soft transition hover:text-ink" aria-label="Sonraki paketler">
+                        <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+                    </button>
+                    <a href="{{ route('backlink-packages.index') }}" class="{{ $btnDark }}">
+                        <span class="{{ $btnChip }} bg-white/15 text-white">{!! $arrowIcon !!}</span>
+                        Tüm Paketler
+                    </a>
+                </div>
+            </div>
+
+            <ul x-ref="track" class="no-scrollbar mt-10 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-2 pt-5" data-reveal>
+                @foreach ($featuredBacklinkPackages as $package)
+                    <li class="w-full shrink-0 snap-start sm:w-[calc((100%-20px)/2)] lg:w-[calc((100%-40px)/3)]">
+                        <div @class([
+                            'relative flex h-full flex-col rounded-[20px] border bg-white p-5',
+                            'border-ink shadow-pop' => $package->is_featured,
+                            'border-ink/10' => ! $package->is_featured,
+                        ])>
+                            @if ($package->is_featured)
+                                <span class="absolute -top-3 start-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-ink px-3 py-1 text-[10px] font-bold text-white">★ EN ÇOK TERCİH EDİLEN</span>
+                            @endif
+                            <h3 class="font-display text-lg font-semibold text-ink">{{ $package->name }}</h3>
+                            @if ($package->description)
+                                <p class="mt-1.5 line-clamp-2 text-sm text-ink-2">{{ $package->description }}</p>
+                            @endif
+                            <p class="mt-4 font-display text-2xl font-semibold text-ink">{{ $money((float) $package->price, $package->currency?->value ?? 'TRY') }}</p>
+                            <a href="{{ route('backlink-packages.index') }}" class="mt-auto inline-flex w-full items-center justify-center gap-x-1.5 rounded-xl bg-gradient-to-b from-black to-[#363b3c] px-4 py-2.5 text-sm font-semibold text-white transition hover:scale-[1.02] active:scale-[0.98]">İncele</a>
+                        </div>
+                    </li>
+                @endforeach
+            </ul>
+        </section>
+    @endif
+
+    {{-- ================= ÜRÜNLERİMİZ ================= --}}
+    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group x-data="autoSlider({ auto: true, delay: 3500 })">
+        <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+            <div class="max-w-xl">
+                <p data-reveal><span class="{{ $chip }}">Ürünlerimiz</span></p>
+                <h2 class="mt-5 {{ $h2 }}" data-reveal>İhtiyacınıza göre tek tek ya da paket halinde satın alın</h2>
+                <p class="mt-4 {{ $sub }}" data-reveal>Gizli ücret yok; her ürünün fiyatı katalog sayfasında net olarak görünür.</p>
+            </div>
+            <div class="flex shrink-0 items-center gap-2" data-reveal>
+                <button type="button" @click="prev()" class="inline-flex size-10 items-center justify-center rounded-full border border-ink/10 bg-white text-ink-2 shadow-soft transition hover:text-ink" aria-label="Önceki ürünler">
+                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
+                </button>
+                <button type="button" @click="next()" class="inline-flex size-10 items-center justify-center rounded-full border border-ink/10 bg-white text-ink-2 shadow-soft transition hover:text-ink" aria-label="Sonraki ürünler">
+                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <ul x-ref="track" class="no-scrollbar mt-10 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-2 pt-3" data-reveal>
+            @foreach ($products as $product)
+                <li class="w-full shrink-0 snap-start sm:w-[calc((100%-20px)/2)] lg:w-[calc((100%-60px)/4)]">
+                    <a href="{{ $product['url'] }}" class="group flex h-full flex-col rounded-[20px] bg-paper p-6 transition hover:-translate-y-0.5 hover:shadow-pop">
+                        <span class="inline-flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-ink text-white">
+                            <svg class="size-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $product['icon'] }}"/></svg>
+                        </span>
+                        <h3 class="mt-4 font-display text-lg font-semibold text-ink">{{ $product['name'] }}</h3>
+                        <p class="mt-1.5 text-sm font-medium leading-relaxed text-ink-2">{{ $product['text'] }}</p>
+                        <p class="mt-4 text-sm font-semibold text-ink">{{ $product['price'] }}{{ $product['suffix'] }}</p>
+                        <span class="mt-auto flex items-center gap-x-1.5 pt-4 text-xs font-semibold text-ink-2 transition group-hover:text-ink">
+                            İncele
+                            <svg class="size-3 transition group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
+                        </span>
+                    </a>
+                </li>
+            @endforeach
+        </ul>
     </section>
 
     <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
@@ -215,7 +361,7 @@
                 </span>
             </p>
 
-            <h2 class="mt-5 font-display text-3xl font-medium leading-[1.2] tracking-[-0.01em] text-ink sm:text-[44px] lg:text-[52px]" data-reveal>
+            <h2 class="mt-5 font-display text-3xl font-medium leading-[1.2] tracking-[-0.01em] text-ink sm:text-[36px] lg:text-[42px]" data-reveal>
                 İhtiyacınız olan her şey tek yerde
             </h2>
         </div>
@@ -227,7 +373,7 @@
                     @foreach ([
                         ['Finans sitesinde tanıtım yazısı', 'Yayında', 'bg-emerald-100 text-emerald-700'],
                         ['Teknoloji bülteni dağıtımı', 'Editörde', 'bg-accent-100 text-accent-700'],
-                        ['Story yayını — 3 hesap', 'Sırada', 'bg-amber-100 text-amber-700'],
+                        ['Footer link yerleşimi', 'Sırada', 'bg-amber-100 text-amber-700'],
                         ['SEO backlink paketi', 'Hazırlanıyor', 'bg-sky-100 text-sky-700'],
                         ['Basın bülteni gönderimi', 'Onayda', 'bg-violet-100 text-violet-700'],
                     ] as [$is, $durum, $tone])
@@ -265,7 +411,7 @@
                     </div>
                     <div class="mx-auto w-[86%] rounded-[11px] bg-white p-4 shadow-[0_5px_20px_rgba(10,11,11,0.1)]">
                         <div class="flex items-center gap-x-2.5">
-                            <x-site-favicon domain="habergazetesi.com.tr" :size="24" class="shrink-0" />
+                            <x-site-logo domain="habergazetesi.com.tr" :height="24" class="shrink-0" />
                             <div class="min-w-0 flex-1">
                                 <p class="truncate text-[13px] font-semibold text-ink">habergazetesi.com.tr</p>
                                 <p class="text-[11px] text-ink-2">Haber · Dofollow</p>
@@ -323,9 +469,9 @@
                     <span class="absolute start-[16%] top-[2%] inline-flex size-[112px] items-center justify-center rounded-full bg-[#9ccaff]">
                         <svg class="size-[56px] text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 1 1 0-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 0 1-1.44-4.282m3.102.069a18.03 18.03 0 0 1-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 0 1 8.835 2.535M10.34 6.66a23.847 23.847 0 0 0 8.835-2.535m0 0A23.74 23.74 0 0 0 18.795 3m.38 1.125a23.91 23.91 0 0 1 1.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 0 0 1.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73"/></svg>
                     </span>
-                    {{-- 51px pembe: Story --}}
+                    {{-- 51px pembe: SEO Paketleri --}}
                     <span class="absolute start-[2%] top-[42%] inline-flex size-[51px] items-center justify-center rounded-full bg-[#f045aa]">
-                        <svg class="size-[26px] text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z"/></svg>
+                        <svg class="size-[26px] text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25"/></svg>
                     </span>
                     {{-- 46px beyaz: AI --}}
                     <span class="absolute start-[54%] top-0 inline-flex size-[46px] items-center justify-center rounded-full bg-white">
@@ -420,7 +566,7 @@
                         @endforeach
                     </div>
                     <ul class="divide-y divide-ink/5">
-                        @foreach ([['Finans sitesinde tanıtım yazısı', 'S', 'bg-brand-100 text-brand-700', 'Bugün'], ['Teknoloji bülteni dağıtımı', 'E', 'bg-accent-100 text-accent-700', 'Yarın'], ['E-ticaret backlink paketi', 'M', 'bg-emerald-100 text-emerald-700', 'Çar'], ['Story yayını — 3 hesap', 'B', 'bg-amber-100 text-amber-700', 'Cum']] as [$is, $avatar, $tone, $gun])
+                        @foreach ([['Finans sitesinde tanıtım yazısı', 'S', 'bg-brand-100 text-brand-700', 'Bugün'], ['Teknoloji bülteni dağıtımı', 'E', 'bg-accent-100 text-accent-700', 'Yarın'], ['E-ticaret backlink paketi', 'M', 'bg-emerald-100 text-emerald-700', 'Çar'], ['Footer link yerleşimi', 'B', 'bg-amber-100 text-amber-700', 'Cum']] as [$is, $avatar, $tone, $gun])
                             <li class="flex items-center gap-3 py-3">
                                 <span class="inline-flex size-4 items-center justify-center rounded border border-ink/15">
                                     <svg class="size-2.5 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
@@ -455,7 +601,7 @@
                     {{-- Merkez site kartı --}}
                     <div class="absolute start-1/2 top-1/2 w-[230px] -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-4 shadow-[0_5px_20px_rgba(10,11,11,0.1)]">
                         <div class="flex items-center gap-x-2.5">
-                            <x-site-favicon domain="olaymedya.com" :size="24" class="shrink-0" />
+                            <x-site-logo domain="olaymedya.com" :height="24" class="shrink-0" />
                             <div class="min-w-0 flex-1">
                                 <p class="truncate text-[13px] font-semibold text-ink">olaymedya.com</p>
                                 <p class="text-[11px] text-ink-2">12 yayın · 2 not</p>
@@ -484,7 +630,7 @@
                 <div class="mt-6 space-y-2.5">
                     @foreach ([['habergazetesi.com.tr', 'DA 45', 'bg-brand-100 text-brand-700'], ['olaymedya.com', 'DA 38', 'bg-accent-100 text-accent-700'], ['nesilhaber.com', 'DA 41', 'bg-amber-100 text-amber-700']] as [$domain, $da, $tone])
                         <div class="flex items-center gap-3 rounded-full bg-white p-2 pe-3 shadow-soft">
-                            <x-site-favicon :domain="$domain" :size="32" class="shrink-0 rounded-full" />
+                            <x-site-logo :domain="$domain" :height="32" class="shrink-0 rounded-full" />
                             <p class="min-w-0 flex-1 truncate text-[13px] font-semibold text-ink">{{ $domain }}</p>
                             <span class="{{ $tone }} shrink-0 rounded-md px-2 py-1 text-[11px] font-bold tabular-nums">{{ $da }}</span>
                             <svg class="size-4 shrink-0 text-brand-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-6.5-4.35-9.192-8.51C1.02 9.72 1.9 6.5 4.6 5.24c2.1-.98 4.2-.2 5.4 1.36C11.2 5.04 13.3 4.26 15.4 5.24c2.7 1.26 3.58 4.48 1.79 7.25C18.5 16.65 12 21 12 21Z"/></svg>
@@ -535,7 +681,6 @@
     {{-- ================= AI ASİSTAN (Beta) ================= --}}
     <section class="mx-auto px-4 py-16 sm:px-6 lg:px-8" x-data="{ tab: 'icerik' }">
         <div class="panel-dark relative overflow-hidden rounded-[20px] p-6 text-white sm:p-12" data-reveal-group>
-            {{-- Devre hatları hissi --}}
             <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" aria-hidden="true"></div>
 
             {{-- Küp aksesuar --}}
@@ -615,178 +760,78 @@
         </div>
     </section>
 
-    {{-- ================= SAYAÇLAR (What teams achieve) ================= --}}
+    {{-- ================= TANITIM YAZISI ================= --}}
     <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
-        <div class="flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between">
-            {{-- Sol: 28px başlık + gradyan çipli CTA --}}
-            <div class="shrink-0 lg:max-w-[320px]" data-reveal>
-                <h2 class="font-display text-[28px] font-medium leading-[1.2] text-ink">Ekiplerin platformumuzla ulaştığı sonuçlar</h2>
-                <a href="{{ route('register') }}" class="group mt-4 inline-flex items-center gap-x-3 rounded-2xl bg-gradient-to-b from-black to-[#363b3c] p-1 pe-5 text-lg font-semibold text-white transition hover:scale-[1.03] active:scale-[0.98]">
-                    <span class="inline-flex size-11 items-center justify-center rounded-xl bg-gradient-to-b from-white to-[#c9c9c9] text-ink">
-                        <svg class="size-4 transition group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
-                    </span>
-                    Ücretsiz başlayın
-                </a>
-            </div>
+        <div class="grid gap-12 lg:grid-cols-2 lg:items-center">
+            <div data-reveal>
+                <h2 class="font-display text-[28px] font-medium leading-[1.2] text-ink">Tanıtım Yazısı</h2>
 
-            {{-- Sağ: 3 kolon — 50px gradyan ikon karesi + rakam yan yana --}}
-            <div class="grid flex-1 gap-8 sm:grid-cols-3 lg:max-w-[800px]">
-                @foreach ($counters as $counter)
-                    <div class="max-w-[247px]" data-reveal>
-                        <div class="flex items-center gap-x-4">
-                            <span class="inline-flex size-[50px] shrink-0 items-center justify-center rounded-[10px] bg-gradient-to-br {{ $counter['chip'] }} text-white">
-                                <svg class="size-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941"/></svg>
-                            </span>
-                            <p class="font-display text-[32px] font-medium leading-none text-ink tabular-nums" data-odometer="{{ $counter['value'] }}" data-odometer-suffix="{{ $counter['suffix'] }}">{{ $fmt($counter['value']) }}{{ $counter['suffix'] }}</p>
-                        </div>
-                        <h3 class="mt-4 font-display text-lg font-semibold text-ink">{{ $counter['title'] }}</h3>
-                        <p class="mt-1 text-sm font-medium leading-snug text-ink-2">{{ $counter['text'] }}</p>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    {{-- ================= HER ROL İÇİN (Built for teams) ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
-        <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
-            <div>
-                <p data-reveal><span class="{{ $chip }}">Ekipler için</span></p>
-                <h2 class="mt-5 {{ $h2 }}" data-reveal>Birçok role uyan tek sistem</h2>
-                <p class="mt-4 max-w-md {{ $sub }}" data-reveal>
-                    Farklı ekipler platformu farklı şekillerde kullanır; hedef aynı kalır: yayınlar, siteler ve bütçe tek basit yerde.
+                <p class="mt-4 text-base font-medium leading-relaxed text-ink-2">
+                    <strong class="font-semibold text-ink">Tanıtım yazısı;</strong> herhangi bir sitenin, hedeflenmiş anahtar kelimeler kullanılarak, Google ve diğer arama motorlarında, sitenin yükselmesini sağlayan, en önemli backlink metotlarından biridir.
                 </p>
-                <div class="mt-7 flex max-w-md flex-wrap gap-2.5" data-reveal>
-                    @foreach ($roles as $i => $role)
-                        <span @class([
-                            'rounded-[10px] px-4 py-1.5 text-[13px] font-medium',
-                            'bg-ink text-white' => $i === count($roles) - 1,
-                            'bg-paper text-ink-2' => $i !== count($roles) - 1,
-                        ])>{{ $role }}</span>
+                <p class="mt-4 text-base font-medium leading-relaxed text-ink-2">
+                    <strong class="font-semibold text-ink">Profesyonel tanıtım yazıları</strong> sayesinde, web sitesinde bulunan tüm ürün ve hizmetler kolayca tanıtılmış olur. Tanıtım yazılarının ikna edici özelliği, ürün ve hizmetlerin, hedef kitleye daha kolay ulaşmasına olanak tanır.
+                </p>
+
+                <h3 class="mt-7 font-display text-xl font-semibold text-ink">Tanıtım Yazısının Faydası Nedir?</h3>
+                <p class="mt-3 text-base font-medium leading-relaxed text-ink-2">
+                    Herhangi bir site için, anahtar kelimelerle oluşturulan tanıtım yazıları, SEO açısından önemlidir. Bunun yanında;
+                </p>
+
+                <ul class="mt-4 space-y-2.5">
+                    @foreach ([
+                        'Google ve diğer arama motorlarında bilinirlik sağlar.',
+                        'Sitenizdeki ürün ve hizmetlerin tanıtımını yapmanın kolay yoludur.',
+                        'Firma tanıtımı, reklam çalışmalarına gerek kalmadan yapılır.',
+                        'Site hızı artmaya başlar.',
+                    ] as $benefit)
+                        <li class="flex items-start gap-x-2.5 text-sm font-medium text-ink-2">
+                            <svg class="mt-0.5 size-4 shrink-0 text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+                            {{ $benefit }}
+                        </li>
                     @endforeach
-                </div>
-            </div>
+                </ul>
 
-            {{-- Lavanta panel + binen kartlar --}}
-            <div class="relative overflow-hidden rounded-[20px] bg-[#f5f3ff] p-8 lg:min-h-[483px]" data-reveal>
-                <div class="relative mx-auto h-[300px] max-w-[420px]">
-                    <div class="absolute start-0 top-2 w-[240px] rounded-[20px] bg-white p-4 shadow-[0_6px_20px_rgba(10,11,11,0.1)]">
-                        <p class="text-[11px] font-semibold uppercase tracking-wide text-ink-3">Sipariş görünümü</p>
-                        <div class="mt-3 space-y-2">
-                            @foreach ([['Site Yazısı', '12 yayın', 'bg-brand-100 text-brand-700'], ['Basın Bülteni', '8 yayın', 'bg-accent-100 text-accent-700'], ['Backlink Paketi', '3 sipariş', 'bg-emerald-100 text-emerald-700']] as [$urun, $adet, $tone])
-                                <div class="flex items-center gap-2.5 rounded-xl bg-paper px-3 py-2.5">
-                                    <span class="{{ $tone }} inline-flex size-6 items-center justify-center rounded-full text-[10px] font-bold">{{ mb_substr($urun, 0, 1) }}</span>
-                                    <p class="min-w-0 flex-1 truncate text-[12px] font-semibold text-ink">{{ $urun }}</p>
-                                    <span class="text-[10px] font-medium text-ink-2">{{ $adet }}</span>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                    <div class="absolute -end-2 bottom-0 w-[200px] rounded-[20px] bg-white p-4 shadow-[0_6px_20px_rgba(10,11,11,0.1)]">
-                        <p class="text-[11px] font-semibold uppercase tracking-wide text-ink-3">SEO görünümü</p>
-                        <p class="mt-2 font-display text-[26px] font-semibold text-ink tabular-nums">DA 45+</p>
-                        <p class="text-[11px] font-medium text-ink-2">ortalama site otoritesi</p>
-                        <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-ink/10"><div class="h-full w-4/5 rounded-full bg-gradient-to-r from-accent-500 to-brand-500"></div></div>
-                    </div>
-                </div>
-                <div class="mt-6 flex items-center justify-center gap-5 text-[11px] font-semibold uppercase tracking-wide text-ink-3">
-                    <span>Tanıtım</span><span>·</span><span>Bülten</span><span>·</span><span>Backlink</span><span>·</span><span>GEO</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    {{-- ================= ÜRÜNLERİMİZ ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
-        <div class="mx-auto max-w-2xl text-center" data-reveal-group>
-            <p data-reveal><span class="{{ $chip }}">Ürünlerimiz</span></p>
-            <h2 class="mt-5 {{ $h2 }}" data-reveal>İhtiyacınıza göre tek tek ya da paket halinde satın alın</h2>
-            <p class="mt-4 {{ $sub }}" data-reveal>Gizli ücret yok; her ürünün fiyatı katalog sayfasında net olarak görünür.</p>
-        </div>
-
-        <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4" data-reveal-group>
-            @foreach ($products as $product)
-                <a href="{{ $product['url'] }}" class="group flex flex-col rounded-[20px] bg-paper p-6 transition hover:-translate-y-0.5 hover:shadow-pop" data-reveal>
-                    <span class="inline-flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-ink text-white">
-                        <svg class="size-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $product['icon'] }}"/></svg>
-                    </span>
-                    <h3 class="mt-4 font-display text-lg font-semibold text-ink">{{ $product['name'] }}</h3>
-                    <p class="mt-1.5 text-sm font-medium leading-relaxed text-ink-2">{{ $product['text'] }}</p>
-                    <p class="mt-4 text-sm font-semibold text-ink">{{ $product['price'] }}{{ $product['suffix'] }}</p>
-                    <span class="mt-auto flex items-center gap-x-1.5 pt-4 text-xs font-semibold text-ink-2 transition group-hover:text-ink">
-                        İncele
-                        <svg class="size-3 transition group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
-                    </span>
+                <a href="#sss" class="mt-7 inline-flex items-center gap-x-2 rounded-full bg-brand-500 px-5 py-3 text-sm font-semibold text-white transition hover:scale-[1.03] active:scale-[0.98]">
+                    Sık Sorulan Sorular
+                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 9.879a3 3 0 1 1 3.414 4.821c-.735.51-1.293 1.235-1.293 2.1M12 17.25h.008v.008H12v-.008Z"/></svg>
                 </a>
-            @endforeach
-        </div>
-    </section>
-
-    {{-- ================= YORUMLAR (What teams say) ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
-        {{-- Başlık satırı: solda rozet + başlık, sağda puan bloğu --}}
-        <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div class="max-w-2xl">
-                <p data-reveal><span class="{{ $chip }}">Ekipler ne diyor</span></p>
-                <h2 class="mt-5 {{ $h2 }}" data-reveal>Gerçek iş yapan ekiplerin güvendiği platform</h2>
             </div>
-            <div class="flex shrink-0 items-center gap-x-4" data-reveal>
-                <span class="inline-flex size-[60px] items-center justify-center rounded-[10px] bg-white shadow-soft">
-                    <span class="font-display text-[28px] font-medium text-ink">4.8</span>
-                </span>
-                <span>
-                    <span class="flex gap-x-0.5 text-amber-400" aria-label="5 üzerinden 5 yıldız">
-                        @for ($i = 0; $i < 5; $i++)
-                            <svg class="size-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd"/></svg>
-                        @endfor
+
+            <div class="relative mx-auto hidden max-w-md py-6 lg:block" data-reveal>
+                <img src="{{ asset('images/tanitim/siteler-gorsel.png') }}" alt="Haber sitelerinde yayınlanmış tanıtım yazıları" class="mx-auto w-[85%]">
+
+                <span class="absolute start-0 top-0 z-20 -rotate-6">
+                    <span class="float-badge flex rounded-2xl border border-ink/5 bg-white p-3 shadow-pop" style="animation-delay:.2s">
+                        <img src="{{ asset('images/tanitim/logo-posta.png') }}" alt="Posta" class="h-6 w-auto">
                     </span>
-                    <span class="mt-1.5 block text-sm font-medium text-ink-2">{{ $fmt($stats['customers']) }}+ kullanıcının değerlendirmesi</span>
+                </span>
+                <span class="absolute end-0 top-6 z-20 rotate-3">
+                    <span class="float-badge flex rounded-2xl border border-ink/5 bg-white p-3 shadow-pop" style="animation-delay:1s">
+                        <img src="{{ asset('images/tanitim/logo-iha.png') }}" alt="İHA" class="h-6 w-auto">
+                    </span>
+                </span>
+                <span class="absolute start-0 top-1/2 z-20 -translate-y-1/2 rotate-3">
+                    <span class="float-badge flex rounded-2xl border border-ink/5 bg-white p-3 shadow-pop" style="animation-delay:1.6s">
+                        <img src="{{ asset('images/tanitim/logo-aksam.png') }}" alt="Akşam" class="h-6 w-auto">
+                    </span>
+                </span>
+                <span class="absolute end-0 bottom-16 z-20 -rotate-3">
+                    <span class="float-badge flex rounded-2xl border border-ink/5 bg-white p-3 shadow-pop" style="animation-delay:.6s">
+                        <img src="{{ asset('images/tanitim/logo-dha.png') }}" alt="DHA" class="h-6 w-auto">
+                    </span>
+                </span>
+                <span class="absolute start-1/2 bottom-0 z-20 -translate-x-1/2 rotate-2">
+                    <span class="float-badge flex rounded-2xl border border-ink/5 bg-white p-3 shadow-pop" style="animation-delay:1.3s">
+                        <img src="{{ asset('images/tanitim/logo-onedio.png') }}" alt="onedio" class="h-6 w-auto">
+                    </span>
                 </span>
             </div>
-        </div>
-
-        {{-- 370x370 kare kartlardan yatay şerit (1. ve 4. kart koyu) --}}
-        <div data-reveal>
-            <ul class="no-scrollbar -mx-4 mt-10 flex snap-x snap-mandatory gap-5 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-                @foreach ($testimonials as $i => $testimonial)
-                    @php $koyu = in_array($i, [0, 3], true); @endphp
-                    <li class="w-[85vw] max-w-[370px] shrink-0 snap-start sm:w-[370px]">
-                        <figure @class([
-                            'relative flex h-[370px] flex-col justify-between overflow-hidden rounded-[20px] p-[30px]',
-                            'bg-ink text-white' => $koyu,
-                            'bg-paper' => ! $koyu,
-                        ])>
-                            @if ($koyu)
-                                {{-- Fotoğraf kartının koyu zemin dokusu --}}
-                                <span class="pointer-events-none absolute -end-16 -top-16 size-56 rounded-full bg-accent-600/40 blur-[70px]" aria-hidden="true"></span>
-                                <span class="pointer-events-none absolute -bottom-20 -start-16 size-56 rounded-full bg-brand-600/30 blur-[70px]" aria-hidden="true"></span>
-                                <span class="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/60 to-transparent" aria-hidden="true"></span>
-                            @endif
-
-                            <blockquote @class(['relative text-lg font-semibold leading-relaxed', 'text-white' => $koyu, 'text-ink' => ! $koyu])>
-                                &ldquo;{{ $testimonial['quote'] }}&rdquo;
-                            </blockquote>
-
-                            <figcaption class="relative flex items-center gap-x-4">
-                                @unless ($koyu)
-                                    <span class="inline-flex size-[50px] shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-accent-100 to-brand-100 font-display text-lg font-semibold text-accent-700">
-                                        {{ mb_substr($testimonial['name'], 0, 1) }}
-                                    </span>
-                                @endunless
-                                <span class="min-w-0">
-                                    <span @class(['block text-lg font-medium', 'text-white' => $koyu, 'text-ink' => ! $koyu])>{{ $testimonial['name'] }}</span>
-                                    <span @class(['block text-sm font-medium', 'text-white/80' => $koyu, 'text-ink-2' => ! $koyu])>{{ $testimonial['role'] }}</span>
-                                </span>
-                            </figcaption>
-                        </figure>
-                    </li>
-                @endforeach
-            </ul>
         </div>
     </section>
 
     {{-- ================= SSS ================= --}}
-    <section class="mx-auto max-w-6xl px-4 pb-20 pt-16 sm:px-6 lg:px-8">
+    <section id="sss" class="mx-auto max-w-6xl px-4 pb-20 pt-16 sm:px-6 lg:px-8">
         <div class="grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
             <div class="lg:sticky lg:top-28 lg:self-start" data-reveal-group>
                 <p data-reveal><span class="{{ $chip }}">SSS</span></p>

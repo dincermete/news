@@ -14,7 +14,7 @@ final class SiteCatalogFilters
 {
     public const PER_PAGE = 24;
 
-    public const DEFAULT_SORT = 'price_asc';
+    public const DEFAULT_SORT = 'da_desc';
 
     /**
      * @var list<string>

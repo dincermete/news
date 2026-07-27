@@ -33,6 +33,7 @@ class SiteCatalogController extends Controller
             'categories' => $categories,
             'activeSiteCount' => $stats->activeSiteCount(),
             'meta' => $seo->forRoute('sites.index', 'Siteler | '.site_setting('site_name')),
+            'favoritedSiteIds' => auth()->user()?->favorites()->pluck('site_id')->all() ?? [],
         ]);
     }
 }

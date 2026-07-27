@@ -94,7 +94,6 @@
                         $payload = is_array($order->content_payload) ? $order->content_payload : [];
                         $orderTitle = $order->site?->domain
                             ?? $order->siteBundle?->name
-                            ?? $order->instagramAccount?->handle
                             ?? $order->seoPackage?->name
                             ?? $order->backlinkPackage?->name
                             ?? $order->product_type?->getLabel()
@@ -105,9 +104,7 @@
                             <div class="min-w-0">
                                 <div class="flex flex-wrap items-center gap-2">
                                     @if ($order->site)
-                                        <x-site-favicon :domain="$order->site->domain" :size="24" class="shrink-0 rounded-md" />
-                                    @elseif ($order->instagramAccount)
-                                        <x-instagram-avatar :account="$order->instagramAccount" :size="24" />
+                                        <x-site-logo :site="$order->site" :height="24" class="shrink-0 rounded-md" />
                                     @endif
                                     <p class="font-semibold text-ink">{{ $orderTitle }}</p>
                                 </div>

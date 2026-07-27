@@ -9,6 +9,7 @@ use App\Services\CatalogCache;
 use App\Services\RelatedSitesService;
 use App\Services\SeoMetaService;
 use App\Services\SiteViewService;
+use App\Support\CatalogQuery;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -49,6 +50,14 @@ class SiteShowController extends Controller
             ->limit(20)
             ->get(['id', 'question', 'answer', 'answered_at', 'guest_email', 'user_id']);
 
+        $bestSellers = CatalogQuery::activeSites()
+            ->where('id', '!=', $site->id)
+            ->withCount('orders')
+            ->orderByDesc('orders_count')
+            ->orderBy('id')
+            ->limit(6)
+            ->get(['id', 'domain', 'price', 'discount_price', 'currency', 'site_category_id']);
+
         return view('sites.show', [
             'site' => $site,
             'meta' => $seo->forSite($site),
@@ -58,6 +67,7 @@ class SiteShowController extends Controller
             'isFavorited' => $isFavorited,
             'relatedSites' => $relatedSites->forSite($site),
             'questions' => $questions,
+            'bestSellers' => $bestSellers,
         ]);
     }
 }

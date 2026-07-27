@@ -59,13 +59,6 @@ class PageSeeder extends Seeder
                 'meta_description' => 'Hazır tanıtım paketleri ile toplu yayın.',
             ],
             [
-                'route_key' => 'story.index',
-                'slug' => 'story-satis',
-                'title' => 'Story Satış',
-                'meta_title' => 'Story Satış | '.$brand,
-                'meta_description' => 'Instagram story tanıtım paketleri.',
-            ],
-            [
                 'route_key' => 'footer-links.index',
                 'slug' => 'footer-linkler',
                 'title' => 'Footer Link',
@@ -106,7 +99,7 @@ class PageSeeder extends Seeder
                 'slug' => 'hakkimizda',
                 'title' => 'Hakkımızda',
                 'meta_title' => 'Hakkımızda | '.$brand,
-                'meta_description' => $brand.'; site yazısı, basın bülteni, backlink, story satış ve SEO/GEO hizmetlerini tek panelde birleştiren dijital tanıtım platformudur.',
+                'meta_description' => $brand.'; site yazısı, basın bülteni, backlink ve SEO/GEO hizmetlerini tek panelde birleştiren dijital tanıtım platformudur.',
                 'content' => null,
             ],
             [

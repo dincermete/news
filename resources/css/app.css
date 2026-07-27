@@ -149,6 +149,25 @@ html.js [data-reveal] {
     }
 }
 
+/* Paket kartı: pakete dahil site listesinde marka renkli ince scrollbar */
+.scrollbar-brand {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-brand-400) transparent;
+}
+
+.scrollbar-brand::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scrollbar-brand::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scrollbar-brand::-webkit-scrollbar-thumb {
+    background-color: var(--color-brand-400);
+    border-radius: 999px;
+}
+
 /* Sonsuz bant (marquee) */
 @keyframes marquee-x {
     from {
@@ -176,8 +195,8 @@ html.js [data-reveal] {
 }
 
 /*
- | Koyu panel (hero + footer): siyah zemin üzerinde mavi→kırmızı ışıma.
- | Worklane yerleşimindeki radyal glow'un marka renklerimizle uyarlaması.
+ | Koyu panel (eski hero): siyah zemin üzerinde mavi→kırmızı ışıma.
+ | Yeni yüzeyler panel-light kullanır; bu sınıf geriye dönük tutulur.
  */
 .panel-dark {
     background-color: var(--color-panel);
@@ -186,6 +205,27 @@ html.js [data-reveal] {
         radial-gradient(44% 42% at 12% 90%, rgb(255 55 56 / 0.28), transparent 70%),
         radial-gradient(70% 60% at 50% 115%, rgb(60 45 140 / 0.4), transparent 72%);
 }
+
+/*
+ | Footer: düz koyu gri, gradient yok.
+ */
+.panel-footer {
+    background-color: #141416;
+}
+
+/*
+ | Açık panel (hero): tanıtım yazısı satan hiçbir siteye karanlık tema
+ | uymuyor — panel-dark'ın aynı ışıma kompozisyonu, paper zemin üzerinde
+ | pastel yoğunlukta.
+ */
+.panel-light {
+    background-color: var(--color-paper);
+    background-image:
+        radial-gradient(52% 46% at 78% 18%, rgb(34 72 171 / 0.12), transparent 68%),
+        radial-gradient(44% 42% at 12% 90%, rgb(255 55 56 / 0.1), transparent 70%),
+        radial-gradient(70% 60% at 50% 115%, rgb(60 45 140 / 0.08), transparent 72%);
+}
+
 
 /* Hero'daki dönen kelime (Motion data-word-rotor) */
 .rotor-wrapper {
@@ -219,7 +259,7 @@ html.js [data-reveal] {
 
 .word-rotor > span {
     position: absolute;
-    left: 0;
+    left: 50%;
     top: 0;
     white-space: nowrap;
 
@@ -228,19 +268,19 @@ html.js [data-reveal] {
     color: transparent;
 
     opacity: 0;
-    transform: translateY(100%);
+    transform: translate(-50%, 100%);
 }
 
 .word-rotor > span:first-child {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate(-50%, 0);
 }
 
 .rotor-border {
     --size: 10px;
     --radius: 4px;
-    --color: #ffffff80;
-    --border-width: 1px;
+    --color: rgb(15 18 28 / 0.35);
+    --border-width: 1.5px;
 
     position: absolute;
     width: var(--size);
@@ -383,6 +423,27 @@ html.js .word-rotor > span:not(:first-child) {
     .orbit-ring-reverse,
     .orbit-counter,
     .orbit-counter-reverse {
+        animation: none;
+    }
+}
+
+/* Hero: kişi görseli etrafında yüzen haber sitesi logo rozetleri */
+@keyframes float-badge {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+.float-badge {
+    animation: float-badge 5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .float-badge {
         animation: none;
     }
 }

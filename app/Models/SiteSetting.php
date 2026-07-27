@@ -47,6 +47,8 @@ class SiteSetting extends Model
         'openai_model',
         'openai_chatbot_model',
         'openai_article_model',
+        'google_client_id',
+        'google_client_secret',
     ];
 
     /**

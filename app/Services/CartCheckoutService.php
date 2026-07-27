@@ -97,8 +97,6 @@ class CartCheckoutService
                     'site_bundle_id' => $item->site_bundle_id,
                     'footer_link_duration_option_id' => $item->footer_link_duration_option_id,
                     'article_word_package_id' => $item->article_word_package_id,
-                    'instagram_account_id' => $item->instagram_account_id,
-                    'instagram_story_price_id' => $item->instagram_story_price_id,
                     'seo_package_id' => $item->seo_package_id,
                     'seo_package_duration_option_id' => $item->seo_package_duration_option_id,
                     'backlink_package_id' => $item->backlink_package_id,

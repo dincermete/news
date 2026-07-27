@@ -10,8 +10,8 @@
     $chip = 'inline-flex items-center rounded-[10px] border border-ink/5 bg-white px-3.5 py-2 text-sm font-medium text-ink shadow-soft';
     $h2 = 'font-display text-3xl font-medium leading-[1.2] tracking-[-0.01em] text-ink sm:text-[44px] lg:text-[52px]';
     $sub = 'text-lg font-medium leading-relaxed text-ink-2';
-    $btnWhite = 'group inline-flex items-center gap-x-3 rounded-2xl bg-gradient-to-b from-white to-[#c9c9c9] p-1 pe-4 text-sm font-medium text-ink transition hover:scale-[1.03] active:scale-[0.98]';
-    $btnGhostDark = 'group inline-flex items-center gap-x-3 rounded-2xl border border-white/15 bg-white/5 p-1 pe-4 text-sm font-medium text-white transition hover:bg-white/10 hover:scale-[1.03] active:scale-[0.98]';
+    $btnWhite = 'group inline-flex items-center gap-x-3 rounded-2xl bg-gradient-to-b from-black to-[#363b3c] p-1 pe-4 text-sm font-medium text-white transition hover:scale-[1.03] active:scale-[0.98]';
+    $btnGhostDark = 'group inline-flex items-center gap-x-3 rounded-2xl border border-ink/10 bg-white p-1 pe-4 text-sm font-medium text-ink transition hover:bg-paper-2 hover:scale-[1.03] active:scale-[0.98]';
     $btnChip = 'inline-flex size-8 items-center justify-center rounded-xl';
     $arrowIcon = '<svg class="size-3.5 transition group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>';
     $fmt = fn (int $n): string => number_format($n, 0, ',', '.');
@@ -51,9 +51,9 @@
 @section('content')
     {{-- ================= HERO ================= --}}
     <section class="px-2 pt-2 sm:px-3">
-        <div class="panel-dark relative overflow-hidden rounded-3xl text-white">
+        <div class="panel-light relative overflow-hidden rounded-3xl text-ink">
             <div class="relative mx-auto flex max-w-3xl flex-col items-center px-5 pb-14 pt-16 text-center sm:px-8 lg:pb-20 lg:pt-24" data-reveal-group>
-                <p class="inline-flex items-center gap-x-2 rounded-full border border-white/15 bg-white/5 py-1 pe-3.5 ps-1 text-xs text-white/80" data-reveal>
+                <p class="inline-flex items-center gap-x-2 rounded-full border border-ink/10 bg-white py-1 pe-3.5 ps-1 text-xs text-ink-2 shadow-soft" data-reveal>
                     <span class="rounded-full bg-brand-500 px-2.5 py-0.5 text-[10px] font-semibold text-white">Hakkımızda</span>
                     {{ $siteSettings->siteName() }}
                 </p>
@@ -62,17 +62,17 @@
                     Tanıtımı tek panelde basitleştiriyoruz
                 </h1>
 
-                <p class="mt-5 max-w-xl text-lg font-medium leading-relaxed text-white/65" data-reveal>
-                    Site yazısı, basın bülteni, backlink, story satış ve SEO/GEO hizmetlerini aramak, pazarlık etmek ve takip etmek için onlarca kişiyle yazışmanıza gerek yok. Katalogdan seçin, sepete ekleyin, yayını panelinizden izleyin.
+                <p class="mt-5 max-w-xl text-lg font-medium leading-relaxed text-ink-2" data-reveal>
+                    Site yazısı, basın bülteni, backlink ve SEO/GEO hizmetlerini aramak, pazarlık etmek ve takip etmek için onlarca kişiyle yazışmanıza gerek yok. Katalogdan seçin, sepete ekleyin, yayını panelinizden izleyin.
                 </p>
 
                 <div class="mt-8 flex flex-wrap items-center justify-center gap-3" data-reveal>
                     <a href="{{ route('sites.index') }}" class="{{ $btnWhite }}">
-                        <span class="{{ $btnChip }} bg-gradient-to-b from-black to-[#363b3c] text-white">{!! $arrowIcon !!}</span>
+                        <span class="{{ $btnChip }} bg-white/15 text-white">{!! $arrowIcon !!}</span>
                         Katalogu İncele
                     </a>
                     <a href="{{ route('contact.show') }}" class="{{ $btnGhostDark }}">
-                        <span class="{{ $btnChip }} bg-white/10 text-white">
+                        <span class="{{ $btnChip }} bg-ink/5 text-ink">
                             <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"/></svg>
                         </span>
                         Bize Ulaşın
@@ -185,21 +185,21 @@
 
     {{-- ================= KAPANIŞ CTA ================= --}}
     <section class="px-2 pb-2 sm:px-3">
-        <div class="panel-dark relative overflow-hidden rounded-3xl text-white">
+        <div class="panel-light relative overflow-hidden rounded-3xl text-ink">
             <div class="relative mx-auto flex max-w-2xl flex-col items-center px-5 py-16 text-center sm:px-8">
                 <h2 class="font-display text-3xl font-medium leading-[1.2] sm:text-[40px]">
                     Sitenizi tanıtmaya bugün başlayın
                 </h2>
-                <p class="mt-4 max-w-md text-lg font-medium leading-relaxed text-white/65">
+                <p class="mt-4 max-w-md text-lg font-medium leading-relaxed text-ink-2">
                     Kayıt ücretsiz, kart bilgisi gerekmez. Ödemeyi yalnızca sipariş verdiğinizde yaparsınız.
                 </p>
                 <div class="mt-7 flex flex-wrap items-center justify-center gap-3">
                     <a href="{{ auth()->check() ? route('account.dashboard') : route('register') }}" class="{{ $btnWhite }}">
-                        <span class="{{ $btnChip }} bg-gradient-to-b from-black to-[#363b3c] text-white">{!! $arrowIcon !!}</span>
+                        <span class="{{ $btnChip }} bg-white/15 text-white">{!! $arrowIcon !!}</span>
                         Ücretsiz Başla
                     </a>
                     <a href="tel:{{ $siteSettings->support_phone ?: '08503052241' }}" class="{{ $btnGhostDark }}">
-                        <span class="{{ $btnChip }} bg-white/10 text-white">
+                        <span class="{{ $btnChip }} bg-ink/5 text-ink">
                             <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"/></svg>
                         </span>
                         {{ $siteSettings->support_phone_display ?: '0850 305 22 41' }}

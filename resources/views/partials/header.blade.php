@@ -6,27 +6,41 @@
     $phone = $siteSettings->support_phone ?: '08503052241';
     $phoneDisplay = $siteSettings->support_phone_display ?: '0850 305 22 41';
 
-    $primaryNav = [
-        ['label' => 'GEO', 'url' => route('geo.index'), 'active' => request()->routeIs('geo.*')],
-        ['label' => 'Backlink Paketleri', 'url' => route('backlink-packages.index'), 'active' => request()->routeIs('backlink-packages.*')],
-        ['label' => 'Siteler', 'url' => route('sites.index'), 'active' => request()->routeIs('sites.*')],
+    $currentKategori = request()->routeIs('sites.index') ? request()->query('kategori') : null;
+
+    $categoryNav = \App\Models\SiteCategory::query()
+        ->orderBy('name')
+        ->get(['name', 'slug'])
+        ->map(fn (\App\Models\SiteCategory $category): array => [
+            'label' => $category->name,
+            'url' => route('sites.index', ['kategori' => $category->slug]),
+            'active' => $currentKategori === $category->slug,
+        ])
+        ->all();
+
+    $allSitesNav = [
+        ['label' => 'Tüm Siteler', 'url' => route('sites.index'), 'active' => request()->routeIs('sites.index') && $currentKategori === null],
         ['label' => 'Basın Bülteni', 'url' => route('press-release.index'), 'active' => request()->routeIs('press-release.*')],
-        ['label' => 'Tanıtım Paketleri', 'url' => route('bundles.index'), 'active' => request()->routeIs('bundles.*')],
+        ['label' => 'Footer Link', 'url' => route('footer-links.index'), 'active' => request()->routeIs('footer-links.*')],
     ];
 
-    $serviceNav = [
-        ['label' => 'Story Satış', 'url' => route('story.index'), 'active' => request()->routeIs('story.*')],
-        ['label' => 'Footer Link', 'url' => route('footer-links.index'), 'active' => request()->routeIs('footer-links.*')],
+    $packagesNav = [
+        ['label' => 'Tanıtım Paketleri', 'url' => route('bundles.index'), 'active' => request()->routeIs('bundles.*')],
         ['label' => 'SEO Paketleri', 'url' => route('seo-packages.index'), 'active' => request()->routeIs('seo-packages.*')],
-        ['label' => 'Ücretsiz Analiz', 'url' => route('free-analysis.show'), 'active' => request()->routeIs('free-analysis.*')],
+        ['label' => 'Backlink Paketleri', 'url' => route('backlink-packages.index'), 'active' => request()->routeIs('backlink-packages.*')],
+        ['label' => 'GEO', 'url' => route('geo.index'), 'active' => request()->routeIs('geo.*')],
+    ];
+
+    $navGroups = [
+        ['key' => 'kategoriler', 'label' => 'Kategoriler', 'items' => $categoryNav],
+        ['key' => 'tum-siteler', 'label' => 'Tüm Siteler', 'items' => $allSitesNav],
+        ['key' => 'paketler', 'label' => 'Paketler', 'items' => $packagesNav],
     ];
 
     $companyNav = [
         ['label' => 'Hakkımızda', 'url' => route('about.show'), 'active' => request()->routeIs('about.*')],
         ['label' => 'İletişim', 'url' => route('contact.show'), 'active' => request()->routeIs('contact.*')],
     ];
-
-    $servicesActive = collect($serviceNav)->contains(fn (array $item): bool => $item['active']);
 @endphp
 
 <header
@@ -55,48 +69,51 @@
             </a>
 
             <div class="hidden min-w-0 flex-1 items-center justify-center gap-x-0.5 lg:flex xl:gap-x-1" role="navigation">
-                @foreach ($primaryNav as $item)
-                    <a href="{{ $item['url'] }}" @class([$item['active'] ? $navLinkActive : $navLink, 'shrink-0 whitespace-nowrap'])>{{ $item['label'] }}</a>
+                <a href="{{ route('home') }}" @class([request()->routeIs('home') ? $navLinkActive : $navLink, 'shrink-0 whitespace-nowrap'])>Anasayfa</a>
+
+                @foreach ($navGroups as $group)
+                    @php $groupActive = collect($group['items'])->contains(fn (array $item): bool => $item['active']); @endphp
+                    <div
+                        class="relative shrink-0"
+                        x-data="{ open: false }"
+                        @keydown.escape.window="open = false"
+                    >
+                        <button
+                            type="button"
+                            @click="open = !open"
+                            @class([
+                                $groupActive ? $navLinkActive : $navLink,
+                                'inline-flex shrink-0 items-center gap-x-1.5 whitespace-nowrap',
+                            ])
+                            :aria-expanded="open.toString()"
+                            aria-haspopup="true"
+                        >
+                            {{ $group['label'] }}
+                            <svg class="size-3.5 shrink-0 opacity-60 transition" :class="open && 'rotate-180'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+                        </button>
+
+                        <div
+                            x-show="open"
+                            x-cloak
+                            x-transition
+                            @click.outside="open = false"
+                            class="absolute start-1/2 z-50 mt-3 max-h-[80vh] w-64 -translate-x-1/2 overflow-y-auto rounded-2xl border border-ink/10 bg-white p-2 shadow-pop"
+                        >
+                            @foreach ($group['items'] as $item)
+                                <a
+                                    href="{{ $item['url'] }}"
+                                    @click="open = false"
+                                    @class([
+                                        'block rounded-xl px-4 py-2.5 text-sm font-medium whitespace-nowrap transition',
+                                        $item['active'] ? 'bg-ink/5 text-ink' : 'text-ink-2 hover:bg-ink/5 hover:text-ink',
+                                    ])
+                                >{{ $item['label'] }}</a>
+                            @endforeach
+                        </div>
+                    </div>
                 @endforeach
 
-                <div
-                    class="relative shrink-0"
-                    x-data="{ open: false }"
-                    @keydown.escape.window="open = false"
-                >
-                    <button
-                        type="button"
-                        @click="open = !open"
-                        @class([
-                            $servicesActive ? $navLinkActive : $navLink,
-                            'inline-flex shrink-0 items-center gap-x-1.5 whitespace-nowrap',
-                        ])
-                        :aria-expanded="open.toString()"
-                        aria-haspopup="true"
-                    >
-                        Hizmetler
-                        <svg class="size-3.5 shrink-0 opacity-60 transition" :class="open && 'rotate-180'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
-                    </button>
-
-                    <div
-                        x-show="open"
-                        x-cloak
-                        x-transition
-                        @click.outside="open = false"
-                        class="absolute start-1/2 z-50 mt-3 w-72 -translate-x-1/2 rounded-2xl border border-ink/10 bg-white p-2 shadow-pop"
-                    >
-                        @foreach ($serviceNav as $item)
-                            <a
-                                href="{{ $item['url'] }}"
-                                @click="open = false"
-                                @class([
-                                    'block rounded-xl px-4 py-2.5 text-sm font-medium whitespace-nowrap transition',
-                                    $item['active'] ? 'bg-ink/5 text-ink' : 'text-ink-2 hover:bg-ink/5 hover:text-ink',
-                                ])
-                            >{{ $item['label'] }}</a>
-                        @endforeach
-                    </div>
-                </div>
+                <a href="{{ route('account.site-submissions') }}" @class([request()->routeIs('account.site-submissions') ? $navLinkActive : $navLink, 'shrink-0 whitespace-nowrap'])>Siteni Ekle</a>
             </div>
 
             <div class="flex shrink-0 items-center gap-x-1 sm:gap-x-1.5">
@@ -294,39 +311,37 @@
                     >
                 </form>
 
-                <p class="px-4 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-3">Katalog</p>
                 <div class="mb-5 space-y-0.5">
-                    @foreach ($primaryNav as $item)
-                        <a
-                            href="{{ $item['url'] }}"
-                            @click="mobileOpen = false"
-                            @class([
-                                $drawerLink,
-                                $item['active'] ? 'bg-ink text-white' : 'text-ink hover:bg-ink/5',
-                            ])
-                        >
-                            <span>{{ $item['label'] }}</span>
-                            <svg class="size-3.5 opacity-40" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
-                        </a>
-                    @endforeach
+                    <a
+                        href="{{ route('home') }}"
+                        @click="mobileOpen = false"
+                        @class([
+                            $drawerLink,
+                            request()->routeIs('home') ? 'bg-ink text-white' : 'text-ink hover:bg-ink/5',
+                        ])
+                    >
+                        <span>Anasayfa</span>
+                    </a>
                 </div>
 
-                <p class="px-4 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-3">Hizmetler</p>
-                <div class="mb-5 space-y-0.5">
-                    @foreach ($serviceNav as $item)
-                        <a
-                            href="{{ $item['url'] }}"
-                            @click="mobileOpen = false"
-                            @class([
-                                $drawerLink,
-                                $item['active'] ? 'bg-ink text-white' : 'text-ink hover:bg-ink/5',
-                            ])
-                        >
-                            <span>{{ $item['label'] }}</span>
-                            <svg class="size-3.5 opacity-40" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
-                        </a>
-                    @endforeach
-                </div>
+                @foreach ($navGroups as $group)
+                    <p class="px-4 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-3">{{ $group['label'] }}</p>
+                    <div class="mb-5 space-y-0.5">
+                        @foreach ($group['items'] as $item)
+                            <a
+                                href="{{ $item['url'] }}"
+                                @click="mobileOpen = false"
+                                @class([
+                                    $drawerLink,
+                                    $item['active'] ? 'bg-ink text-white' : 'text-ink hover:bg-ink/5',
+                                ])
+                            >
+                                <span>{{ $item['label'] }}</span>
+                                <svg class="size-3.5 opacity-40" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+                            </a>
+                        @endforeach
+                    </div>
+                @endforeach
 
                 <p class="px-4 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-3">Kurumsal</p>
                 <div class="space-y-0.5">

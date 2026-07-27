@@ -67,6 +67,35 @@ class HomeController extends Controller
             ->limit(8)
             ->get(['id', 'question_topic', 'answer']);
 
+        $newestSites = CatalogQuery::activeSites()
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->limit(10)
+            ->get();
+
+        $bestSellerSites = CatalogQuery::activeSites()
+            ->withCount('orders')
+            ->orderByDesc('orders_count')
+            ->orderBy('id')
+            ->limit(10)
+            ->get();
+
+        $featuredBundles = SiteBundle::query()
+            ->where('status', SiteStatus::Active)
+            ->withCount('sites')
+            ->with(['sites' => fn ($sites) => $sites->orderBy('domain')])
+            ->orderBy('price')
+            ->limit(8)
+            ->get();
+
+        $featuredBacklinkPackages = BacklinkPackage::query()
+            ->where('status', SiteStatus::Active)
+            ->orderByDesc('is_featured')
+            ->orderBy('sort_order')
+            ->orderBy('price')
+            ->limit(8)
+            ->get();
+
         return view('home', [
             'meta' => $seo->forRoute('home'),
             'stats' => $stats->all(),
@@ -74,6 +103,11 @@ class HomeController extends Controller
             'categories' => $categories,
             'faqs' => $faqs,
             'productPrices' => $this->productPrices(),
+            'newestSites' => $newestSites,
+            'bestSellerSites' => $bestSellerSites,
+            'featuredBundles' => $featuredBundles,
+            'featuredBacklinkPackages' => $featuredBacklinkPackages,
+            'favoritedSiteIds' => auth()->user()?->favorites()->pluck('site_id')->all() ?? [],
         ]);
     }
 

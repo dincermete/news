@@ -52,9 +52,9 @@
 @section('content')
     {{-- ================= HERO ================= --}}
     <section class="px-2 pt-2 sm:px-3">
-        <div class="panel-dark relative overflow-hidden rounded-3xl text-white">
+        <div class="panel-light relative overflow-hidden rounded-3xl text-ink">
             <div class="relative mx-auto flex max-w-3xl flex-col items-center px-5 pb-12 pt-16 text-center sm:px-8 lg:pb-16 lg:pt-20">
-                <p class="inline-flex items-center gap-x-2 rounded-full border border-white/15 bg-white/5 py-1 pe-3.5 ps-1 text-xs text-white/80">
+                <p class="inline-flex items-center gap-x-2 rounded-full border border-ink/10 bg-white py-1 pe-3.5 ps-1 text-xs text-ink-2 shadow-soft">
                     <span class="rounded-full bg-brand-500 px-2.5 py-0.5 text-[10px] font-semibold text-white">Off-Page SEO & Otorite</span>
                     6 Ay Garanti
                 </p>
@@ -63,18 +63,18 @@
                     Otoriteyi büyüten backlink paketleri
                 </h1>
 
-                <p class="mt-5 max-w-xl text-lg font-medium leading-relaxed text-white/65">
+                <p class="mt-5 max-w-xl text-lg font-medium leading-relaxed text-ink-2">
                     Konuyla alakalı, yüksek otoriteli ve gerçek trafiği olan kaynaklardan; doğal anchor dağılımıyla kalıcı backlink paketleri. DR/DA değerinizi yükseltin, hedef sayfalarınızı güçlendirin, sıralamada öne geçin.
                 </p>
 
-                <p class="mt-4 inline-flex items-center gap-x-2 text-sm text-white/70">
+                <p class="mt-4 inline-flex items-center gap-x-2 text-sm text-ink-2">
                     <span class="text-amber-400">★★★★★</span>
                     5,0 · 1.773 olumlu müşteri değerlendirmesi
                 </p>
 
                 <div class="mt-6 flex max-w-2xl flex-wrap items-center justify-center gap-2">
                     @foreach ($metricBadges as $badge)
-                        <span class="rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-white/80">{{ $badge }}</span>
+                        <span class="rounded-full border border-ink/10 bg-white px-3.5 py-1.5 text-xs font-medium text-ink-2">{{ $badge }}</span>
                     @endforeach
                 </div>
             </div>
@@ -249,27 +249,27 @@
 
     {{-- ================= KAPANIŞ CTA ================= --}}
     <section class="px-2 pb-2 sm:px-3">
-        <div class="panel-dark relative overflow-hidden rounded-3xl text-white">
+        <div class="panel-light relative overflow-hidden rounded-3xl text-ink">
             <div class="relative mx-auto flex max-w-2xl flex-col items-center px-5 py-16 text-center sm:px-8">
-                <p class="inline-flex items-center gap-x-2 rounded-full border border-white/15 bg-white/5 py-1 pe-3.5 ps-1 text-xs text-white/80">
+                <p class="inline-flex items-center gap-x-2 rounded-full border border-ink/10 bg-white py-1 pe-3.5 ps-1 text-xs text-ink-2 shadow-soft">
                     <span class="rounded-full bg-brand-500 px-2.5 py-0.5 text-[10px] font-semibold text-white">AI Visibility</span>
                     SEO Strateji Ajansı
                 </p>
                 <h2 class="mt-5 font-display text-3xl font-medium leading-[1.2] sm:text-[40px]">
                     Hangi paket size uygun? Önce ücretsiz analiz alalım
                 </h2>
-                <p class="mt-4 max-w-md text-lg font-medium leading-relaxed text-white/65">
+                <p class="mt-4 max-w-md text-lg font-medium leading-relaxed text-ink-2">
                     Sitenizi 4 AI motorunda ve Google'da analiz edelim; rekabet düzeyinize en uygun paketi 24 saat içinde önerelim.
                 </p>
                 <div class="mt-7 flex flex-wrap items-center justify-center gap-3">
-                    <a href="{{ route('free-analysis.show') }}" class="group inline-flex items-center gap-x-3 rounded-2xl bg-gradient-to-b from-white to-[#c9c9c9] p-1 pe-5 text-sm font-medium text-ink transition hover:scale-[1.03] active:scale-[0.98]">
-                        <span class="inline-flex size-8 items-center justify-center rounded-xl bg-gradient-to-b from-black to-[#363b3c] text-white">
+                    <a href="{{ route('free-analysis.show') }}" class="group inline-flex items-center gap-x-3 rounded-2xl bg-gradient-to-b from-black to-[#363b3c] p-1 pe-5 text-sm font-medium text-white transition hover:scale-[1.03] active:scale-[0.98]">
+                        <span class="inline-flex size-8 items-center justify-center rounded-xl bg-white/15 text-white">
                             <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
                         </span>
                         Ücretsiz Analiz İste
                     </a>
-                    <a href="tel:{{ $siteSettings->support_phone ?: '08503052241' }}" class="group inline-flex items-center gap-x-3 rounded-2xl border border-white/15 bg-white/5 p-1 pe-5 text-sm font-medium text-white transition hover:bg-white/10 hover:scale-[1.03] active:scale-[0.98]">
-                        <span class="inline-flex size-8 items-center justify-center rounded-xl bg-white/10 text-white">
+                    <a href="tel:{{ $siteSettings->support_phone ?: '08503052241' }}" class="group inline-flex items-center gap-x-3 rounded-2xl border border-ink/10 bg-white p-1 pe-5 text-sm font-medium text-ink transition hover:bg-paper-2 hover:scale-[1.03] active:scale-[0.98]">
+                        <span class="inline-flex size-8 items-center justify-center rounded-xl bg-ink/5 text-ink">
                             <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"/></svg>
                         </span>
                         {{ $siteSettings->support_phone_display ?: '0850 305 22 41' }}

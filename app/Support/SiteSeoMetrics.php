@@ -18,6 +18,7 @@ final class SiteSeoMetrics
             'majestic_cf' => 'Majestic CF',
             'majestic_tf' => 'Majestic TF',
             'ahrefs_dr' => 'Ahrefs DR',
+            'ahrefs_rank' => 'Ahrefs Rank',
             'ahrefs_traffic' => 'Ahrefs Traffic',
             'semrush_authority_score' => 'Semrush Authority Score',
             'organic_traffic' => 'Organic Traffic',

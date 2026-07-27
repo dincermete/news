@@ -38,7 +38,7 @@ class AppServiceProvider extends ServiceProvider
             $this->applySiteSettingOverrides();
         });
 
-        View::composer(['layouts.app', 'partials.footer', 'partials.header', 'layouts.account', 'components.chatbot-widget', 'about.index', 'contact.index', 'home', 'geo.index', 'backlink-packages.index'], function ($view): void {
+        View::composer(['layouts.app', 'partials.footer', 'partials.header', 'layouts.account', 'components.chatbot-widget', 'about.index', 'contact.index', 'home', 'geo.index', 'backlink-packages.index', 'seo-packages.index', 'agency-services.index', 'agency-services.show'], function ($view): void {
             $view->with('siteSettings', SiteSetting::current());
         });
 
@@ -116,6 +116,13 @@ class AppServiceProvider extends ServiceProvider
 
             if (filled($s->whatsapp_number)) {
                 config(['whatsapp.support_number' => $s->whatsapp_number]);
+            }
+
+            if (filled($s->google_client_id)) {
+                config(['services.google.client_id' => $s->google_client_id]);
+            }
+            if (filled($s->google_client_secret)) {
+                config(['services.google.client_secret' => $s->google_client_secret]);
             }
         } catch (\Throwable) {
             // migrations / early boot

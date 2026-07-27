@@ -5,8 +5,6 @@
     {{ $item->product_type?->getLabel() }}
     @if ($item->footerLinkDurationOption)
         · {{ $item->footerLinkDurationOption->name }}
-    @elseif ($item->instagramStoryPrice)
-        · {{ $item->instagramStoryPrice->format->getLabel() }}
     @elseif ($item->seoPackageDurationOption)
         · {{ $item->seoPackageDurationOption->name }}
     @endif

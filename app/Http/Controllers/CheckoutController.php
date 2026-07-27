@@ -43,7 +43,7 @@ class CheckoutController extends Controller
     public function show(Request $request): View|RedirectResponse
     {
         $cart = $this->carts->resolveOrCreateCart($request);
-        $cart->load(['items.site', 'items.siteBundle', 'items.footerLinkDurationOption', 'items.instagramAccount', 'items.instagramStoryPrice', 'items.seoPackage', 'items.seoPackageDurationOption', 'items.backlinkPackage']);
+        $cart->load(['items.site', 'items.siteBundle', 'items.footerLinkDurationOption', 'items.seoPackage', 'items.seoPackageDurationOption', 'items.backlinkPackage']);
 
         if ($cart->items->isEmpty()) {
             return redirect()
@@ -225,7 +225,7 @@ class CheckoutController extends Controller
      */
     protected function postSubmitViewData(OrderGroup $orderGroup, PaymentMethod $method): array
     {
-        $orderGroup->loadMissing(['user', 'payments', 'orders.site', 'orders.siteBundle', 'orders.footerLinkDurationOption', 'orders.instagramAccount', 'orders.instagramStoryPrice', 'orders.seoPackage', 'orders.seoPackageDurationOption', 'orders.backlinkPackage']);
+        $orderGroup->loadMissing(['user', 'payments', 'orders.site', 'orders.siteBundle', 'orders.footerLinkDurationOption', 'orders.seoPackage', 'orders.seoPackageDurationOption', 'orders.backlinkPackage']);
 
         $payment = $orderGroup->payments->firstWhere('method', $method) ?? $orderGroup->payments->first();
 

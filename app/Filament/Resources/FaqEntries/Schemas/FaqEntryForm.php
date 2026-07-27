@@ -24,7 +24,8 @@ class FaqEntryForm
                     ->columnSpanFull(),
                 TextInput::make('category')
                     ->label('Kategori')
-                    ->maxLength(100),
+                    ->maxLength(100)
+                    ->helperText('Bir tanıtım paketine özel SSS için "bundle-{paket-slug}" yazın, örn: bundle-starter-paket.'),
                 Toggle::make('is_active')
                     ->label('Aktif')
                     ->default(true),

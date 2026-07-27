@@ -3,7 +3,6 @@
         ['label' => 'Siteler', 'url' => route('sites.index')],
         ['label' => 'Basın Bülteni', 'url' => route('press-release.index')],
         ['label' => 'Tanıtım Paketleri', 'url' => route('bundles.index')],
-        ['label' => 'Story Satış', 'url' => route('story.index')],
         ['label' => 'Footer Link', 'url' => route('footer-links.index')],
     ];
 
@@ -15,10 +14,15 @@
         ['label' => 'Ücretsiz Analiz', 'url' => route('free-analysis.show')],
     ];
 
+    $agencyServiceLinks = collect(\App\Support\AgencyServicePages::all())
+        ->map(fn (array $item): array => ['label' => $item['name'], 'url' => route('agency-services.show', $item['slug'])])
+        ->all();
+
     $companyLinks = [
         ['label' => 'Hakkımızda', 'url' => route('about.show')],
         ['label' => 'İletişim', 'url' => route('contact.show')],
         ['label' => 'Destek', 'url' => auth()->check() ? route('account.support-tickets') : route('login')],
+        ['label' => 'Siteniz Ekle', 'url' => route('account.site-submissions')],
     ];
 
     $accountLinks = [
@@ -64,7 +68,6 @@
 
     $phone = $siteSettings->support_phone ?: '08503052241';
     $phoneDisplay = $siteSettings->support_phone_display ?: '0850 305 22 41';
-    $payments = ['Visa', 'Mastercard', 'Troy', 'Amex', 'PayTR'];
 @endphp
 
 <style>
@@ -77,14 +80,14 @@
 
     @media (min-width: 768px) {
         .ty-footer-cols {
-            grid-template-columns: repeat(5, minmax(0, 1fr));
+            grid-template-columns: repeat(6, minmax(0, 1fr));
             gap: 1.5rem;
         }
     }
 </style>
 
 <footer class="mt-auto px-2 pb-2 sm:px-3 sm:pb-3">
-    <div class="panel-dark overflow-hidden rounded-3xl text-white">
+    <div class="panel-footer overflow-hidden rounded-3xl text-white">
         <div class="mx-auto w-full max-w-6xl px-5 pt-14 sm:px-8">
             {{-- Üst CTA --}}
             <div class="mx-auto max-w-2xl text-center">
@@ -129,6 +132,16 @@
                 </div>
 
                 <div>
+                    <h4 class="text-[13px] font-semibold text-white">Medya &amp; Reklam</h4>
+                    <ul class="mt-4 space-y-2.5 text-[13px]">
+                        <li><a href="{{ route('agency-services.index') }}" class="text-white/55 transition hover:text-white">Diğer Hizmetlerimiz</a></li>
+                        @foreach ($agencyServiceLinks as $item)
+                            <li><a href="{{ $item['url'] }}" class="text-white/55 transition hover:text-white">{{ $item['label'] }}</a></li>
+                        @endforeach
+                    </ul>
+                </div>
+
+                <div>
                     <h4 class="text-[13px] font-semibold text-white">Kurumsal</h4>
                     <ul class="mt-4 space-y-2.5 text-[13px]">
                         @foreach ($companyLinks as $item)
@@ -164,12 +177,38 @@
                         Ödemeler PayTR güvencesinde, tüm trafik SSL ile şifreli; verileriniz her seviyede korunur.
                     </p>
                 </div>
-                <div class="flex flex-wrap items-center gap-1.5">
-                    @foreach ($payments as $payment)
-                        <span class="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-white/70">
-                            {{ $payment }}
-                        </span>
-                    @endforeach
+                <div class="flex flex-wrap items-center gap-2">
+                    {{-- Visa --}}
+                    <span class="inline-flex h-7 w-11 shrink-0 items-center justify-center rounded-md bg-white" aria-label="Visa">
+                        <svg viewBox="0 0 48 16" class="h-3 w-auto" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <text x="0" y="13" font-family="Arial, sans-serif" font-size="15" font-style="italic" font-weight="bold" fill="#1434CB">VISA</text>
+                        </svg>
+                    </span>
+                    {{-- Mastercard --}}
+                    <span class="inline-flex h-7 w-11 shrink-0 items-center justify-center rounded-md bg-white" aria-label="Mastercard">
+                        <svg viewBox="0 0 32 20" class="h-4 w-auto" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <circle cx="12" cy="10" r="9" fill="#EB001B"/>
+                            <circle cx="20" cy="10" r="9" fill="#F79E1B" fill-opacity="0.85"/>
+                        </svg>
+                    </span>
+                    {{-- Troy --}}
+                    <span class="inline-flex h-7 w-11 shrink-0 items-center justify-center rounded-md bg-white" aria-label="Troy">
+                        <svg viewBox="0 0 48 16" class="h-3 w-auto" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <text x="0" y="13" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#E30613">troy</text>
+                        </svg>
+                    </span>
+                    {{-- Amex --}}
+                    <span class="inline-flex h-7 w-11 shrink-0 items-center justify-center rounded-md bg-[#006FCF]" aria-label="American Express">
+                        <svg viewBox="0 0 48 16" class="h-3 w-auto" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <text x="0" y="13" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#ffffff">AMEX</text>
+                        </svg>
+                    </span>
+                    {{-- PayTR --}}
+                    <span class="inline-flex h-7 w-14 shrink-0 items-center justify-center rounded-md bg-white" aria-label="PayTR">
+                        <svg viewBox="0 0 60 16" class="h-3 w-auto" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <text x="0" y="13" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#193C6C">Pay<tspan fill="#00A19A">TR</tspan></text>
+                        </svg>
+                    </span>
                 </div>
             </div>
 

@@ -51,6 +51,7 @@ class PressReleaseCatalogController extends Controller
             'kategori' => $kategori,
             'sort' => $sort,
             'meta' => $seo->forRoute('press-release.index', 'Basın Bülteni | '.site_setting('site_name')),
+            'favoritedSiteIds' => auth()->user()?->favorites()->pluck('site_id')->all() ?? [],
         ]);
     }
 }

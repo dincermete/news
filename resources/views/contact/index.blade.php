@@ -33,9 +33,9 @@
 @section('content')
     {{-- ================= HERO ================= --}}
     <section class="px-2 pt-2 sm:px-3">
-        <div class="panel-dark relative overflow-hidden rounded-3xl text-white">
+        <div class="panel-light relative overflow-hidden rounded-3xl text-ink">
             <div class="relative mx-auto flex max-w-2xl flex-col items-center px-5 pb-14 pt-16 text-center sm:px-8 lg:pb-16 lg:pt-20" data-reveal-group>
-                <p class="inline-flex items-center gap-x-2 rounded-full border border-white/15 bg-white/5 py-1 pe-3.5 ps-1 text-xs text-white/80" data-reveal>
+                <p class="inline-flex items-center gap-x-2 rounded-full border border-ink/10 bg-white py-1 pe-3.5 ps-1 text-xs text-ink-2 shadow-soft" data-reveal>
                     <span class="rounded-full bg-brand-500 px-2.5 py-0.5 text-[10px] font-semibold text-white">İletişim</span>
                     Bize Ulaşın
                 </p>
@@ -44,7 +44,7 @@
                     Sizinle konuşmak isteriz
                 </h1>
 
-                <p class="mt-5 max-w-xl text-lg font-medium leading-relaxed text-white/65" data-reveal>
+                <p class="mt-5 max-w-xl text-lg font-medium leading-relaxed text-ink-2" data-reveal>
                     Ürünlerimiz, bir siparişiniz veya iş birliği fırsatları hakkında konuşmak isterseniz aşağıdaki kanallardan bize ulaşabilirsiniz.
                 </p>
             </div>

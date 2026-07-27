@@ -10,8 +10,8 @@
     $chip = 'inline-flex items-center rounded-[10px] border border-ink/5 bg-white px-3.5 py-2 text-sm font-medium text-ink shadow-soft';
     $h2 = 'font-display text-3xl font-medium leading-[1.2] tracking-[-0.01em] text-ink sm:text-[44px] lg:text-[52px]';
     $sub = 'text-lg font-medium leading-relaxed text-ink-2';
-    $btnWhite = 'group inline-flex items-center gap-x-3 rounded-2xl bg-gradient-to-b from-white to-[#c9c9c9] p-1 pe-4 text-sm font-medium text-ink transition hover:scale-[1.03] active:scale-[0.98]';
-    $btnGhostDark = 'group inline-flex items-center gap-x-3 rounded-2xl border border-white/15 bg-white/5 p-1 pe-4 text-sm font-medium text-white transition hover:bg-white/10 hover:scale-[1.03] active:scale-[0.98]';
+    $btnWhite = 'group inline-flex items-center gap-x-3 rounded-2xl bg-gradient-to-b from-black to-[#363b3c] p-1 pe-4 text-sm font-medium text-white transition hover:scale-[1.03] active:scale-[0.98]';
+    $btnGhostDark = 'group inline-flex items-center gap-x-3 rounded-2xl border border-ink/10 bg-white p-1 pe-4 text-sm font-medium text-ink transition hover:bg-paper-2 hover:scale-[1.03] active:scale-[0.98]';
     $btnDark = 'group inline-flex items-center gap-x-3 rounded-2xl bg-gradient-to-b from-black to-[#363b3c] p-1 pe-4 text-sm font-medium text-white transition hover:scale-[1.03] active:scale-[0.98]';
     $btnChip = 'inline-flex size-8 items-center justify-center rounded-xl';
     $arrowIcon = '<svg class="size-3.5 transition group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>';
@@ -48,9 +48,9 @@
 @section('content')
     {{-- ================= HERO / BANNER ================= --}}
     <section class="px-2 pt-2 sm:px-3">
-        <div class="panel-dark relative overflow-hidden rounded-3xl text-white">
+        <div class="panel-light relative overflow-hidden rounded-3xl text-ink">
             <div class="relative mx-auto flex max-w-3xl flex-col items-center px-5 pb-14 pt-16 text-center sm:px-8 lg:pb-20 lg:pt-24" data-reveal-group>
-                <p class="inline-flex items-center gap-x-2 rounded-full border border-white/15 bg-white/5 py-1 pe-3.5 ps-1 text-xs text-white/80" data-reveal>
+                <p class="inline-flex items-center gap-x-2 rounded-full border border-ink/10 bg-white py-1 pe-3.5 ps-1 text-xs text-ink-2 shadow-soft" data-reveal>
                     <span class="rounded-full bg-brand-500 px-2.5 py-0.5 text-[10px] font-semibold text-white">Ücretsiz Analiz</span>
                     24 saatte dönüş
                 </p>
@@ -59,24 +59,24 @@
                     Projenize özel ücretsiz görünürlük analizi
                 </h1>
 
-                <p class="mt-5 max-w-xl text-lg font-medium leading-relaxed text-white/65" data-reveal>
+                <p class="mt-5 max-w-xl text-lg font-medium leading-relaxed text-ink-2" data-reveal>
                     Sitenizi inceleyelim; SEO, GEO, backlink veya diğer hedeflerinize göre size en uygun yol haritasını panelinizde paylaşalım. Bağlayıcı teklif yok — yalnızca net sonraki adımlar.
                 </p>
 
                 <div class="mt-8 flex flex-wrap items-center justify-center gap-3" data-reveal>
                     <a href="#analiz-formu" class="{{ $btnWhite }}">
-                        <span class="{{ $btnChip }} bg-gradient-to-b from-black to-[#363b3c] text-white">{!! $arrowIcon !!}</span>
+                        <span class="{{ $btnChip }} bg-white/15 text-white">{!! $arrowIcon !!}</span>
                         Analiz Formuna Git
                     </a>
                     <a href="{{ route('geo.index') }}" class="{{ $btnGhostDark }}">
-                        <span class="{{ $btnChip }} bg-white/10 text-white">
+                        <span class="{{ $btnChip }} bg-ink/5 text-ink">
                             <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/></svg>
                         </span>
                         GEO hakkında bilgi
                     </a>
                 </div>
 
-                <div class="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-white/55" data-reveal>
+                <div class="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-ink-2" data-reveal>
                     <span>Ücretsiz talep</span>
                     <span>·</span>
                     <span>Panelden takip</span>
@@ -249,21 +249,21 @@
 
     {{-- ================= KAPANIŞ CTA ================= --}}
     <section class="px-2 pb-2 sm:px-3">
-        <div class="panel-dark relative overflow-hidden rounded-3xl text-white">
+        <div class="panel-light relative overflow-hidden rounded-3xl text-ink">
             <div class="relative mx-auto flex max-w-2xl flex-col items-center px-5 py-16 text-center sm:px-8" data-reveal-group>
-                <p class="inline-flex items-center gap-x-2 rounded-full border border-white/15 bg-white/5 py-1 pe-3.5 ps-1 text-xs text-white/80" data-reveal>
+                <p class="inline-flex items-center gap-x-2 rounded-full border border-ink/10 bg-white py-1 pe-3.5 ps-1 text-xs text-ink-2 shadow-soft" data-reveal>
                     <span class="rounded-full bg-brand-500 px-2.5 py-0.5 text-[10px] font-semibold text-white">Hazır mısınız?</span>
                     Ücretsiz Analiz
                 </p>
                 <h2 class="mt-5 font-display text-3xl font-medium leading-[1.2] sm:text-[40px]" data-reveal>
                     Sitenizin yol haritasını birlikte netleştirelim
                 </h2>
-                <p class="mt-4 max-w-md text-lg font-medium leading-relaxed text-white/65" data-reveal>
+                <p class="mt-4 max-w-md text-lg font-medium leading-relaxed text-ink-2" data-reveal>
                     Formu doldurun; 24 saat içinde panelinizde özet analizi görün.
                 </p>
                 <div class="mt-7" data-reveal>
                     <a href="#analiz-formu" class="{{ $btnWhite }}">
-                        <span class="{{ $btnChip }} bg-gradient-to-b from-black to-[#363b3c] text-white">{!! $arrowIcon !!}</span>
+                        <span class="{{ $btnChip }} bg-white/15 text-white">{!! $arrowIcon !!}</span>
                         Forma dön
                     </a>
                 </div>

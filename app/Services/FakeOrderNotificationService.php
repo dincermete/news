@@ -20,7 +20,6 @@ class FakeOrderNotificationService
         ProductType::PressRelease,
         ProductType::FooterLink,
         ProductType::Bundle,
-        ProductType::Story,
         ProductType::SeoPackage,
         ProductType::BacklinkPackage,
     ];

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AboutController;
+use App\Http\Controllers\AgencyServiceController;
 use App\Http\Controllers\Account\AccountAffiliateController;
 use App\Http\Controllers\Account\AccountDashboardController;
 use App\Http\Controllers\Account\AccountFavoriteController;
@@ -15,6 +16,7 @@ use App\Http\Controllers\Account\AccountSpinWheelController;
 use App\Http\Controllers\Account\AccountSupportTicketController;
 use App\Http\Controllers\Account\AccountWalletTopupController;
 use App\Http\Controllers\Auth\EmailVerificationController;
+use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BacklinkPackageCatalogController;
@@ -35,11 +37,11 @@ use App\Http\Controllers\PressReleaseCatalogController;
 use App\Http\Controllers\SeoPackageCatalogController;
 use App\Http\Controllers\SiteBundleCatalogController;
 use App\Http\Controllers\SiteCatalogController;
+use App\Http\Controllers\SiteExportController;
 use App\Http\Controllers\SiteFavoriteController;
 use App\Http\Controllers\SiteQuestionController;
 use App\Http\Controllers\SiteShowController;
 use App\Http\Controllers\SiteViewController;
-use App\Http\Controllers\StoryCatalogController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -51,13 +53,16 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', HomeController::class)->name('home');
 
 Route::get('/siteler', SiteCatalogController::class)->name('sites.index');
+Route::get('/siteler/disa-aktar', SiteExportController::class)->name('sites.export');
 Route::get('/basin-bulteni', PressReleaseCatalogController::class)->name('press-release.index');
-Route::get('/tanitim-paketleri', SiteBundleCatalogController::class)->name('bundles.index');
-Route::get('/story-satis', StoryCatalogController::class)->name('story.index');
+Route::get('/tanitim-paketleri', [SiteBundleCatalogController::class, 'index'])->name('bundles.index');
+Route::get('/tanitim-paketleri/{slug}', [SiteBundleCatalogController::class, 'show'])->name('bundles.show');
 Route::get('/footer-linkler', FooterLinkCatalogController::class)->name('footer-links.index');
 Route::get('/geo', GeoPageController::class)->name('geo.index');
 Route::get('/seo-paketleri', SeoPackageCatalogController::class)->name('seo-packages.index');
 Route::get('/backlink-paketleri', BacklinkPackageCatalogController::class)->name('backlink-packages.index');
+Route::get('/hizmetler', [AgencyServiceController::class, 'index'])->name('agency-services.index');
+Route::get('/hizmetler/{slug}', [AgencyServiceController::class, 'show'])->name('agency-services.show');
 Route::get('/ucretsiz-analiz', [FreeAnalysisController::class, 'show'])->name('free-analysis.show');
 Route::get('/hakkimizda', AboutController::class)->name('about.show');
 Route::get('/iletisim', ContactController::class)->name('contact.show');
@@ -77,6 +82,9 @@ Route::middleware('guest')->group(function (): void {
     Route::post('/giris', [LoginController::class, 'store'])->name('login.store');
     Route::get('/kayitol', [RegisterController::class, 'create'])->name('register');
     Route::post('/kayitol', [RegisterController::class, 'store'])->name('register.store');
+
+    Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect'])->name('auth.google.redirect');
+    Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('auth.google.callback');
 });
 
 Route::post('/cikis', [LoginController::class, 'destroy'])

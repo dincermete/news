@@ -26,8 +26,6 @@ class OrderObserver
             'site_id',
             'site_bundle_id',
             'footer_link_duration_option_id',
-            'instagram_account_id',
-            'instagram_story_price_id',
             'seo_package_id',
             'seo_package_duration_option_id',
             'backlink_package_id',
@@ -59,7 +57,6 @@ class OrderObserver
             ProductType::PressRelease => $this->requireFilled($order->site_id, 'press_release için site_id zorunludur.'),
             ProductType::Bundle => $this->requireFilled($order->site_bundle_id, 'bundle için site_bundle_id zorunludur.'),
             ProductType::FooterLink => $this->assertFooterLink($order),
-            ProductType::Story => $this->assertStoryPayload($order),
             ProductType::SeoPackage => $this->assertSeoPackagePayload($order),
             ProductType::BacklinkPackage => $this->assertBacklinkPackagePayload($order),
             ProductType::Balance => $this->assertBalancePayload($order),
@@ -80,20 +77,6 @@ class OrderObserver
             $order->footer_link_duration_option_id,
             'footer_link için footer_link_duration_option_id zorunludur.',
         );
-    }
-
-    protected function assertStoryPayload(Order $order): void
-    {
-        $this->requireFilled($order->instagram_account_id, 'story için instagram_account_id zorunludur.');
-        $this->requireFilled($order->instagram_story_price_id, 'story için instagram_story_price_id zorunludur.');
-
-        $payload = is_array($order->content_payload) ? $order->content_payload : [];
-
-        if (blank($payload['target_url'] ?? null) && blank($payload['image_path'] ?? null) && blank($payload['image'] ?? null)) {
-            throw InvalidOrderProductException::make(
-                'story için content_payload içinde target_url veya görsel (image_path) zorunludur.',
-            );
-        }
     }
 
     protected function assertSeoPackagePayload(Order $order): void

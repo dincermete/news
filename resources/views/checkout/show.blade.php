@@ -16,14 +16,14 @@
 @section('content')
     {{-- ================= HERO ================= --}}
     <section class="px-2 pt-2 sm:px-3">
-        <div class="panel-dark relative overflow-hidden rounded-3xl text-white">
+        <div class="panel-light relative overflow-hidden rounded-3xl text-ink">
             <div class="relative mx-auto px-5 py-9 sm:px-8" data-reveal>
-                <p class="inline-flex items-center gap-x-2 rounded-full border border-white/15 bg-white/5 py-1 pe-3.5 ps-1 text-xs text-white/80">
+                <p class="inline-flex items-center gap-x-2 rounded-full border border-ink/10 bg-white py-1 pe-3.5 ps-1 text-xs text-ink-2 shadow-soft">
                     <span class="rounded-full bg-brand-500 px-2.5 py-0.5 text-[10px] font-semibold text-white">Son adım</span>
                     Güvenli ödeme
                 </p>
                 <h1 class="mt-4 font-display text-3xl font-medium leading-tight sm:text-4xl">Ödeme</h1>
-                <p class="mt-1.5 text-sm text-white/60">Ödeme yöntemini seçin.</p>
+                <p class="mt-1.5 text-sm text-ink-2">Ödeme yöntemini seçin.</p>
             </div>
         </div>
     </section>
@@ -136,7 +136,6 @@
                             @php
                                 $itemTitle = $item->site?->domain
                                     ?? $item->siteBundle?->name
-                                    ?? $item->instagramAccount?->handle
                                     ?? $item->seoPackage?->name
                                     ?? $item->backlinkPackage?->name
                                     ?? $item->product_type?->getLabel()
@@ -146,9 +145,7 @@
                                 <div class="min-w-0">
                                     <div class="flex flex-wrap items-center gap-1.5">
                                         @if ($item->site)
-                                            <x-site-favicon :domain="$item->site->domain" :size="20" class="shrink-0 rounded-md" />
-                                        @elseif ($item->instagramAccount)
-                                            <x-instagram-avatar :account="$item->instagramAccount" :size="20" />
+                                            <x-site-logo :site="$item->site" :height="20" class="shrink-0 rounded-md" />
                                         @endif
                                         <p class="truncate text-sm font-medium text-ink">{{ $itemTitle }}</p>
                                     </div>

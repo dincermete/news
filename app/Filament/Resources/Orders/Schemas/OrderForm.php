@@ -51,12 +51,6 @@ class OrderForm
                                             ProductType::PressRelease,
                                             ProductType::FooterLink,
                                         ], true)),
-                                    Select::make('instagram_account_id')
-                                        ->label('Instagram hesabı')
-                                        ->relationship('instagramAccount', 'handle')
-                                        ->searchable()
-                                        ->preload()
-                                        ->visible(fn (Get $get): bool => self::productType($get) === ProductType::Story),
                                     Select::make('site_bundle_id')
                                         ->label('Site paketi')
                                         ->relationship('siteBundle', 'name')
@@ -69,13 +63,6 @@ class OrderForm
                                         ->searchable()
                                         ->preload()
                                         ->visible(fn (Get $get): bool => self::productType($get) === ProductType::FooterLink),
-                                    Select::make('instagram_story_price_id')
-                                        ->label('Story fiyatı')
-                                        ->relationship('instagramStoryPrice', 'id')
-                                        ->getOptionLabelFromRecordUsing(fn ($record): string => $record->instagramAccount?->handle.' — '.$record->format->getLabel())
-                                        ->searchable()
-                                        ->preload()
-                                        ->visible(fn (Get $get): bool => self::productType($get) === ProductType::Story),
                                     Select::make('seo_package_id')
                                         ->label('SEO paketi')
                                         ->relationship('seoPackage', 'name')

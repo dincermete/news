@@ -34,6 +34,9 @@ use Laravel\Sanctum\HasApiTokens;
     'affiliate_code',
     'affiliate_commission_rate',
     'referred_by_id',
+    'google_id',
+    'avatar',
+    'email_verified_at',
 ])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser, MustVerifyEmail

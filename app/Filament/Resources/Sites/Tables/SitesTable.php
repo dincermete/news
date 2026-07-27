@@ -14,6 +14,7 @@ use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -29,6 +30,13 @@ class SitesTable
     {
         return $table
             ->columns([
+                ImageColumn::make('logo_path')
+                    ->label('Logo')
+                    ->disk('public')
+                    ->height(24)
+                    ->width(107)
+                    ->extraImgAttributes(['class' => 'object-contain'])
+                    ->defaultImageUrl(fn (Site $record): string => app(\App\Services\SeoMetaService::class)->faviconUrl($record->domain)),
                 TextColumn::make('domain')
                     ->label('Domain')
                     ->searchable()
@@ -85,6 +93,10 @@ class SitesTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('is_news_approved')
                     ->label('News')
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                IconColumn::make('is_google_indexed')
+                    ->label('Google Index')
                     ->boolean()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')

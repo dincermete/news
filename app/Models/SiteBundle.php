@@ -13,7 +13,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'name',
+    'slug',
     'description',
+    'content',
     'price',
     'currency',
     'status',
@@ -30,6 +32,11 @@ class SiteBundle extends Model
         'currency' => 'TRY',
         'status' => 'draft',
     ];
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 
     /**
      * @return array<string, string>

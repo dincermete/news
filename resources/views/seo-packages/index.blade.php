@@ -13,6 +13,10 @@
     $chip = 'inline-flex items-center rounded-[10px] border border-ink/5 bg-white px-3.5 py-2 text-sm font-medium text-ink shadow-soft';
     $h2 = 'font-display text-3xl font-medium leading-[1.2] tracking-[-0.01em] text-ink sm:text-[44px] lg:text-[52px]';
     $sub = 'text-lg font-medium leading-relaxed text-ink-2';
+    $btnWhite = 'group inline-flex items-center gap-x-3 rounded-2xl bg-gradient-to-b from-white to-[#c9c9c9] p-1 pe-4 text-sm font-medium text-ink transition hover:scale-[1.03] active:scale-[0.98]';
+    $btnGhostDark = 'group inline-flex items-center gap-x-3 rounded-2xl border border-ink/10 bg-white p-1 pe-4 text-sm font-medium text-ink transition hover:bg-paper-2 hover:scale-[1.03] active:scale-[0.98]';
+    $btnChip = 'inline-flex size-8 items-center justify-center rounded-xl';
+    $arrowIcon = '<svg class="size-3.5 transition group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>';
 
     $money = fn (float $amount): string => number_format($amount, 0, ',', '.');
 
@@ -95,6 +99,27 @@
     $tools = ['Google Analytics', 'Search Console', 'Tag Manager', 'Google Trends', 'Google İşletme Profili', 'Bing Webmaster', 'Yandex Webmaster', 'Semrush', 'Ahrefs', 'Screaming Frog', 'SEOmonitor', 'Majestic', 'Moz', 'Ubersuggest', 'KWFinder', 'Microsoft Clarity', 'Hotjar', 'GTmetrix', 'PageSpeed Insights', 'SimilarWeb', 'Looker Studio', 'Keyword Tool'];
     $aiTools = ['ChatGPT', 'Gemini', 'Perplexity', 'Claude', 'Grok', 'Copilot', 'DeepSeek', 'Google AI Overviews', 'Meta AI', 'Qwen', 'Kimi'];
 
+    $trustBadges = [
+        ['value' => '500+', 'label' => 'Tamamlanan proje'],
+        ['value' => '200', 'label' => 'Maddelik manuel analiz'],
+        ['value' => '%100', 'label' => 'Manuel inceleme, otomasyon yok'],
+    ];
+
+    $platforms = ['Google', 'Bing', 'Yandex', 'ChatGPT', 'Perplexity', 'Gemini'];
+
+    $methodSteps = [
+        ['no' => '01', 'title' => 'Analiz', 'text' => 'Sitenizi 200 maddelik teknik ve içerik kontrol listesiyle uçtan uca tarar, rakip görünürlüğünü ölçeriz.'],
+        ['no' => '02', 'title' => 'Planlama', 'text' => 'Bulguları önceliklendirir, anahtar kelime ve içerik takvimini paketinize göre netleştiririz.'],
+        ['no' => '03', 'title' => 'Uygulama', 'text' => 'Teknik düzeltmeler, içerik üretimi ve otorite çalışmalarını paralel yürütürüz.'],
+        ['no' => '04', 'title' => 'Raporlama', 'text' => 'Sıralama, trafik ve AI görünürlük verilerini düzenli aralıklarla panelinize taşırız.'],
+    ];
+
+    $crossSell = [
+        ['name' => 'Backlink Paketleri', 'text' => 'Yüksek otoriteli kaynaklardan doğal anchor dağılımıyla kalıcı backlink.', 'url' => route('backlink-packages.index'), 'icon' => 'M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22'],
+        ['name' => 'GEO', 'text' => 'ChatGPT, Gemini ve Perplexity gibi AI motorlarında kaynak gösterilin.', 'url' => route('geo.index'), 'icon' => 'M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z'],
+        ['name' => 'Basın Bülteni', 'text' => 'Haber sitelerinde basın bülteninizi yayınlayın, geniş kitlelere ulaşın.', 'url' => route('press-release.index'), 'icon' => 'M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 1 1 0-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783'],
+    ];
+
     $faqItems = [
         ['q' => 'SEO paketi seçerken ilk neye bakılmalı?', 'a' => 'SEO paketi seçerken ilk bakılması gereken şey fiyat değil, paketin hangi sorunu çözdüğüdür. Teknik analizi olmayan, işlem görecek sayfaları net tanımlamayan ve yalnızca genel vaat sunan paketler sağlıklı bir yapı kurmaz.'],
         ['q' => 'Hangi SEO paketi hangi site için uygundur?', 'a' => 'Doğru paket, sitenin yaşına, rekabet düzeyine, sayfa sayısına ve hedeflediği görünürlük alanına göre belirlenir. Yeni sitelerde temel yapı öne çıkarken, rekabetli projelerde içerik, teknik takip ve düzenli optimizasyon birlikte gerekir.'],
@@ -107,10 +132,10 @@
 
 @section('content')
     {{-- ================= HERO ================= --}}
-    <section class="px-2 pt-2 sm:px-3" x-data="{ cycle: '{{ (string) ($durationOptions->first()?->id) }}' }">
-        <div class="panel-dark relative overflow-hidden rounded-3xl text-white">
+    <section class="px-2 pt-2 sm:px-3">
+        <div class="panel-light relative overflow-hidden rounded-3xl text-ink">
             <div class="relative mx-auto flex max-w-3xl flex-col items-center px-5 pb-12 pt-16 text-center sm:px-8 lg:pb-16 lg:pt-20">
-                <p class="inline-flex items-center gap-x-2 rounded-full border border-white/15 bg-white/5 py-1 pe-3.5 ps-1 text-xs text-white/80">
+                <p class="inline-flex items-center gap-x-2 rounded-full border border-ink/10 bg-white py-1 pe-3.5 ps-1 text-xs text-ink-2 shadow-soft">
                     <span class="rounded-full bg-brand-500 px-2.5 py-0.5 text-[10px] font-semibold text-white">SEO · GEO · AEO</span>
                     Hepsi bir arada
                 </p>
@@ -119,22 +144,82 @@
                     Google ve yapay zekâda tam görünürlük
                 </h1>
 
-                <p class="mt-5 max-w-xl text-lg font-medium leading-relaxed text-white/65">
+                <p class="mt-5 max-w-xl text-lg font-medium leading-relaxed text-ink-2">
                     Google'da ilk sayfa, ChatGPT · Gemini · Perplexity'de referans alınma. 8 başlık ve 99 kontrol noktasıyla SEO, GEO ve AEO tek pakette uygulanır.
                 </p>
 
-                <p class="mt-4 inline-flex items-center gap-x-2 text-sm text-white/70">
+                <p class="mt-4 inline-flex items-center gap-x-2 text-sm text-ink-2">
                     <span class="text-amber-400">★★★★★</span>
                     5,0 · 1.773 olumlu müşteri değerlendirmesi
                 </p>
 
-                {{-- Billing cycle toggle --}}
-                <div class="mt-8 inline-flex flex-wrap items-center justify-center gap-1.5 rounded-2xl border border-white/15 bg-white/5 p-1.5">
+                <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+                    <a href="#paketler" class="{{ $btnWhite }}">
+                        <span class="{{ $btnChip }} bg-white/15 text-white">{!! $arrowIcon !!}</span>
+                        Paketleri İncele
+                    </a>
+                    <a href="tel:{{ $siteSettings->support_phone ?: '08503052241' }}" class="{{ $btnGhostDark }}">
+                        <span class="{{ $btnChip }} bg-ink/5 text-ink">
+                            <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"/></svg>
+                        </span>
+                        {{ $siteSettings->support_phone_display ?: '0850 305 22 41' }}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- ================= GÜVEN ŞERİDİ ================= --}}
+    <section class="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8" data-reveal-group>
+        <div class="grid gap-6 rounded-[20px] bg-paper p-6 sm:grid-cols-3 sm:p-8" data-reveal>
+            @foreach ($trustBadges as $badge)
+                <div class="text-center sm:text-start">
+                    <p class="font-display text-3xl font-semibold text-ink">{{ $badge['value'] }}</p>
+                    <p class="mt-1 text-sm font-medium text-ink-2">{{ $badge['label'] }}</p>
+                </div>
+            @endforeach
+        </div>
+        <div class="mt-6 flex flex-wrap items-center justify-center gap-2" data-reveal>
+            @foreach ($platforms as $platform)
+                <span class="rounded-full border border-ink/10 bg-white px-3.5 py-1.5 text-xs font-medium text-ink-2">{{ $platform }}</span>
+            @endforeach
+        </div>
+    </section>
+
+    {{-- ================= YÖNTEMİMİZ ================= --}}
+    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
+        <div class="mx-auto max-w-2xl text-center">
+            <p data-reveal><span class="{{ $chip }}">Yöntemimiz</span></p>
+            <h2 class="mt-5 {{ $h2 }}" data-reveal>4 adımda ölçülebilir büyüme</h2>
+        </div>
+
+        <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            @foreach ($methodSteps as $step)
+                <div class="rounded-[20px] bg-paper p-6" data-reveal>
+                    <span class="inline-flex size-10 items-center justify-center rounded-[10px] bg-white font-display text-lg font-semibold text-ink shadow-soft">{{ $step['no'] }}</span>
+                    <h3 class="mt-4 font-display text-lg font-semibold text-ink">{{ $step['title'] }}</h3>
+                    <p class="mt-1.5 text-sm font-medium leading-relaxed text-ink-2">{{ $step['text'] }}</p>
+                </div>
+            @endforeach
+        </div>
+    </section>
+
+    {{-- ================= PAKET KARTLARI ================= --}}
+    <section id="paketler" class="px-2 sm:px-3" x-data="{ cycle: '{{ (string) ($durationOptions->first()?->id) }}' }">
+        <div class="mx-auto max-w-6xl px-2 py-10 sm:px-4">
+            <div class="mx-auto max-w-2xl text-center">
+                <p><span class="{{ $chip }}">Paketler</span></p>
+                <h2 class="mt-5 {{ $h2 }}">İhtiyacınıza uygun paketi seçin</h2>
+            </div>
+
+            {{-- Billing cycle toggle --}}
+            <div class="mt-8 flex flex-wrap items-center justify-center gap-1.5">
+                <div class="inline-flex flex-wrap items-center justify-center gap-1.5 rounded-2xl border border-ink/10 bg-white p-1.5 shadow-soft">
                     @foreach ($durationOptions as $option)
                         <button
                             type="button"
                             class="relative rounded-xl px-4 py-2 text-sm font-medium transition"
-                            :class="cycle === '{{ $option->id }}' ? 'bg-white text-ink' : 'text-white/70 hover:text-white'"
+                            :class="cycle === '{{ $option->id }}' ? 'bg-ink text-white' : 'text-ink-2 hover:text-ink'"
                             @click="cycle = '{{ $option->id }}'"
                         >
                             {{ $option->name }}
@@ -145,11 +230,8 @@
                     @endforeach
                 </div>
             </div>
-        </div>
 
-        {{-- ================= PAKET KARTLARI ================= --}}
-        <div class="mx-auto max-w-6xl px-2 py-10 sm:px-4">
-            <div class="grid gap-5 lg:grid-cols-3">
+            <div class="mt-10 grid gap-5 lg:grid-cols-3">
                 @foreach ($packages as $package)
                     @php
                         $prices = $packagePrices[$package->id]->mapWithKeys(fn ($value, $key) => [$key => $money((float) $value)]);
@@ -302,26 +384,27 @@
         </div>
     </section>
 
-    {{-- ================= BİLGİLENDİRME ================= --}}
+    {{-- ================= DİĞER HİZMETLER ================= --}}
     <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-2xl text-center">
-            <p><span class="{{ $chip }}">Profesyonel SEO Hizmetleri</span></p>
-            <h2 class="mt-5 {{ $h2 }}">SEO Paketleri</h2>
-            <p class="mt-4 {{ $sub }}">
-                SEO paketi seçimi, paket adıyla değil sitenin ihtiyacıyla yapılır. Doğru yapı; teknik sorunların giderilmesi, hedef sayfaların güçlendirilmesi, içerik planının kurulması ve performansın düzenli izlenmesiyle sonuç verir.
-            </p>
+            <p><span class="{{ $chip }}">Diğer Hizmetler</span></p>
+            <h2 class="mt-5 {{ $h2 }}">SEO paketinizi tamamlayan hizmetler</h2>
+            <p class="mt-4 {{ $sub }}">Görünürlüğü tek kanala sıkıştırmayın; backlink, GEO ve basın bülteniyle etkiyi büyütün.</p>
         </div>
 
-        <div class="mt-10 grid gap-8 sm:grid-cols-3">
-            @foreach ([
-                ['title' => 'Hangi SEO paketi hangi site için uygundur?', 'text' => 'Doğru paket, sektör adına göre değil sitenin mevcut açığına göre belirlenir. Yeni açılmış kurumsal sitelerde temel teknik düzenleme öne çıkarken, rekabetçi projelerde içerik yoğunluğu ve teknik takip birlikte çalışmalıdır.'],
-                ['title' => 'SEO paketi seçerken nelere dikkat edilmeli?', 'text' => 'İlk bakılması gereken şey fiyat değil kapsamdır. Teknik analiz yoksa ve raporlama yalnızca sıralama ekranından ibaretse paket güçlü görünse bile zayıftır.'],
-                ['title' => 'SEO paketi kapsamında neler bulunmalı?', 'text' => 'Etkili bir SEO paketi; teknik tarama, anahtar kelime haritası, sayfa içi optimizasyon, içerik geliştirme ve düzenli raporlamayı birlikte içermelidir.'],
-            ] as $info)
-                <div>
-                    <h3 class="font-display text-lg font-semibold text-ink">{{ $info['title'] }}</h3>
-                    <p class="mt-2 text-sm font-medium leading-relaxed text-ink-2">{{ $info['text'] }}</p>
-                </div>
+        <div class="mt-10 grid gap-5 sm:grid-cols-3">
+            @foreach ($crossSell as $service)
+                <a href="{{ $service['url'] }}" class="group flex flex-col rounded-[20px] bg-paper p-6 transition hover:-translate-y-0.5 hover:shadow-pop">
+                    <span class="inline-flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-ink text-white">
+                        <svg class="size-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $service['icon'] }}"/></svg>
+                    </span>
+                    <h3 class="mt-4 font-display text-lg font-semibold text-ink">{{ $service['name'] }}</h3>
+                    <p class="mt-1.5 text-sm font-medium leading-relaxed text-ink-2">{{ $service['text'] }}</p>
+                    <span class="mt-auto flex items-center gap-x-1.5 pt-4 text-xs font-semibold text-ink-2 transition group-hover:text-ink">
+                        İncele
+                        <svg class="size-3 transition group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
+                    </span>
+                </a>
             @endforeach
         </div>
     </section>

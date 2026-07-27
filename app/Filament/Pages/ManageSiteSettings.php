@@ -231,6 +231,21 @@ class ManageSiteSettings extends Page
                                             ->label('Makale modeli')
                                             ->maxLength(80),
                                     ]),
+                                Section::make('Google ile Giriş')
+                                    ->columns(2)
+                                    ->schema([
+                                        TextInput::make('google_client_id')
+                                            ->label('Client ID')
+                                            ->maxLength(255)
+                                            ->columnSpanFull(),
+                                        TextInput::make('google_client_secret')
+                                            ->label('Client Secret')
+                                            ->password()
+                                            ->revealable()
+                                            ->maxLength(255)
+                                            ->columnSpanFull(),
+                                    ])
+                                    ->description('Google Cloud Console\'da yetkili yönlendirme URI\'si olarak "'.route('auth.google.callback').'" tanımlayın.'),
                             ]),
                     ]),
             ])

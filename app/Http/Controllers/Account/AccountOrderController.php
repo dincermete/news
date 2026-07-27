@@ -16,7 +16,7 @@ class AccountOrderController extends Controller
     {
         $orders = $request->user()
             ->orders()
-            ->with(['site', 'instagramAccount', 'seoPackage', 'backlinkPackage', 'orderGroup'])
+            ->with(['site', 'seoPackage', 'backlinkPackage', 'orderGroup'])
             ->latest('id')
             ->paginate(15);
 
@@ -34,8 +34,6 @@ class AccountOrderController extends Controller
             'orders.site',
             'orders.siteBundle',
             'orders.footerLinkDurationOption',
-            'orders.instagramAccount',
-            'orders.instagramStoryPrice',
             'orders.seoPackage',
             'orders.seoPackageDurationOption',
             'orders.backlinkPackage',

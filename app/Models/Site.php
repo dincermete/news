@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 #[ObservedBy([SiteObserver::class])]
 class Site extends Model
@@ -26,11 +27,13 @@ class Site extends Model
      */
     protected $fillable = [
         'domain',
+        'logo_path',
         'site_category_id',
         'description',
         'age',
         'is_dofollow',
         'is_news_approved',
+        'is_google_indexed',
         'status',
         'price',
         'discount_price',
@@ -38,6 +41,8 @@ class Site extends Model
         'currency',
         'daily_capacity',
         'weekly_capacity',
+        'max_link_count',
+        'estimated_delivery',
         'internal_notes',
         'site_owner_name',
         'site_owner_contact',
@@ -66,6 +71,9 @@ class Site extends Model
         'ahrefs_dr_value',
         'ahrefs_dr_source',
         'ahrefs_dr_updated_at',
+        'ahrefs_rank_value',
+        'ahrefs_rank_source',
+        'ahrefs_rank_updated_at',
         'ahrefs_traffic_value',
         'ahrefs_traffic_source',
         'ahrefs_traffic_updated_at',
@@ -89,6 +97,7 @@ class Site extends Model
     protected $attributes = [
         'is_dofollow' => true,
         'is_news_approved' => false,
+        'is_google_indexed' => true,
         'status' => 'draft',
         'currency' => 'USD',
     ];
@@ -102,6 +111,7 @@ class Site extends Model
             'age' => 'integer',
             'is_dofollow' => 'boolean',
             'is_news_approved' => 'boolean',
+            'is_google_indexed' => 'boolean',
             'status' => SiteStatus::class,
             'price' => 'decimal:2',
             'discount_price' => 'decimal:2',
@@ -109,6 +119,7 @@ class Site extends Model
             'currency' => Currency::class,
             'daily_capacity' => 'integer',
             'weekly_capacity' => 'integer',
+            'max_link_count' => 'integer',
         ];
 
         foreach (SiteSeoMetrics::keys() as $metric) {
@@ -118,6 +129,15 @@ class Site extends Model
         }
 
         return $casts;
+    }
+
+    public function logoUrl(): ?string
+    {
+        if (! filled($this->logo_path)) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($this->logo_path);
     }
 
     public function category(): BelongsTo

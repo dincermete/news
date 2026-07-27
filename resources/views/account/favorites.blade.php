@@ -37,7 +37,7 @@
                     @if ($favorite->site)
                         <div class="flex items-start justify-between gap-3 rounded-[20px] border border-ink/10 bg-paper p-5">
                             <div class="flex min-w-0 items-start gap-x-3">
-                                <x-site-favicon :domain="$favorite->site->domain" :size="32" class="mt-0.5 shrink-0 rounded-lg" />
+                                <x-site-logo :site="$favorite->site" :height="32" class="mt-0.5 shrink-0 rounded-lg" />
                                 <div class="min-w-0">
                                     <a href="{{ route('sites.show', $favorite->site->domain) }}" class="block truncate text-sm font-semibold text-ink transition hover:text-accent-700">
                                         {{ $favorite->site->domain }}
