@@ -195,6 +195,168 @@ html.js [data-reveal] {
 }
 
 /*
+ | Site katalog tablosu: tek <table> (kolon hizası korunur),
+ | thead + tbody görsel olarak ayrı yuvarlatılmış kartlar gibi.
+ */
+.site-catalog-table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.site-catalog-table [data-sort-group] {
+    transition: opacity 0.18s ease;
+}
+
+.site-catalog-table--sorting [data-sort-group] {
+    opacity: 0.35;
+}
+
+.site-catalog-table__head button[aria-sort] {
+    cursor: pointer;
+}
+
+.site-catalog-table__sort-icon {
+    inset-inline-end: -18px;
+    position: absolute;
+    bottom: 3px;
+}
+
+/*
+ | Sahte sipariş toast: görünürken alt progress çubuğu 6s'de erir.
+ */
+.fake-order-toast__progress {
+    width: 100%;
+    transform: scaleX(1);
+}
+
+.fake-order-toast.is-playing .fake-order-toast__progress {
+    animation: fake-order-toast-progress 6s linear forwards;
+}
+
+@keyframes fake-order-toast-progress {
+    from {
+        transform: scaleX(1);
+    }
+    to {
+        transform: scaleX(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fake-order-toast.is-playing .fake-order-toast__progress {
+        animation: none;
+    }
+}
+
+.site-catalog-table__head .site-catalog-table__th {
+    background-color: var(--color-paper, #f4f5f7);
+    border-top: 1px solid color-mix(in oklab, var(--color-ink) 10%, transparent);
+    border-bottom: 1px solid color-mix(in oklab, var(--color-ink) 10%, transparent);
+}
+
+.site-catalog-table__head .site-catalog-table__th:first-child {
+    border-left: 1px solid color-mix(in oklab, var(--color-ink) 10%, transparent);
+    border-radius: 20px 0 0 20px;
+}
+
+.site-catalog-table__head .site-catalog-table__th:last-child {
+    border-right: 1px solid color-mix(in oklab, var(--color-ink) 10%, transparent);
+    border-radius: 0 20px 20px 0;
+}
+
+.site-catalog-table__gap td {
+    height: 0.75rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+}
+
+.site-catalog-table__row .site-catalog-table__td {
+    background-color: #fff;
+    border-bottom: 1px solid color-mix(in oklab, var(--color-ink) 5%, transparent);
+}
+
+.site-catalog-table__row .site-catalog-table__td:first-child {
+    border-left: 1px solid color-mix(in oklab, var(--color-ink) 10%, transparent);
+}
+
+.site-catalog-table__row .site-catalog-table__td:last-child {
+    border-right: 1px solid color-mix(in oklab, var(--color-ink) 10%, transparent);
+}
+
+.site-catalog-table__row--first .site-catalog-table__td {
+    border-top: 1px solid color-mix(in oklab, var(--color-ink) 10%, transparent);
+}
+
+.site-catalog-table__row--first .site-catalog-table__td:first-child {
+    border-top-left-radius: 20px;
+}
+
+.site-catalog-table__row--first .site-catalog-table__td:last-child {
+    border-top-right-radius: 20px;
+}
+
+.site-catalog-table__row--end .site-catalog-table__td {
+    border-bottom: 1px solid color-mix(in oklab, var(--color-ink) 10%, transparent);
+}
+
+.site-catalog-table__row--end .site-catalog-table__td:first-child {
+    border-bottom-left-radius: 20px;
+}
+
+.site-catalog-table__row--end .site-catalog-table__td:last-child {
+    border-bottom-right-radius: 20px;
+}
+
+.site-catalog-table__detail-cell {
+    background-color: var(--color-paper, #f4f5f7);
+    border-bottom: 1px solid color-mix(in oklab, var(--color-ink) 5%, transparent);
+    border-left: 1px solid color-mix(in oklab, var(--color-ink) 10%, transparent);
+    border-right: 1px solid color-mix(in oklab, var(--color-ink) 10%, transparent);
+}
+
+.site-catalog-table__detail--end .site-catalog-table__detail-cell {
+    border-bottom: 1px solid color-mix(in oklab, var(--color-ink) 10%, transparent);
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+}
+
+/* Mobilde yalnızca 1–2. kolon görünür; sağ köşeyi Index hücresine taşı */
+@media (max-width: 639px) {
+    .site-catalog-table__head .site-catalog-table__th:last-child {
+        border-radius: 0;
+        border-right: 0;
+    }
+
+    .site-catalog-table__head .site-catalog-table__th:nth-child(2) {
+        border-right: 1px solid color-mix(in oklab, var(--color-ink) 10%, transparent);
+        border-radius: 0 20px 20px 0;
+    }
+
+    .site-catalog-table__row .site-catalog-table__td:last-child {
+        border-right: 0;
+        border-radius: 0;
+    }
+
+    .site-catalog-table__row .site-catalog-table__td:nth-child(2) {
+        border-right: 1px solid color-mix(in oklab, var(--color-ink) 10%, transparent);
+    }
+
+    .site-catalog-table__row--first .site-catalog-table__td:nth-child(2) {
+        border-top-right-radius: 20px;
+    }
+
+    .site-catalog-table__row--end .site-catalog-table__td:nth-child(2) {
+        border-bottom-right-radius: 20px;
+    }
+
+    .site-catalog-table__row--first .site-catalog-table__td:last-child,
+    .site-catalog-table__row--end .site-catalog-table__td:last-child {
+        border-radius: 0;
+    }
+}
+
+/*
  | Koyu panel (eski hero): siyah zemin üzerinde mavi→kırmızı ışıma.
  | Yeni yüzeyler panel-light kullanır; bu sınıf geriye dönük tutulur.
  */
@@ -207,10 +369,10 @@ html.js [data-reveal] {
 }
 
 /*
- | Footer: düz koyu gri, gradient yok.
+ | Footer: paper zemin.
  */
 .panel-footer {
-    background-color: #141416;
+    background-color: var(--color-paper, #f4f5f7);
 }
 
 /*
@@ -473,3 +635,115 @@ html.js .word-rotor > span:not(:first-child) {
         linear-gradient(#0a0b0b, #0a0b0b) padding-box,
         linear-gradient(111deg, rgb(255 255 255 / 0.25), rgb(255 255 255 / 0.05)) border-box;
 }
+
+/*
+ | Blog yazı gövdesi tipografi skalası
+ | H1 sayfa başlığında (blog/show hero); içerikte H2–H4 + body.
+ */
+.blog-title {
+    font-family: var(--font-display);
+    font-size: 1.875rem; /* 30px mobile */
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+}
+
+@media (min-width: 640px) {
+    .blog-title {
+        font-size: 2.5rem; /* 40px desktop */
+    }
+}
+
+.blog-prose {
+    color: var(--color-ink-2);
+    font-size: 1rem; /* 16px */
+    font-weight: 400;
+    line-height: 1.75;
+}
+
+.blog-prose :where(p, li, td, th) {
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.75;
+    color: var(--color-ink-2);
+}
+
+.blog-prose :where(h2, h3, h4) {
+    font-family: var(--font-display);
+    color: var(--color-ink);
+    letter-spacing: -0.01em;
+    scroll-margin-top: 7rem;
+}
+
+.blog-prose :where(h2) {
+    margin-top: 2.5rem;
+    margin-bottom: 0.875rem;
+    font-size: 1.375rem; /* 22px mobile */
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.blog-prose :where(h3) {
+    margin-top: 2rem;
+    margin-bottom: 0.625rem;
+    font-size: 1.125rem; /* 18px mobile */
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.blog-prose :where(h4) {
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 1rem; /* 16px */
+    font-weight: 500;
+    line-height: 1.45;
+    color: var(--color-ink);
+}
+
+@media (min-width: 640px) {
+    .blog-prose :where(h2) {
+        font-size: 1.75rem; /* 28px desktop */
+    }
+
+    .blog-prose :where(h3) {
+        font-size: 1.3125rem; /* 21px desktop */
+    }
+
+    .blog-prose :where(h4) {
+        font-size: 1.0625rem; /* 17px desktop */
+    }
+}
+
+.blog-prose :where(a) {
+    font-weight: 500;
+    color: var(--color-accent-600);
+    text-decoration: none;
+}
+
+.blog-prose :where(a:hover) {
+    text-decoration: underline;
+}
+
+.blog-prose :where(strong) {
+    font-weight: 600;
+    color: var(--color-ink);
+}
+
+.blog-prose :where(img) {
+    border-radius: 0.75rem;
+}
+
+.blog-prose :where(blockquote) {
+    border-inline-start: 3px solid var(--color-accent-600);
+    color: var(--color-ink-2);
+}
+
+.blog-prose :where(ul, ol) {
+    padding-inline-start: 1.25rem;
+}
+
+.blog-prose :where(h2:first-child, h3:first-child, h4:first-child) {
+    margin-top: 0;
+}
+

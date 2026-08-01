@@ -145,7 +145,7 @@
     </section>
 
     {{-- ================= SEO VS GEO ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
+    <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
         <div class="mx-auto max-w-2xl text-center">
             <p data-reveal><span class="{{ $chip }}">SEO VS GEO</span></p>
             <h2 class="mt-5 {{ $h2 }}" data-reveal>Yapay zeka çağında oyunun kuralları değişti</h2>
@@ -178,7 +178,7 @@
     </section>
 
     {{-- ================= GEO NEDİR ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
+    <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
         <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
             <div>
                 <p data-reveal><span class="{{ $chip }}">GEO Nedir?</span></p>
@@ -200,7 +200,7 @@
     </section>
 
     {{-- ================= HİZMET KAPSAMIMIZ ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
+    <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
         <div class="mx-auto max-w-2xl text-center">
             <p data-reveal><span class="{{ $chip }}">Hizmet Kapsamımız</span></p>
             <h2 class="mt-5 {{ $h2 }}" data-reveal>AI araçları için bütünleşik GEO yaklaşımı</h2>
@@ -229,7 +229,7 @@
     </section>
 
     {{-- ================= ÇALIŞMA YÖNTEMİMİZ ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
+    <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
         <div class="mx-auto max-w-2xl text-center">
             <p data-reveal><span class="{{ $chip }}">Çalışma Yöntemimiz</span></p>
             <h2 class="mt-5 {{ $h2 }}" data-reveal>4 adımda yapay zeka görünürlüğü</h2>
@@ -249,7 +249,7 @@
     </section>
 
     {{-- ================= RAKAMLARLA GEO ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
+    <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
         <div class="mx-auto max-w-2xl text-center">
             <p data-reveal><span class="{{ $chip }}">Rakamlarla GEO</span></p>
             <h2 class="mt-5 {{ $h2 }}" data-reveal>Yapay zeka aramaları artık satışa dönüşüyor</h2>
@@ -270,7 +270,7 @@
     </section>
 
     {{-- ================= ARAÇ SETİMİZ ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
+    <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
         <div class="mx-auto max-w-2xl text-center">
             <p data-reveal><span class="{{ $chip }}">Araç Setimiz</span></p>
             <h2 class="mt-5 {{ $h2 }}" data-reveal>GEO performansını ölçen profesyonel araçlar</h2>
@@ -305,7 +305,7 @@
     </section>
 
     {{-- ================= SSS ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+    <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div class="grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
             <div class="lg:sticky lg:top-28 lg:self-start" data-reveal-group>
                 <p data-reveal><span class="{{ $chip }}">SSS</span></p>

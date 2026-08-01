@@ -2,26 +2,21 @@
 
 namespace App\Filament\Resources\Sites\Schemas;
 
-use App\Enums\Currency;
-use App\Enums\MetricSource;
 use App\Enums\SiteStatus;
+use App\Filament\Actions\AiSuggestFieldAction;
 use App\Models\User;
 use App\Support\SiteSeoMetrics;
-use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
-use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\ToggleButtons;
-use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 
@@ -50,10 +45,16 @@ class SiteForm
                                         ->preload()
                                         ->required()
                                         ->columnSpan(1),
-                                    Textarea::make('description')
+                                    Textarea::make('short_description')
+                                        ->label('Kısa açıklama')
+                                        ->rows(2)
+                                        ->maxLength(500)
+                                        ->helperText('Kaynak site özeti (ürün kartı metinleri Tanıtım Siteleri ürününde yönetilir).')
+                                        ->hintAction(AiSuggestFieldAction::make('short_description'))
+                                        ->columnSpanFull(),
+                                    RichEditor::make('description')
                                         ->label('Açıklama')
-                                        ->rows(3)
-                                        ->hintAction(\App\Filament\Actions\AiSuggestFieldAction::make('description'))
+                                        ->helperText('Kaynak site açıklaması.')
                                         ->columnSpanFull(),
                                     TextInput::make('age')
                                         ->label('Yaş (yıl)')
@@ -61,10 +62,11 @@ class SiteForm
                                         ->minValue(0)
                                         ->columnSpan(1),
                                     Select::make('status')
-                                        ->label('Durum')
+                                        ->label('Kaynak durumu')
                                         ->options(SiteStatus::class)
                                         ->required()
                                         ->default(SiteStatus::Draft)
+                                        ->helperText('Satış durumu Tanıtım Siteleri ürününden yönetilir.')
                                         ->columnSpan(1),
                                     Toggle::make('is_dofollow')
                                         ->label('Dofollow')
@@ -89,32 +91,10 @@ class SiteForm
                                         ->columnSpanFull(),
                                 ]),
                             ]),
-                        Tab::make('Fiyat & Kapasite')
-                            ->icon(Heroicon::OutlinedCurrencyDollar)
+                        Tab::make('Kapasite')
+                            ->icon(Heroicon::OutlinedCalendarDays)
                             ->schema([
                                 Grid::make(2)->schema([
-                                    TextInput::make('price')
-                                        ->label('Fiyat')
-                                        ->numeric()
-                                        ->required()
-                                        ->minValue(0)
-                                        ->step(0.01),
-                                    TextInput::make('discount_price')
-                                        ->label('İndirimli fiyat')
-                                        ->numeric()
-                                        ->minValue(0)
-                                        ->step(0.01),
-                                    TextInput::make('press_release_price')
-                                        ->label('Basın Bülteni Fiyatı')
-                                        ->numeric()
-                                        ->minValue(0)
-                                        ->step(0.01)
-                                        ->helperText('Boş bırakılırsa bu site Basın Bülteni sayfasında listelenmez.'),
-                                    Select::make('currency')
-                                        ->label('Para birimi')
-                                        ->options(Currency::class)
-                                        ->required()
-                                        ->default(Currency::Usd),
                                     TextInput::make('daily_capacity')
                                         ->label('Günlük kapasite')
                                         ->numeric()
@@ -128,16 +108,18 @@ class SiteForm
                                         ->numeric()
                                         ->minValue(0)
                                         ->helperText('Bir yazı içinde izin verilen azami link sayısı.'),
-                                    TextInput::make('estimated_delivery')
-                                        ->label('Tahmini teslimat')
-                                        ->maxLength(255)
-                                        ->placeholder('Ör. 1-2 gün')
-                                        ->helperText('Katalog tablosunda gösterilecek serbest metin.'),
                                 ]),
                             ]),
                         Tab::make('SEO Metrikleri')
                             ->icon(Heroicon::OutlinedChartBar)
-                            ->schema(self::seoMetricSections()),
+                            ->schema([
+                                View::make('filament.sites.seo-metrics-table')
+                                    ->viewData([
+                                        'metrics' => SiteSeoMetrics::definitions(),
+                                    ])
+                                    ->schema(self::seoMetricInputs())
+                                    ->columnSpanFull(),
+                            ]),
                         Tab::make('Etiketler')
                             ->icon(Heroicon::OutlinedBookmark)
                             ->schema([
@@ -186,49 +168,22 @@ class SiteForm
     }
 
     /**
-     * @return array<int, Section>
+     * @return array<int, TextInput>
      */
-    protected static function seoMetricSections(): array
+    protected static function seoMetricInputs(): array
     {
-        $sections = [];
+        $inputs = [];
 
         foreach (SiteSeoMetrics::definitions() as $key => $label) {
-            $sections[] = Section::make($label)
-                ->schema([
-                    Grid::make(4)->schema([
-                        TextInput::make("{$key}_value")
-                            ->label('Değer')
-                            ->numeric()
-                            ->step(0.01),
-                        ToggleButtons::make("{$key}_source")
-                            ->label('Kaynak')
-                            ->options(MetricSource::class)
-                            ->default(MetricSource::Manual)
-                            ->inline()
-                            ->required(),
-                        DateTimePicker::make("{$key}_updated_at")
-                            ->label('Güncellendi')
-                            ->disabled()
-                            ->dehydrated()
-                            ->seconds(false),
-                        Actions::make([
-                            Action::make("fetch_{$key}")
-                                ->label("API'den Çek")
-                                ->icon(Heroicon::ArrowPath)
-                                ->color('gray')
-                                ->action(function (Set $set) use ($key): void {
-                                    $set("{$key}_updated_at", now());
-                                    $set("{$key}_source", MetricSource::Api);
-                                }),
-                        ])
-                            ->verticallyAlignEnd(),
-                    ]),
-                ])
-                ->compact()
-                ->columnSpanFull();
+            $inputs[] = TextInput::make("{$key}_value")
+                ->label($label)
+                ->numeric()
+                ->step(0.01)
+                ->placeholder('—')
+                ->hiddenLabel();
         }
 
-        return $sections;
+        return $inputs;
     }
 
     protected static function currentUserIsAdmin(): bool

@@ -21,16 +21,24 @@ return [
     'surface_shadow' => 'none',
     'apply_panel_font' => true,
     'default_theme_mode' => 'light',
-    'dark_mode' => true,
+    'dark_mode' => false,
     'force_dark_mode' => false,
     'token_overrides' => [
         'light' => [
-            // Active nav = zinc-100 pill, darker text (not primary amber)
-            'sidebar-accent' => 'oklch(0.967 0.001 286.375)', // zinc-100
-            'sidebar-accent-foreground' => 'oklch(0.21 0.006 285.885)', // zinc-900
+            // Shell: header + sidebar + body
+            'background' => 'oklch(98.7% 0 0)',
+            'sidebar' => 'oklch(98.7% 0 0)',
+            'sidebar-foreground' => 'oklch(0.205 0 0)',
+            'sidebar-accent' => 'oklch(96% 0 0)',
+            'sidebar-accent-foreground' => 'oklch(0.205 0 0)',
+            'sidebar-border' => 'oklch(0.145 0 0 / 0.1)',
+
+            // Panel-wide borders
+            'border' => 'oklch(0.145 0 0 / 0.1)',
+            'input' => 'oklch(0.145 0 0 / 0.1)',
         ],
         'dark' => [
-            'sidebar-accent' => 'oklch(0.274 0.006 286.033)', // zinc-800
+            'sidebar-accent' => 'oklch(0.274 0.006 286.033)',
             'sidebar-accent-foreground' => 'oklch(0.985 0 0)',
         ],
     ],
@@ -68,6 +76,9 @@ return [
         // Flat surfaces
         'fs-surface-shadow' => 'none',
         'fs-input-shadow' => 'none',
+
+        // Shell dividers match panel border
+        'fs-shell-divider-color' => 'oklch(0.145 0 0 / 0.1)',
 
         // Sticky sidebar (existing)
         'fs-topbar-height' => '56px',

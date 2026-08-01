@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\Currency;
 use App\Enums\SiteStatus;
+use App\Models\Concerns\HasStorefrontSeo;
 use Database\Factories\BacklinkPackageFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'name',
+    'slug',
     'description',
     'competition_label',
     'price',
@@ -20,11 +22,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'is_featured',
     'status',
     'sort_order',
+    'public_path',
+    'meta_title',
+    'meta_description',
+    'meta_keywords',
+    'og_image',
 ])]
 class BacklinkPackage extends Model
 {
     /** @use HasFactory<BacklinkPackageFactory> */
     use HasFactory;
+
+    use HasStorefrontSeo;
 
     /**
      * @var array<string, mixed>
@@ -49,6 +58,11 @@ class BacklinkPackage extends Model
             'status' => SiteStatus::class,
             'sort_order' => 'integer',
         ];
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
     }
 
     public function cartItems(): HasMany

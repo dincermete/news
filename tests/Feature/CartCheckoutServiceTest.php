@@ -52,12 +52,13 @@ class CartCheckoutServiceTest extends TestCase
         $this->assertInstanceOf(OrderGroup::class, $group);
         $this->assertCount(2, $group->orders);
         $this->assertSame('300.00', $group->subtotal);
-        $this->assertSame('300.00', $group->total);
+        $this->assertSame('60.00', $group->vat_amount);
+        $this->assertSame('360.00', $group->total);
         $this->assertSame(CartStatus::Converted, $cart->fresh()->status);
         $this->assertSame(2, Order::query()->where('order_group_id', $group->id)->count());
     }
 
-    public function test_checkout_succeeds_without_billing_profile(): void
+    public function test_checkout_can_persist_null_billing_profile_at_service_level(): void
     {
         $user = User::factory()->create();
         $cart = Cart::factory()->create(['user_id' => $user->id, 'status' => CartStatus::Active]);
@@ -75,6 +76,8 @@ class CartCheckoutServiceTest extends TestCase
         $this->assertInstanceOf(OrderGroup::class, $group);
         $this->assertSame($user->id, $group->user_id);
         $this->assertNull($group->billing_profile_id);
+        $this->assertSame('20.00', $group->vat_amount);
+        $this->assertSame('120.00', $group->total);
         $this->assertCount(1, $group->orders);
     }
 
@@ -102,10 +105,11 @@ class CartCheckoutServiceTest extends TestCase
 
         $group = app(CartCheckoutService::class)->checkout($cart, $billing);
 
-        // Highest matching tier is 500 → 10% = 60
+        // Highest matching tier is 500 → 10% = 60; VAT 20% of 540 = 108
         $this->assertSame('600.00', $group->subtotal);
         $this->assertSame('60.00', $group->discount_tier_amount);
-        $this->assertSame('540.00', $group->total);
+        $this->assertSame('108.00', $group->vat_amount);
+        $this->assertSame('648.00', $group->total);
     }
 
     public function test_checkout_applies_tier_and_coupon_together(): void
@@ -133,11 +137,12 @@ class CartCheckoutServiceTest extends TestCase
 
         $group = app(CartCheckoutService::class)->checkout($cart, $billing, 'EXTRA5');
 
-        // Tier 10% of 200 = 20, coupon 5% of 200 = 10, total = 170
+        // Tier 10% of 200 = 20, coupon 5% of 200 = 10, net = 170, VAT 20% = 34, total = 204
         $this->assertSame('200.00', $group->subtotal);
         $this->assertSame('20.00', $group->discount_tier_amount);
         $this->assertSame('10.00', $group->coupon_discount_amount);
-        $this->assertSame('170.00', $group->total);
+        $this->assertSame('34.00', $group->vat_amount);
+        $this->assertSame('204.00', $group->total);
 
         $this->assertDatabaseHas(CouponRedemption::class, [
             'order_group_id' => $group->id,

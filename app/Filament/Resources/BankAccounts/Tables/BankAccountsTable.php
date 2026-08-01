@@ -2,7 +2,8 @@
 
 namespace App\Filament\Resources\BankAccounts\Tables;
 
-use Filament\Actions\BulkActionGroup;
+use App\Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
@@ -23,9 +24,15 @@ class BankAccountsTable
                 TextColumn::make('sort_order')->label('Sıra')->sortable(),
             ])
             ->defaultSort('sort_order')
-            ->recordActions([EditAction::make()])
+            ->recordActions([
+                EditAction::make(),
+                DeleteAction::make(),
+            ])
+            ->recordAction('edit')
             ->toolbarActions([
-                BulkActionGroup::make([DeleteBulkAction::make()]),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
             ]);
     }
 }

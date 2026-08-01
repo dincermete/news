@@ -32,7 +32,15 @@ return new class extends Migration
             DB::table('site_bundles')->where('id', $row->id)->update(['slug' => $slug]);
         }
 
-        DB::statement('ALTER TABLE site_bundles MODIFY slug VARCHAR(255) NOT NULL');
+        $driver = Schema::getConnection()->getDriverName();
+
+        if ($driver === 'mysql') {
+            DB::statement('ALTER TABLE site_bundles MODIFY slug VARCHAR(255) NOT NULL');
+        } else {
+            Schema::table('site_bundles', function (Blueprint $table) {
+                $table->string('slug')->nullable(false)->change();
+            });
+        }
 
         Schema::table('site_bundles', function (Blueprint $table) {
             $table->unique('slug');

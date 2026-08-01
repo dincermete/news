@@ -27,9 +27,15 @@
         </button>
     </div>
 
-    <form method="post" action="{{ route('cart.update-content', $item) }}" enctype="multipart/form-data" class="mt-4 space-y-3">
+    <form method="post" action="{{ $updateUrl ?? route('cart.update-content', $item) }}" enctype="multipart/form-data" class="mt-4 space-y-3">
         @csrf
-        @method('PATCH')
+        @method($updateMethod ?? 'PATCH')
+
+        @if (! empty($pricingLocked))
+            <p class="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                Ödeme tamamlandığı için ek makale yazdır ücreti yansıtılmaz. Ücretli yazım için sepet aşamasında paket seçmeniz gerekir.
+            </p>
+        @endif
 
         <div class="space-y-3" x-show="tab === 'file'" x-cloak>
             <input type="hidden" name="content_mode" value="file_upload" :disabled="tab !== 'file'">

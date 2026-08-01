@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\Site;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
@@ -129,14 +130,14 @@ final class SiteCatalogFilters
     }
 
     /**
-     * @param  Builder<\App\Models\Site>  $query
-     * @return Builder<\App\Models\Site>
+     * @param  Builder<Site>  $query
+     * @return Builder<Site>
      */
     public function apply(Builder $query): Builder
     {
         if ($this->q !== null) {
             $escaped = addcslashes($this->q, '%_\\');
-            $query->where('domain', 'like', "%{$escaped}%");
+            $query->where('sites.domain', 'like', "%{$escaped}%");
         }
 
         if ($this->kategori !== null) {
@@ -144,35 +145,35 @@ final class SiteCatalogFilters
         }
 
         if ($this->fiyatMin !== null) {
-            $query->where('price', '>=', $this->fiyatMin);
+            $query->where('promotional_listings.price', '>=', $this->fiyatMin);
         }
 
         if ($this->fiyatMax !== null) {
-            $query->where('price', '<=', $this->fiyatMax);
+            $query->where('promotional_listings.price', '<=', $this->fiyatMax);
         }
 
         if ($this->daMin !== null) {
-            $query->where('da_value', '>=', $this->daMin);
+            $query->where('sites.da_value', '>=', $this->daMin);
         }
 
         if ($this->daMax !== null) {
-            $query->where('da_value', '<=', $this->daMax);
+            $query->where('sites.da_value', '<=', $this->daMax);
         }
 
         if ($this->dofollowOnly) {
-            $query->where('is_dofollow', true);
+            $query->where('sites.is_dofollow', true);
         }
 
         if ($this->newsApprovedOnly) {
-            $query->where('is_news_approved', true);
+            $query->where('sites.is_news_approved', true);
         }
 
         return match ($this->sort) {
-            'price_desc' => $query->orderByDesc('price')->orderBy('id'),
-            'da_asc' => $query->orderBy('da_value')->orderBy('id'),
-            'da_desc' => $query->orderByDesc('da_value')->orderBy('id'),
-            'newest' => $query->orderByDesc('created_at')->orderByDesc('id'),
-            default => $query->orderBy('price')->orderBy('id'),
+            'price_desc' => $query->orderByDesc('promotional_listings.price')->orderBy('sites.id'),
+            'da_asc' => $query->orderBy('sites.da_value')->orderBy('sites.id'),
+            'da_desc' => $query->orderByDesc('sites.da_value')->orderBy('sites.id'),
+            'newest' => $query->orderByDesc('sites.created_at')->orderByDesc('sites.id'),
+            default => $query->orderBy('promotional_listings.price')->orderBy('sites.id'),
         };
     }
 

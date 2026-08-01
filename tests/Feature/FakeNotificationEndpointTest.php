@@ -26,11 +26,13 @@ class FakeNotificationEndpointTest extends TestCase
                 'display_interval_seconds',
                 'name',
                 'city',
+                'product',
             ]);
 
         $this->assertNotEmpty($response->json('message'));
         $this->assertNotEmpty($response->json('name'));
         $this->assertNotEmpty($response->json('city'));
+        $this->assertNotEmpty($response->json('product'));
         $this->assertGreaterThanOrEqual(5, $response->json('display_interval_seconds'));
         $this->assertStringContainsString($response->json('name'), $response->json('message'));
     }
@@ -39,6 +41,6 @@ class FakeNotificationEndpointTest extends TestCase
     {
         $this->getJson(route('api.fake-notification'))
             ->assertOk()
-            ->assertJsonStructure(['message', 'display_interval_seconds', 'name', 'city']);
+            ->assertJsonStructure(['message', 'display_interval_seconds', 'name', 'city', 'product']);
     }
 }

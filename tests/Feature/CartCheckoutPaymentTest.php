@@ -58,7 +58,8 @@ class CartCheckoutPaymentTest extends TestCase
 
         $this->assertNotNull($payment);
         $this->assertNull($payment->order_id);
-        $this->assertSame('245.00', $payment->amount);
+        // Net 250 + KDV 50 = 300; havale %2 → 294
+        $this->assertSame('294.00', $payment->amount);
         $this->assertSame(PaymentMethod::BankTransfer, $payment->method);
         $this->assertSame(PaymentStatus::Pending, $payment->status);
         $this->assertSame(2, $group->orders()->count());
@@ -100,7 +101,8 @@ class CartCheckoutPaymentTest extends TestCase
         ])->save();
 
         $status = 'success';
-        $totalAmount = '20000';
+        // Net 200 + KDV 40 = 240.00 TRY → PayTR kuruş: 24000
+        $totalAmount = '24000';
         $hash = base64_encode(hash_hmac(
             'sha256',
             $payment->paytr_merchant_oid.'test_salt'.$status.$totalAmount,

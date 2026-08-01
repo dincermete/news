@@ -7,7 +7,7 @@
         x-show="visible.length > 0"
     >
         <template x-for="item in visible" :key="item.id">
-            <div class="mx-auto flex max-w-6xl items-start justify-between gap-3 px-4 py-2 sm:px-6 lg:px-8">
+            <div class="mx-auto flex max-w-7xl items-start justify-between gap-3 px-4 py-2 sm:px-6 lg:px-8">
                 <div class="min-w-0">
                     <p class="font-semibold" x-text="item.title"></p>
                     <p class="mt-0.5 text-teal-50" x-text="item.body"></p>

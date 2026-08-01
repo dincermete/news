@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Account;
 
 use App\Http\Controllers\Controller;
+use App\Models\ArticleWordPackage;
 use App\Models\BillingProfile;
 use App\Models\Invoice;
 use App\Models\OrderGroup;
@@ -37,6 +38,7 @@ class AccountOrderController extends Controller
             'orders.seoPackage',
             'orders.seoPackageDurationOption',
             'orders.backlinkPackage',
+            'orders.articleWordPackage',
             'orders.publishedLink',
             'payments',
             'billingProfile',
@@ -49,11 +51,18 @@ class AccountOrderController extends Controller
             ->latest('id')
             ->get();
 
+        $wordPackages = ArticleWordPackage::query()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('word_count')
+            ->get();
+
         return view('account.order-show', [
             'meta' => $seo->forDefault(),
             'orderGroup' => $orderGroup,
             'invoice' => $invoice,
             'billingProfiles' => $billingProfiles,
+            'wordPackages' => $wordPackages,
         ]);
     }
 }

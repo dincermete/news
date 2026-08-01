@@ -4,7 +4,7 @@
     @include('partials.seo-meta', ['meta' => $meta])
 @endsection
 
-@section('mainClass', 'w-full flex-1')
+@section('mainClass', 'w-full flex-1 bg-gray-50')
 
 @php
     /** @var \App\Models\Site $site */
@@ -26,240 +26,322 @@
         ? (int) round((1 - ((float) $site->discount_price / (float) $site->price)) * 100)
         : null;
 
-    $chip ='inline-flex items-center rounded-[10px] border border-ink/5 bg-white px-3.5 py-2 text-sm font-medium text-ink shadow-soft';
-    $btnDark = 'group inline-flex items-center justify-center gap-x-3 rounded-2xl bg-gradient-to-b from-black to-[#363b3c] p-1 pe-5 text-sm font-medium text-white transition hover:scale-[1.02] active:scale-[0.98]';
-    $btnChip = 'inline-flex size-9 items-center justify-center rounded-xl';
-
-    // "Site Verileri" kartı: kısa özet + otorite verileri tek gridde birleşti.
-    // Yalnızca gerçekten "otorite skoru" olan DA/PA/News yeşil vurgulanır;
-    // diğerleri (Moz Rank, Majestic, trafik) normal ink tonunda kalır.
-    $num = fn (?float $value): string => $value !== null ? number_format($value, 0, ',', '.') : '—';
+    $num = fn (?float $value): ?string => $value !== null ? number_format($value, 0, ',', '.') : null;
 
     $dataCells = [
-        ['label' => 'Kategori', 'value' => $site->category?->name ?? 'Kategorisiz', 'type' => 'text'],
-        ['label' => 'Site Yaşı', 'value' => $site->age !== null ? $site->age.' yıl' : '—', 'type' => 'text'],
-        ['label' => 'DA', 'value' => $num($site->da_value !== null ? (float) $site->da_value : null), 'type' => 'score', 'icon' => 'moz'],
-        ['label' => 'PA', 'value' => $num($site->pa_value !== null ? (float) $site->pa_value : null), 'type' => 'score', 'icon' => 'moz'],
-        ['label' => 'News Kaydı', 'value' => $site->is_news_approved ? 'Var' : 'Yok', 'type' => $site->is_news_approved ? 'score' : 'muted', 'icon' => 'google'],
-        ['label' => 'Link Tipi', 'value' => null, 'type' => 'linktype'],
-        ['label' => 'Moz Rank', 'value' => $num($site->moz_rank_value !== null ? (float) $site->moz_rank_value : null), 'type' => 'text', 'icon' => 'moz'],
-        ['label' => 'Majestic CF', 'value' => $num($site->majestic_cf_value !== null ? (float) $site->majestic_cf_value : null), 'type' => 'text', 'icon' => 'majestic'],
-        ['label' => 'Majestic TF', 'value' => $num($site->majestic_tf_value !== null ? (float) $site->majestic_tf_value : null), 'type' => 'text', 'icon' => 'majestic'],
-        ['label' => 'Aylık Trafik', 'value' => $num($site->monthly_traffic_value !== null ? (float) $site->monthly_traffic_value : null), 'type' => 'text', 'icon' => 'google'],
+        ['label' => 'Kategori', 'value' => $site->category?->name ?? 'Kategorisiz', 'icon' => null, 'featured' => false],
+        ['label' => 'Google Index', 'value' => $site->is_google_indexed ? 'Var' : 'Yok', 'icon' => 'google', 'featured' => false],
+        ['label' => 'Google News', 'value' => $site->is_news_approved ? 'Var' : 'Yok', 'icon' => 'google', 'featured' => false],
+        ['label' => 'DA', 'value' => $num($site->da_value !== null ? (float) $site->da_value : null), 'icon' => 'moz', 'featured' => true],
+        ['label' => 'PA', 'value' => $num($site->pa_value !== null ? (float) $site->pa_value : null), 'icon' => 'moz', 'featured' => true],
+        ['label' => 'Ahrefs DR', 'value' => $num($site->ahrefs_dr_value !== null ? (float) $site->ahrefs_dr_value : null), 'icon' => 'ahrefs', 'featured' => true],
+        ['label' => 'Semrush AS', 'value' => $num($site->semrush_authority_score_value !== null ? (float) $site->semrush_authority_score_value : null), 'icon' => 'semrush', 'featured' => false],
+        ['label' => 'Site Yaşı', 'value' => $site->age !== null ? $site->age.' yıl' : null, 'icon' => null, 'featured' => false],
+        ['label' => 'Link Tipi', 'value' => $site->is_dofollow ? 'Dofollow' : 'Nofollow', 'icon' => null, 'featured' => false],
+        ['label' => 'Aylık Trafik', 'value' => $num($site->monthly_traffic_value !== null ? (float) $site->monthly_traffic_value : null), 'icon' => 'google', 'featured' => false],
+        ['label' => 'Moz Rank', 'value' => $num($site->moz_rank_value !== null ? (float) $site->moz_rank_value : null), 'icon' => 'moz', 'featured' => false],
+        ['label' => 'Majestic CF', 'value' => $num($site->majestic_cf_value !== null ? (float) $site->majestic_cf_value : null), 'icon' => 'majestic', 'featured' => false],
+        ['label' => 'Majestic TF', 'value' => $num($site->majestic_tf_value !== null ? (float) $site->majestic_tf_value : null), 'icon' => 'majestic', 'featured' => false],
+        ['label' => 'Backlink', 'value' => $num($site->backlinks_value !== null ? (float) $site->backlinks_value : null), 'icon' => 'ahrefs', 'featured' => false],
+        ['label' => 'Link Çıkışı', 'value' => $site->max_link_count !== null ? (string) $site->max_link_count : null, 'icon' => null, 'featured' => false],
+        ['label' => 'Spam Score', 'value' => $num($site->spam_score_value !== null ? (float) $site->spam_score_value : null), 'icon' => 'moz', 'featured' => false],
+        ['label' => 'Ahrefs Kelime', 'value' => $num($site->ahrefs_keywords_value !== null ? (float) $site->ahrefs_keywords_value : null), 'icon' => 'ahrefs', 'featured' => false],
     ];
-    $dataCellRows = collect($dataCells)->chunk(3);
 
-    $shortDescription = $site->description
-        ? \Illuminate\Support\Str::limit($site->description, 140)
-        : null;
+    $metaFacts = collect([
+        $site->is_news_approved ? 'News Onaylı' : null,
+        $site->age !== null ? $site->age.' yıllık' : null,
+    ])->filter()->merge($site->labels->pluck('name'))->values();
+
+    $shortDescription = $site->short_description
+        ?: ($site->description ? \Illuminate\Support\Str::limit(trim(preg_replace('/\s+/', ' ', strip_tags($site->description)) ?? ''), 140) : null);
+
+    $productDeliveryDetails = filled($site->delivery_details)
+        ? (string) $site->delivery_details
+        : (filled($listing?->delivery_details) ? (string) $listing->delivery_details : null);
+
+    if (filled($productDeliveryDetails) && trim(strip_tags($productDeliveryDetails)) === '') {
+        $productDeliveryDetails = null;
+    }
+
+    $deliveryDetails = $productDeliveryDetails
+        ?? site_setting()->defaultDeliveryDetails();
 
     $tabs = [
         ['key' => 'aciklama', 'label' => 'Açıklamalar'],
-        ['key' => 'teslimat', 'label' => 'Teslimat Detayları'],
+        ...($deliveryDetails !== null ? [['key' => 'teslimat', 'label' => 'Teslimat Detayları']] : []),
         ['key' => 'yorumlar', 'label' => 'Kullanıcı Yorumları'],
         ['key' => 'soru-cevap', 'label' => 'Kullanıcı Soruları & Yanıtları'],
     ];
+
+    $ctaWhatsappColor = filled($site->cta_whatsapp_color) ? (string) $site->cta_whatsapp_color : '#25D366';
+
+    $card = 'min-w-0 overflow-hidden rounded-xl border border-gray-200 bg-white';
+    $ctaBase = 'inline-flex w-full items-center justify-center gap-x-2 rounded-xl px-4 py-3.5 text-sm font-semibold text-white transition hover:brightness-110 active:scale-[0.99]';
+    $ctaCart = $ctaBase.' bg-black hover:bg-gray-900';
+    $ctaBuy = $ctaBase.' bg-accent-600 hover:bg-accent-700';
+    $outlineBtn = 'inline-flex w-full items-center justify-center gap-x-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm font-medium text-gray-900 transition hover:border-gray-300 hover:bg-gray-50';
+    $linkAccent = 'text-black transition hover:text-gray-700';
 @endphp
 
 @section('content')
-    {{-- ================= BAŞLIK: sadece breadcrumb + ürün adı ================= --}}
-    <section class="mx-auto max-w-6xl px-4 pt-8 sm:px-6 lg:px-8" data-reveal-group>
-        <nav class="flex items-center gap-x-1.5 text-xs text-ink-3" aria-label="Konum" data-reveal>
-            <a href="{{ route('home') }}" class="transition hover:text-ink">Anasayfa</a>
+    <section class="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8" data-reveal-group>
+        <nav class="flex items-center gap-x-1.5 text-xs text-gray-400" aria-label="Konum" data-reveal>
+            <a href="{{ route('home') }}" class="transition hover:text-gray-900">Anasayfa</a>
             <svg class="size-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
-            <a href="{{ route('sites.index') }}" class="transition hover:text-ink">Siteler</a>
+            <a href="{{ route('sites.index') }}" class="transition hover:text-gray-900">Siteler</a>
             <svg class="size-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
-            <span class="truncate text-ink-2">{{ $site->domain }}</span>
+            <span class="truncate text-gray-500">{{ $site->domain }}</span>
         </nav>
-
     </section>
 
-    {{-- ================= İÇERİK: kimlik/veriler/detaylar solda, satın alma sağda ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-        <div class="grid gap-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-start" data-reveal-group>
-            <div class="space-y-6">
-                {{-- Site kimliği: logo, ad, kategori, rozetler --}}
-                <div class="rounded-[20px] border border-ink/10 bg-white p-5" data-reveal>
-                    <div class="flex items-center gap-x-4">
-                        <x-site-logo :site="$site" :height="52" class="shrink-0 rounded-2xl" />
-                        <div class="min-w-0">
-                            <h1 class="truncate font-display text-3xl font-medium leading-tight text-ink sm:text-4xl">{{ $site->domain }}</h1>
-                            <p class="mt-1 text-sm text-ink-2">{{ $site->category?->name ?? 'Kategorisiz' }}</p>
+    <section class="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <div class="grid min-w-0 gap-5 sm:gap-6 lg:grid-cols-[1.75fr_.85fr] lg:items-start" data-reveal-group>
+            <div class="contents lg:flex lg:min-w-0 lg:flex-col lg:gap-5">
+                {{-- 1. Site kimliği --}}
+                <div class="{{ $card }} p-5 sm:p-6" style="order: 1" data-reveal>
+                    <div class="flex items-start gap-3 sm:items-center sm:gap-x-4">
+                        <x-site-logo :site="$site" :height="40" class="shrink-0 rounded-lg" />
+                        <div class="min-w-0 flex-1">
+                            <h1 class="break-words font-display text-xl font-medium leading-tight text-gray-900 sm:truncate sm:text-3xl lg:text-4xl">{{ $site->domain }}</h1>
+                            <p class="mt-1 text-sm text-gray-500">{{ $site->category?->name ?? 'Kategorisiz' }}</p>
                         </div>
+                        <x-visit-site-button :site="$site" class="shrink-0" />
+                    </div>
+
+                    <div class="mt-4">
+                        @if ($site->is_dofollow)
+                            <span class="inline-flex items-center gap-x-1.5 rounded-lg bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-700">
+                                <span class="size-1.5 rounded-full bg-gray-500"></span>
+                                Dofollow
+                            </span>
+                        @else
+                            <span class="inline-flex items-center rounded-lg bg-gray-50 px-3 py-1.5 text-xs font-semibold text-gray-500">Nofollow</span>
+                        @endif
                     </div>
 
                     @if ($shortDescription)
-                        <p class="mt-4 max-w-2xl text-sm leading-relaxed text-ink-2">{{ $shortDescription }}</p>
+                        <p class="mt-4 max-w-2xl text-sm leading-relaxed text-gray-500">{{ $shortDescription }}</p>
                     @endif
 
-                    <div class="mt-5 flex flex-wrap items-center gap-2">
-                        @if ($site->is_dofollow)
-                            <span class="inline-flex items-center gap-x-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-700">
-                                <span class="size-1.5 rounded-full bg-emerald-500"></span> Dofollow
-                            </span>
-                        @else
-                            <span class="inline-flex items-center rounded-full bg-ink/5 px-3 py-1.5 text-xs font-semibold text-ink-3">Nofollow</span>
-                        @endif
-                        @if ($site->is_news_approved)
-                            <span class="inline-flex items-center gap-x-1.5 rounded-full bg-accent-100 px-3 py-1.5 text-xs font-semibold text-accent-700">
-                                <span class="size-1.5 rounded-full bg-accent-500"></span> News Onaylı
-                            </span>
-                        @endif
-                        @if ($site->age !== null)
-                            <span class="inline-flex items-center rounded-full bg-ink/5 px-3 py-1.5 text-xs font-semibold text-ink-2">{{ $site->age }} yıllık</span>
-                        @endif
-                        @foreach ($site->labels as $label)
-                            <span class="inline-flex items-center rounded-full bg-ink/5 px-3 py-1.5 text-xs font-semibold text-ink-2">{{ $label->name }}</span>
-                        @endforeach
-                    </div>
+                    @if ($metaFacts->isNotEmpty())
+                        <ul class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-gray-400">
+                            @foreach ($metaFacts as $fact)
+                                <li class="inline-flex items-center gap-x-1.5">
+                                    <svg class="size-3.5 shrink-0 text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+                                    {{ $fact }}
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
                 </div>
 
-                {{-- Site Verileri + Otorite Verileri --}}
-                <div class="rounded-[20px] border border-ink/10 bg-white" data-reveal>
-                    <div class="px-5 py-4">
-                        <p class="font-display text-base font-semibold text-ink">Site Verileri</p>
+                {{-- 3. Site Verileri --}}
+                <div class="{{ $card }}" style="order: 3" data-reveal>
+                    <div class="border-b border-gray-200 px-5 py-4 sm:px-6">
+                        <p class="font-display text-base font-semibold text-gray-900">Site Verileri</p>
                     </div>
 
-                    <div class="divide-y divide-ink/10 border-t border-ink/10">
-                        @foreach ($dataCellRows as $row)
-                            @php $rowCols = min(3, $row->count()); @endphp
+                    <div class="grid grid-cols-2 gap-3 p-5 sm:grid-cols-3 sm:gap-3 sm:p-6">
+                        @foreach ($dataCells as $cell)
+                            @php
+                                $isEmpty = $cell['value'] === null;
+                                $isFeatured = ! empty($cell['featured']);
+                            @endphp
                             <div @class([
-                                'grid divide-x divide-ink/10',
-                                'grid-cols-1' => $rowCols === 1,
-                                'grid-cols-2' => $rowCols === 2,
-                                'grid-cols-2 sm:grid-cols-3' => $rowCols === 3,
+                                'rounded-lg p-3',
+                                'opacity-50' => $isEmpty,
+                                'bg-gray-100' => $isFeatured,
+                                'bg-gray-50' => ! $isFeatured,
                             ])>
-                                @foreach ($row as $cell)
-                                    <div class="px-5 py-4">
-                                        <p class="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-ink-3">
-                                            @if (! empty($cell['icon']))
-                                                <x-metric-icon :source="$cell['icon']" />
-                                            @endif
-                                            {{ $cell['label'] }}
-                                        </p>
-                                        @if ($cell['type'] === 'linktype')
-                                            <p class="mt-1.5">
-                                                @if ($site->is_dofollow)
-                                                    <span class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-                                                        <svg class="size-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
-                                                        Dofollow
-                                                    </span>
-                                                @else
-                                                    <span class="inline-flex items-center rounded-full bg-ink/5 px-2.5 py-1 text-xs font-semibold text-ink-3">Nofollow</span>
-                                                @endif
-                                            </p>
-                                        @else
-                                            <p @class([
-                                                'mt-1 truncate text-base font-bold',
-                                                'text-emerald-600' => $cell['type'] === 'score',
-                                                'text-ink' => $cell['type'] === 'text',
-                                                'text-ink-3' => $cell['type'] === 'muted',
-                                            ])>{{ $cell['value'] }}</p>
-                                        @endif
-                                    </div>
-                                @endforeach
+                                <p @class([
+                                    'truncate text-xl font-medium',
+                                    'text-black' => $isFeatured,
+                                    'text-gray-900' => ! $isFeatured,
+                                ])>{{ $cell['value'] ?? '—' }}</p>
+                                <p @class([
+                                    'mt-1 flex items-center gap-1 text-xs',
+                                    'text-black' => $isFeatured,
+                                    'text-gray-400' => ! $isFeatured,
+                                ])>
+                                    @if (! empty($cell['icon']))
+                                        <x-metric-icon :source="$cell['icon']" class="opacity-50" />
+                                    @endif
+                                    {{ $cell['label'] }}
+                                </p>
                             </div>
                         @endforeach
                     </div>
                 </div>
 
-                {{-- Detay sekmeleri --}}
-                <div class="rounded-[20px] border border-ink/10 bg-white" x-data="{ tab: 'aciklama' }" data-reveal>
-                    <div class="no-scrollbar flex gap-1 overflow-x-auto border-b border-ink/10 px-2 pt-2">
+                {{-- 4. Detay sekmeleri --}}
+                <div class="{{ $card }}" style="order: 4" x-data="{ tab: window.location.hash === '#yorumlar' ? 'yorumlar' : 'aciklama' }" data-reveal>
+                    <div class="no-scrollbar flex gap-1 overflow-x-auto border-b border-gray-200 px-2 pt-2">
                         @foreach ($tabs as $t)
                             <button
                                 type="button"
                                 @click="tab = '{{ $t['key'] }}'"
-                                :class="tab === '{{ $t['key'] }}' ? 'border-ink text-ink' : 'border-transparent text-ink-3 hover:text-ink-2'"
-                                class="shrink-0 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-semibold transition"
+                                :class="tab === '{{ $t['key'] }}' ? 'border-black text-gray-900' : 'border-transparent text-gray-400 hover:text-gray-500'"
+                                class="shrink-0 whitespace-nowrap border-b-2 px-3 py-3 text-xs font-semibold transition sm:px-4 sm:text-sm"
                             >{{ $t['label'] }}</button>
                         @endforeach
                     </div>
 
-                    <div class="p-6">
-                        {{-- Açıklamalar --}}
+                    <div class="p-5 sm:p-6">
                         <div x-show="tab === 'aciklama'">
-                            @if ($site->description)
-                                <p class="text-[15px] leading-relaxed text-ink-2">{{ $site->description }}</p>
+                            @if (filled($site->description))
+                                <div class="prose prose-sm max-w-none prose-headings:text-gray-900 prose-p:text-gray-500 prose-a:text-black prose-strong:text-gray-900">
+                                    {!! $site->description !!}
+                                </div>
                             @else
-                                <p class="py-6 text-center text-sm text-ink-2">Bu site için henüz açıklama eklenmedi.</p>
+                                <p class="py-6 text-center text-sm text-gray-400">Bu site için henüz açıklama eklenmedi.</p>
                             @endif
                         </div>
 
-                        {{-- Teslimat Detayları --}}
-                        <div x-show="tab === 'teslimat'" x-cloak>
-                            <div class="grid grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-3">
-                                <div>
-                                    <p class="text-[11px] font-semibold uppercase tracking-wide text-ink-3">Max Link Çıkışı</p>
-                                    <p class="mt-1 text-base font-bold text-ink">{{ $site->max_link_count !== null ? $site->max_link_count : '—' }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-[11px] font-semibold uppercase tracking-wide text-ink-3">Tahmini Teslimat</p>
-                                    <p class="mt-1 text-base font-bold text-ink">{{ $site->estimated_delivery ?: '—' }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-[11px] font-semibold uppercase tracking-wide text-ink-3">Günlük Kapasite</p>
-                                    <p class="mt-1 text-base font-bold text-ink">{{ $site->daily_capacity !== null ? $site->daily_capacity : '—' }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-[11px] font-semibold uppercase tracking-wide text-ink-3">Haftalık Kapasite</p>
-                                    <p class="mt-1 text-base font-bold text-ink">{{ $site->weekly_capacity !== null ? $site->weekly_capacity : '—' }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-[11px] font-semibold uppercase tracking-wide text-ink-3">Link Garantisi</p>
-                                    <p class="mt-1 flex items-center gap-1.5 text-base font-bold text-ink">
-                                        6 ay
-                                        <svg class="size-4 text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
-                                    </p>
+                        @if ($deliveryDetails !== null)
+                            <div x-show="tab === 'teslimat'" x-cloak>
+                                <div class="prose prose-sm max-w-none prose-headings:text-gray-900 prose-p:text-gray-500 prose-a:text-black prose-strong:text-gray-900">
+                                    {!! $deliveryDetails !!}
                                 </div>
                             </div>
-                        </div>
+                        @endif
 
-                        {{-- Kullanıcı Yorumları --}}
-                        <div x-show="tab === 'yorumlar'" x-cloak>
-                            <p class="py-6 text-center text-sm text-ink-2">Bu site için henüz kullanıcı yorumu bulunmuyor.</p>
-                        </div>
-
-                        {{-- Kullanıcı Soruları & Yanıtları --}}
-                        <div x-show="tab === 'soru-cevap'" x-cloak>
-                            <div class="grid gap-6 lg:grid-cols-2">
-                                <div class="rounded-[20px] border border-ink/10">
-                                    <div class="border-b border-ink/10 px-5 py-4">
-                                        <h3 class="font-display text-base font-semibold text-ink">Sorular &amp; yanıtlar</h3>
+                        <div x-show="tab === 'yorumlar'" x-cloak id="yorumlar">
+                            <div class="grid gap-5 lg:grid-cols-2 lg:gap-6">
+                                <div class="overflow-hidden rounded-xl border border-gray-200">
+                                    <div class="border-b border-gray-200 px-5 py-4">
+                                        <h3 class="font-display text-base font-semibold text-gray-900">Kullanıcı yorumları</h3>
                                     </div>
-                                    <div class="max-h-[420px] divide-y divide-ink/5 overflow-y-auto">
-                                        @forelse ($questions as $item)
+                                    <div class="max-h-[420px] divide-y divide-gray-100 overflow-y-auto">
+                                        @forelse ($reviews as $review)
                                             <div class="px-5 py-4">
-                                                <p class="text-sm font-semibold text-ink">{{ $item->question }}</p>
-                                                <p class="mt-1.5 text-sm leading-relaxed text-ink-2">{{ $item->answer }}</p>
-                                                @if ($item->answered_at)
-                                                    <p class="mt-2 text-[11px] font-medium text-ink-3">{{ $item->answered_at->format('d.m.Y') }}</p>
+                                                <p class="text-sm font-semibold text-gray-900">{{ $review->name }}</p>
+                                                <p class="mt-1.5 text-sm leading-relaxed text-gray-500">{{ $review->message }}</p>
+                                                @if ($review->approved_at)
+                                                    <p class="mt-2 text-[11px] font-medium text-gray-400">{{ $review->approved_at->format('d.m.Y') }}</p>
                                                 @endif
                                             </div>
                                         @empty
-                                            <div class="px-5 py-10 text-center text-sm text-ink-2">Henüz yanıtlanmış soru yok.</div>
+                                            <div class="px-5 py-10 text-center text-sm text-gray-400">Henüz onaylanmış yorum yok.</div>
                                         @endforelse
                                     </div>
                                 </div>
 
-                                <div class="rounded-[20px] border border-ink/10">
-                                    <div class="border-b border-ink/10 px-5 py-4">
-                                        <h3 class="font-display text-base font-semibold text-ink">Soru sor</h3>
-                                        <p class="mt-1 text-sm text-ink-2">Yanıtlandıktan sonra herkese açık olarak yayınlanır.</p>
+                                <div class="overflow-hidden rounded-xl border border-gray-200">
+                                    <div class="border-b border-gray-200 px-5 py-4">
+                                        <h3 class="font-display text-base font-semibold text-gray-900">Yorum yaz</h3>
+                                        <p class="mt-1 text-sm text-gray-500">Üye olmadan gönderebilirsiniz. Onaylandıktan sonra yayınlanır.</p>
+                                    </div>
+
+                                    <form method="post" action="{{ route('sites.review', $site) }}" class="space-y-4 p-5">
+                                        @csrf
+                                        <div class="grid gap-4 sm:grid-cols-2">
+                                            <div class="sm:col-span-2">
+                                                <label for="review_name" class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-gray-400">Ad soyad</label>
+                                                <input
+                                                    id="review_name"
+                                                    type="text"
+                                                    name="name"
+                                                    value="{{ old('name', auth()->user()?->name) }}"
+                                                    required
+                                                    maxlength="120"
+                                                    class="block w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-black focus:ring-0"
+                                                >
+                                                @error('name')
+                                                    <p class="mt-1.5 text-xs text-brand-600">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+                                            <div>
+                                                <label for="review_email" class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-gray-400">E-posta</label>
+                                                <input
+                                                    id="review_email"
+                                                    type="email"
+                                                    name="email"
+                                                    value="{{ old('email', auth()->user()?->email) }}"
+                                                    required
+                                                    class="block w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-black focus:ring-0"
+                                                >
+                                                @error('email')
+                                                    <p class="mt-1.5 text-xs text-brand-600">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+                                            <div>
+                                                <label for="review_phone" class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-gray-400">Telefon</label>
+                                                <input
+                                                    id="review_phone"
+                                                    type="tel"
+                                                    name="phone"
+                                                    value="{{ old('phone') }}"
+                                                    required
+                                                    maxlength="40"
+                                                    class="block w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-black focus:ring-0"
+                                                >
+                                                @error('phone')
+                                                    <p class="mt-1.5 text-xs text-brand-600">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label for="review_message" class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-gray-400">Mesaj</label>
+                                            <textarea
+                                                id="review_message"
+                                                name="message"
+                                                rows="4"
+                                                required
+                                                minlength="10"
+                                                class="block w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-black focus:ring-0"
+                                            >{{ old('message') }}</textarea>
+                                            @error('message')
+                                                <p class="mt-1.5 text-xs text-brand-600">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+                                        <button type="submit" class="{{ $outlineBtn }} sm:w-auto sm:px-6">
+                                            Gönder
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div x-show="tab === 'soru-cevap'" x-cloak>
+                            <div class="grid gap-5 lg:grid-cols-2 lg:gap-6">
+                                <div class="overflow-hidden rounded-xl border border-gray-200">
+                                    <div class="border-b border-gray-200 px-5 py-4">
+                                        <h3 class="font-display text-base font-semibold text-gray-900">Sorular &amp; yanıtlar</h3>
+                                    </div>
+                                    <div class="max-h-[420px] divide-y divide-gray-100 overflow-y-auto">
+                                        @forelse ($questions as $item)
+                                            <div class="px-5 py-4">
+                                                <p class="text-sm font-semibold text-gray-900">{{ $item->question }}</p>
+                                                <p class="mt-1.5 text-sm leading-relaxed text-gray-500">{{ $item->answer }}</p>
+                                                @if ($item->answered_at)
+                                                    <p class="mt-2 text-[11px] font-medium text-gray-400">{{ $item->answered_at->format('d.m.Y') }}</p>
+                                                @endif
+                                            </div>
+                                        @empty
+                                            <div class="px-5 py-10 text-center text-sm text-gray-400">Henüz yanıtlanmış soru yok.</div>
+                                        @endforelse
+                                    </div>
+                                </div>
+
+                                <div class="overflow-hidden rounded-xl border border-gray-200">
+                                    <div class="border-b border-gray-200 px-5 py-4">
+                                        <h3 class="font-display text-base font-semibold text-gray-900">Soru sor</h3>
+                                        <p class="mt-1 text-sm text-gray-500">Yanıtlandıktan sonra herkese açık olarak yayınlanır.</p>
                                     </div>
 
                                     <form method="post" action="{{ route('sites.question', $site) }}" class="space-y-4 p-5">
                                         @csrf
                                         @guest
                                             <div>
-                                                <label for="guest_email" class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-ink-3">E-posta</label>
+                                                <label for="guest_email" class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-gray-400">E-posta</label>
                                                 <input
                                                     id="guest_email"
                                                     type="email"
                                                     name="guest_email"
                                                     value="{{ old('guest_email') }}"
                                                     required
-                                                    class="block w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm text-ink focus:border-ink/30 focus:ring-0"
+                                                    class="block w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-black focus:ring-0"
                                                 >
                                                 @error('guest_email')
                                                     <p class="mt-1.5 text-xs text-brand-600">{{ $message }}</p>
@@ -267,23 +349,20 @@
                                             </div>
                                         @endguest
                                         <div>
-                                            <label for="question" class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-ink-3">Sorunuz</label>
+                                            <label for="question" class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-gray-400">Sorunuz</label>
                                             <textarea
                                                 id="question"
                                                 name="question"
                                                 rows="4"
                                                 required
                                                 minlength="10"
-                                                class="block w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm text-ink focus:border-ink/30 focus:ring-0"
+                                                class="block w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-black focus:ring-0"
                                             >{{ old('question') }}</textarea>
                                             @error('question')
                                                 <p class="mt-1.5 text-xs text-brand-600">{{ $message }}</p>
                                             @enderror
                                         </div>
-                                        <button type="submit" class="{{ $btnDark }}">
-                                            <span class="{{ $btnChip }} bg-white/15 text-white">
-                                                <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.126A59.768 59.768 0 0 1 21.485 12 59.77 59.77 0 0 1 3.27 20.876L5.999 12Zm0 0h7.5"/></svg>
-                                            </span>
+                                        <button type="submit" class="{{ $outlineBtn }} sm:w-auto sm:px-6">
                                             Gönder
                                         </button>
                                     </form>
@@ -292,94 +371,122 @@
                         </div>
                     </div>
                 </div>
-
             </div>
 
-            <div class="space-y-6 lg:sticky lg:top-28">
-                {{-- Satın alma kartı --}}
-                <div class="rounded-2xl border border-ink/10 bg-white p-6" data-reveal>
-                    <div class="flex items-center justify-between">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-ink-3">Fiyat</p>
-                        @if ($hasDiscount)
-                            <span class="rounded-full bg-brand-100 px-2.5 py-1 text-[11px] font-bold text-brand-700">%{{ $discountPercent }} İNDİRİM</span>
-                        @endif
-                    </div>
+            {{-- Sağ kolon --}}
+            <div class="contents lg:sticky lg:top-28 lg:flex lg:min-w-0 lg:flex-col lg:gap-5">
+                {{-- 2. Satın alma --}}
+                <div class="{{ $card }} p-5 sm:p-6" style="order: 2" data-reveal>
                     @if ($hasDiscount)
-                        <p class="mt-1.5 flex items-baseline gap-x-2">
-                            <span class="font-display text-3xl font-semibold text-accent-600">{{ $money((float) $site->discount_price, $currency) }}</span>
-                            <span class="text-sm text-ink-3 line-through">{{ $money((float) $site->price, $currency) }}</span>
-                        </p>
-                    @else
-                        <p class="mt-1.5 font-display text-3xl font-semibold text-ink">{{ $money((float) $site->price, $currency) }}</p>
+                        <span class="mb-3 inline-flex rounded-lg bg-gray-100 px-2.5 py-1 text-[11px] font-semibold text-gray-900">%{{ $discountPercent }} indirim</span>
                     @endif
 
-                    <form method="post" action="{{ route('cart.add') }}" class="mt-5">
-                        @csrf
-                        <input type="hidden" name="product_type" value="site_article">
-                        <input type="hidden" name="site_id" value="{{ $site->id }}">
-                        @guest
-                            <button type="button" class="{{ $btnDark }} w-full" onclick="window.dispatchEvent(new CustomEvent('open-login-modal'))">
-                                <span class="{{ $btnChip }} bg-white/15 text-white">
-                                    <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                                </span>
-                                Sepete Ekle
-                            </button>
-                        @else
-                            <button type="submit" class="{{ $btnDark }} w-full">
-                                <span class="{{ $btnChip }} bg-white/15 text-white">
-                                    <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                                </span>
-                                Sepete Ekle
-                            </button>
-                        @endguest
-                    </form>
+                    @if ($hasDiscount)
+                        <p class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                            <span class="text-2xl font-semibold text-gray-900">{{ $money((float) $site->discount_price, $currency) }}</span>
+                            <span class="text-sm text-gray-400 line-through">{{ $money((float) $site->price, $currency) }}</span>
+                        </p>
+                    @else
+                        <p class="text-2xl font-semibold text-gray-900">{{ $money((float) $site->price, $currency) }}</p>
+                    @endif
 
-                    <div class="mt-2.5 grid grid-cols-2 gap-2">
+                    <div class="mt-5 space-y-2.5">
+                        <form method="post" action="{{ route('cart.add') }}">
+                            @csrf
+                            <input type="hidden" name="product_type" value="site_article">
+                            <input type="hidden" name="site_id" value="{{ $site->id }}">
+                            <input type="hidden" name="redirect" value="cart">
+                            @guest
+                                <button type="button" class="{{ $ctaCart }}" onclick="window.dispatchEvent(new CustomEvent('open-login-modal'))">
+                                    <svg class="size-5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"/></svg>
+                                    Sepete Ekle
+                                </button>
+                            @else
+                                <button type="submit" class="{{ $ctaCart }}">
+                                    <svg class="size-5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"/></svg>
+                                    Sepete Ekle
+                                </button>
+                            @endguest
+                        </form>
+
+                        <form method="post" action="{{ route('cart.add') }}">
+                            @csrf
+                            <input type="hidden" name="product_type" value="site_article">
+                            <input type="hidden" name="site_id" value="{{ $site->id }}">
+                            <input type="hidden" name="redirect" value="checkout">
+                            @guest
+                                <button type="button" class="{{ $ctaBuy }}" onclick="window.dispatchEvent(new CustomEvent('open-login-modal'))">
+                                    <svg class="size-5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg>
+                                    Hemen Satın Al
+                                </button>
+                            @else
+                                <button type="submit" class="{{ $ctaBuy }}">
+                                    <svg class="size-5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"/></svg>
+                                    Hemen Satın Al
+                                </button>
+                            @endguest
+                        </form>
+
+                        @if (filled($whatsappUrl))
+                            <a
+                                href="{{ $whatsappUrl }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="{{ $ctaBase }}"
+                                style="background-color: {{ $ctaWhatsappColor }}"
+                            >
+                                <svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+                                WhatsApp Sipariş Hattı
+                            </a>
+                        @endif
+                    </div>
+
+                    <div class="mt-3 grid grid-cols-2 gap-2">
                         <form method="post" action="{{ route('sites.favorite', $site) }}">
                             @csrf
-                            <button type="submit" class="flex w-full items-center justify-center gap-x-1.5 rounded-2xl border border-ink/10 bg-white px-3 py-3 text-sm font-medium text-ink transition hover:border-ink/25">
-                                <svg class="size-4 {{ $isFavorited ? 'text-brand-500' : 'text-ink-3' }}" viewBox="0 0 24 24" fill="{{ $isFavorited ? 'currentColor' : 'none' }}" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>
+                            <button type="submit" class="{{ $outlineBtn }}">
+                                <svg class="size-4 shrink-0 {{ $isFavorited ? 'text-gray-900' : 'text-gray-400' }}" viewBox="0 0 24 24" fill="{{ $isFavorited ? 'currentColor' : 'none' }}" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>
                                 {{ $isFavorited ? 'Favoride' : 'Favorile' }}
                             </button>
                         </form>
 
                         <button
                             type="button"
-                            class="flex w-full items-center justify-center gap-x-1.5 rounded-2xl border border-ink/10 bg-white px-3 py-3 text-sm font-medium text-ink transition hover:border-ink/25"
-                            data-share-url="{{ route('sites.show', $site->domain) }}"
+                            class="{{ $outlineBtn }}"
+                            data-share-url="{{ storefront_site_url($site) }}"
                             onclick="const btn=this; const url=btn.dataset.shareUrl; if (navigator.share) { navigator.share({title: document.title, url}); } else { navigator.clipboard.writeText(url); const label = btn.querySelector('[data-share-label]'); const original = label.textContent; label.textContent = 'Kopyalandı'; setTimeout(() => { label.textContent = original; }, 1500); }"
                         >
-                            <svg class="size-4 text-ink-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z"/></svg>
+                            <svg class="size-4 shrink-0 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z"/></svg>
                             <span data-share-label>Paylaş</span>
                         </button>
                     </div>
 
-                    <div class="mt-5 space-y-2.5 border-t border-ink/10 pt-5">
-                        <div class="flex items-center justify-between text-sm">
-                            <span class="text-ink-2">6 ay link garantisi</span>
-                            <svg class="size-4 text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
+                    <div class="mt-5 space-y-2 border-t border-gray-200 pt-5 text-sm text-gray-500">
+                        <div class="flex items-center justify-between gap-3">
+                            <span>6 ay link garantisi</span>
+                            <svg class="size-4 shrink-0 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
                         </div>
-                        <div class="flex items-center justify-between text-sm">
-                            <span class="text-ink-2">Favoriye eklendi</span>
-                            <span class="font-semibold text-ink">{{ $fmt($favoritesCount) }}</span>
+                        <div class="flex items-center justify-between gap-3">
+                            <span>Favoriye eklendi</span>
+                            <span class="shrink-0 text-gray-400">{{ $fmt($favoritesCount) }}</span>
                         </div>
-                        <div class="flex items-center justify-between text-sm">
-                            <span class="text-ink-2">Bugün görüntülenme</span>
-                            <span class="font-semibold text-ink">{{ $fmt($viewsToday) }}</span>
+                        <div class="flex items-center justify-between gap-3">
+                            <span>Bugün görüntülenme</span>
+                            <span class="shrink-0 text-gray-400">{{ $fmt($viewsToday) }}</span>
                         </div>
-                        <div class="flex items-center justify-between text-sm">
-                            <span class="text-ink-2">Toplam görüntülenme</span>
-                            <span class="font-semibold text-ink">{{ $fmt($viewsTotal) }}</span>
+                        <div class="flex items-center justify-between gap-3">
+                            <span>Toplam görüntülenme</span>
+                            <span class="shrink-0 text-gray-400">{{ $fmt($viewsTotal) }}</span>
                         </div>
                     </div>
                 </div>
 
-                {{-- En Çok Satanlar --}}
+                {{-- 5. En Çok Satanlar --}}
                 @if ($bestSellers->isNotEmpty())
-                    <div class="rounded-2xl border border-ink/10 bg-white p-6" data-reveal>
-                        <div class="flex items-center justify-between">
-                            <p class="text-xs font-semibold uppercase tracking-wide text-ink-3">En Çok Satanlar</p>
-                            <a href="{{ route('sites.index') }}" class="text-xs font-semibold text-ink-2 transition hover:text-ink">Tümü</a>
+                    <div class="{{ $card }} p-5 sm:p-6" style="order: 5" data-reveal>
+                        <div class="flex items-center justify-between gap-3">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-gray-400">En Çok Satanlar</p>
+                            <a href="{{ route('sites.index') }}" class="{{ $linkAccent }} shrink-0 text-xs font-semibold">Tümü</a>
                         </div>
                         <ul class="mt-3 space-y-1">
                             @foreach ($bestSellers as $bestSeller)
@@ -388,10 +495,10 @@
                                     $bsHasDiscount = $bestSeller->discount_price !== null && (float) $bestSeller->discount_price < (float) $bestSeller->price;
                                 @endphp
                                 <li>
-                                    <a href="{{ route('sites.show', $bestSeller->domain) }}" class="flex items-center gap-x-2.5 rounded-xl px-1.5 py-2 transition hover:bg-paper">
+                                    <a href="{{ storefront_site_url($bestSeller) }}" class="flex min-w-0 items-center gap-x-2.5 rounded-lg px-1.5 py-2 transition hover:bg-gray-50">
                                         <x-site-logo :site="$bestSeller" :height="20" class="shrink-0 rounded" />
-                                        <span class="min-w-0 flex-1 truncate text-sm font-medium text-ink">{{ $bestSeller->domain }}</span>
-                                        <span class="shrink-0 text-sm font-bold text-ink">{{ $money((float) ($bsHasDiscount ? $bestSeller->discount_price : $bestSeller->price), $bsCurrency) }}</span>
+                                        <span class="min-w-0 flex-1 truncate text-sm font-medium text-gray-900">{{ $bestSeller->domain }}</span>
+                                        <span class="shrink-0 text-sm font-medium tabular-nums text-gray-500">{{ $money((float) ($bsHasDiscount ? $bestSeller->discount_price : $bestSeller->price), $bsCurrency) }}</span>
                                     </a>
                                 </li>
                             @endforeach
@@ -402,19 +509,33 @@
         </div>
     </section>
 
-    <div class="mx-auto max-w-6xl px-4 pb-14 sm:px-6 lg:px-8">
-        {{-- ================= BENZER SİTELER ================= --}}
-        @if ($relatedSites->isNotEmpty())
+    <div class="mx-auto max-w-7xl px-4 pb-14 sm:px-6 lg:px-8">
+        @if ($relatedSites->isNotEmpty() || $recommendedSites->isNotEmpty())
             <section data-reveal-group>
-                <p><span class="{{ $chip }}">Benzer siteler</span></p>
-                <h2 class="mt-4 font-display text-2xl font-medium text-ink sm:text-[28px]" data-reveal>Aynı kategoride diğer siteler</h2>
-
-                <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                    @foreach ($relatedSites as $related)
+                <div class="grid gap-8 lg:grid-cols-2">
+                    @if ($relatedSites->isNotEmpty())
                         <div data-reveal>
-                            <x-site-card :site="$related" />
+                            <h2 class="font-display text-2xl font-medium text-gray-900 sm:text-[28px]">İlgili Ürünler</h2>
+                            <div class="mt-5 rounded-[20px] border border-ink/10 bg-white p-2 sm:p-3">
+                                <x-site-table-compact
+                                    :sites="$relatedSites"
+                                    :favoritedSiteIds="$favoritedSiteIds"
+                                />
+                            </div>
                         </div>
-                    @endforeach
+                    @endif
+
+                    @if ($recommendedSites->isNotEmpty())
+                        <div data-reveal>
+                            <h2 class="font-display text-2xl font-medium text-gray-900 sm:text-[28px]">Tavsiye Edilen Ürünler</h2>
+                            <div class="mt-5 rounded-[20px] border border-ink/10 bg-white p-2 sm:p-3">
+                                <x-site-table-compact
+                                    :sites="$recommendedSites"
+                                    :favoritedSiteIds="$favoritedSiteIds"
+                                />
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </section>
         @endif

@@ -25,9 +25,9 @@ class SiteResource extends Resource
 
     protected static ?string $navigationLabel = 'Siteler';
 
-    protected static ?string $modelLabel = 'Site';
+    protected static ?string $modelLabel = 'Kaynak site';
 
-    protected static ?string $pluralModelLabel = 'Siteler';
+    protected static ?string $pluralModelLabel = 'Kaynak siteler';
 
     protected static ?int $navigationSort = 1;
 
@@ -59,6 +59,6 @@ class SiteResource extends Resource
 
     public static function getGloballySearchableAttributes(): array
     {
-        return ['domain', 'description', 'category.name'];
+        return ['domain', 'description', 'short_description', 'category.name'];
     }
 }

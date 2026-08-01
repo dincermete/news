@@ -5,9 +5,29 @@ namespace App\Services;
 use App\Enums\BillingProfileType;
 use App\Models\BillingProfile;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class BillingProfileResolver
 {
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function resolveRequired(Request $request, array $data): BillingProfile
+    {
+        if (filled($data['billing_profile_id'] ?? null)) {
+            return $this->findExisting($request, (int) $data['billing_profile_id']);
+        }
+
+        if (blank($data['billing_type'] ?? null) || blank($data['tax_id'] ?? null)) {
+            throw ValidationException::withMessages([
+                'billing_type' => 'Fatura bilgileri zorunludur.',
+                'tax_id' => 'TCKN / VKN zorunludur.',
+            ]);
+        }
+
+        return $this->createFromData($request, $data);
+    }
+
     /**
      * Resolve a billing profile from request data, or return null when the
      * user submitted no billing information at all (billing is optional).
@@ -20,20 +40,8 @@ class BillingProfileResolver
             return $this->findExisting($request, (int) $data['billing_profile_id']);
         }
 
-        if (blank($data['billing_type'] ?? null) && blank($data['tax_id'] ?? null) && blank($data['address'] ?? null)) {
+        if (blank($data['billing_type'] ?? null) && blank($data['tax_id'] ?? null)) {
             return null;
-        }
-
-        return $this->createFromData($request, $data);
-    }
-
-    /**
-     * @param  array<string, mixed>  $data
-     */
-    public function resolveRequired(Request $request, array $data): BillingProfile
-    {
-        if (filled($data['billing_profile_id'] ?? null)) {
-            return $this->findExisting($request, (int) $data['billing_profile_id']);
         }
 
         return $this->createFromData($request, $data);
@@ -59,7 +67,7 @@ class BillingProfileResolver
             'type' => $type,
             'tax_id' => $data['tax_id'],
             'company_name' => $type === BillingProfileType::Corporate ? ($data['company_name'] ?? null) : null,
-            'address' => $data['address'],
+            'address' => filled($data['address'] ?? null) ? $data['address'] : null,
             'tax_office' => $type === BillingProfileType::Corporate ? ($data['tax_office'] ?? null) : null,
         ]);
     }

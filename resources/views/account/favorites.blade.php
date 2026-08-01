@@ -39,7 +39,7 @@
                             <div class="flex min-w-0 items-start gap-x-3">
                                 <x-site-logo :site="$favorite->site" :height="32" class="mt-0.5 shrink-0 rounded-lg" />
                                 <div class="min-w-0">
-                                    <a href="{{ route('sites.show', $favorite->site->domain) }}" class="block truncate text-sm font-semibold text-ink transition hover:text-accent-700">
+                                    <a href="{{ storefront_site_url($favorite->site) }}" class="block truncate text-sm font-semibold text-ink transition hover:text-accent-700">
                                         {{ $favorite->site->domain }}
                                     </a>
                                     <p class="mt-0.5 truncate text-xs text-ink-3">{{ $favorite->site->category?->name }}</p>

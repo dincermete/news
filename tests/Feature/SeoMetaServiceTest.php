@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\SiteStatus;
 use App\Models\Page;
+use App\Models\PromotionalListing;
 use App\Models\Site;
 use App\Services\SeoMetaService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -24,7 +25,7 @@ class SeoMetaServiceTest extends TestCase
 
     public function test_for_site_uses_domain_and_description(): void
     {
-        $site = Site::factory()->create([
+        $site = Site::factory()->withoutListings()->create([
             'domain' => 'example-seo.test',
             'description' => 'Kaliteli backlink için örnek site açıklaması.',
             'status' => SiteStatus::Active,
@@ -35,6 +36,27 @@ class SeoMetaServiceTest extends TestCase
         $this->assertStringContainsString('example-seo.test', $meta['title']);
         $this->assertStringContainsString('Kaliteli backlink', $meta['description']);
         $this->assertStringContainsString('example-seo.test', (string) $meta['og_image']);
+    }
+
+    public function test_for_listing_prefers_meta_and_public_path(): void
+    {
+        $site = Site::factory()->withoutListings()->create([
+            'domain' => 'listing-seo.test',
+            'status' => SiteStatus::Active,
+        ]);
+        $listing = PromotionalListing::factory()->article()->for($site)->create([
+            'status' => SiteStatus::Active,
+            'price' => 100,
+            'public_path' => 'listing-seo-path',
+            'meta_title' => 'Özel Listing Başlık',
+            'meta_description' => 'Özel listing açıklama',
+        ]);
+
+        $meta = app(SeoMetaService::class)->forPromotionalListing($listing);
+
+        $this->assertSame('Özel Listing Başlık', $meta['title']);
+        $this->assertSame('Özel listing açıklama', $meta['description']);
+        $this->assertSame(url('/listing-seo-path'), $meta['og_url']);
     }
 
     public function test_for_page_prefers_meta_fields(): void

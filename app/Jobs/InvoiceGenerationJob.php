@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Models\BillingProfile;
 use App\Models\Invoice;
 use App\Models\Order;
+use App\Models\OrderGroup;
 use App\Models\Payment;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -60,6 +61,7 @@ class InvoiceGenerationJob implements ShouldQueue
             billingProfile: $billingProfile,
             orderId: $order->id,
             orderGroupId: null,
+            orderGroup: null,
             customerName: $order->user?->name,
             customerEmail: $order->user?->email,
         );
@@ -95,6 +97,7 @@ class InvoiceGenerationJob implements ShouldQueue
             billingProfile: $billingProfile,
             orderId: null,
             orderGroupId: $orderGroup->id,
+            orderGroup: $orderGroup,
             customerName: $orderGroup->user?->name,
             customerEmail: $orderGroup->user?->email,
         );
@@ -109,6 +112,7 @@ class InvoiceGenerationJob implements ShouldQueue
         ?BillingProfile $billingProfile,
         ?int $orderId,
         ?int $orderGroupId,
+        ?OrderGroup $orderGroup,
         ?string $customerName,
         ?string $customerEmail,
     ): void {
@@ -119,6 +123,7 @@ class InvoiceGenerationJob implements ShouldQueue
             'invoiceNumber' => $invoiceNumber,
             'orders' => $orders,
             'order' => $orders->first(),
+            'orderGroup' => $orderGroup,
             'payment' => $payment,
             'billingProfile' => $billingProfile,
             'customerName' => $customerName,

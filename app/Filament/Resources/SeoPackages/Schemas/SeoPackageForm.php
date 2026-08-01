@@ -4,13 +4,17 @@ namespace App\Filament\Resources\SeoPackages\Schemas;
 
 use App\Enums\Currency;
 use App\Enums\SiteStatus;
+use App\Filament\Schemas\StorefrontSeoForm;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Str;
 
 class SeoPackageForm
 {
@@ -23,6 +27,21 @@ class SeoPackageForm
                         ->label('Ad')
                         ->required()
                         ->maxLength(255)
+                        ->live(onBlur: true)
+                        ->afterStateUpdated(function (Set $set, Get $get, ?string $state, string $operation): void {
+                            if ($operation !== 'create' || filled($get('slug'))) {
+                                return;
+                            }
+
+                            $set('slug', Str::slug((string) $state));
+                        })
+                        ->columnSpan(1),
+                    TextInput::make('slug')
+                        ->label('Teknik slug')
+                        ->required()
+                        ->unique(ignoreRecord: true)
+                        ->maxLength(255)
+                        ->helperText('Teknik URL: /seo-paketleri/{slug}')
                         ->columnSpan(1),
                     TextInput::make('keyword_count')
                         ->label('Anahtar kelime sayısı')
@@ -69,6 +88,7 @@ class SeoPackageForm
                     )
                     ->addActionLabel('Özellik ekle')
                     ->columnSpanFull(),
+                ...StorefrontSeoForm::section(),
             ]);
     }
 }

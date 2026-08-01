@@ -13,7 +13,7 @@
             <x-site-logo :site="$site" :height="32" class="mt-0.5 shrink-0 rounded-lg" />
             <div class="min-w-0 flex-1">
                 <a
-                    href="{{ route('sites.show', $site->domain) }}"
+                    href="{{ storefront_site_url($site) }}"
                     class="block truncate text-sm font-semibold text-ink transition hover:text-accent-700 focus:outline-hidden"
                 >
                     {{ $site->domain }}

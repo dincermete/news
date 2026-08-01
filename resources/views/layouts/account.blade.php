@@ -31,7 +31,7 @@
 
     @if (auth()->check() && ! auth()->user()->hasVerifiedEmail())
         <div class="border-b border-amber-200 bg-amber-50">
-            <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-2.5 text-sm text-amber-900 sm:px-6 lg:px-8">
+            <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-2.5 text-sm text-amber-900 sm:px-6 lg:px-8">
                 <p>E-posta adresiniz doğrulanmadı. Lütfen gelen kutunuzu kontrol edin.</p>
                 <form method="post" action="{{ route('verification.send') }}">
                     @csrf
@@ -43,7 +43,7 @@
         </div>
     @endif
 
-    <div class="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
+    <div class="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
         <div class="grid gap-6 lg:grid-cols-4">
             <aside class="lg:col-span-1">
                 <div class="rounded-[20px] border border-ink/10 bg-paper p-5">

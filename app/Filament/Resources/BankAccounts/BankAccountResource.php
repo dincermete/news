@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\BankAccounts;
 
-use App\Filament\Resources\BankAccounts\Pages\CreateBankAccount;
-use App\Filament\Resources\BankAccounts\Pages\EditBankAccount;
 use App\Filament\Resources\BankAccounts\Pages\ListBankAccounts;
 use App\Filament\Resources\BankAccounts\Schemas\BankAccountForm;
 use App\Filament\Resources\BankAccounts\Tables\BankAccountsTable;
@@ -47,8 +45,6 @@ class BankAccountResource extends Resource
     {
         return [
             'index' => ListBankAccounts::route('/'),
-            'create' => CreateBankAccount::route('/create'),
-            'edit' => EditBankAccount::route('/{record}/edit'),
         ];
     }
 }

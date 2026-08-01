@@ -52,7 +52,6 @@ class AccountOrderShowTest extends TestCase
             ->post(route('account.orders.billing.store', $group), [
                 'billing_type' => 'individual',
                 'tax_id' => '12345678901',
-                'address' => 'Test mahallesi no:1',
             ])
             ->assertRedirect(route('account.orders.show', $group));
 
@@ -92,7 +91,6 @@ class AccountOrderShowTest extends TestCase
             ->post(route('account.orders.billing.store', $group), [
                 'billing_type' => 'individual',
                 'tax_id' => '98765432109',
-                'address' => 'Yeni adres',
             ])
             ->assertRedirect(route('account.orders.show', $group));
 

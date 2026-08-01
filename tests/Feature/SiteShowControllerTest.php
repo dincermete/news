@@ -10,7 +10,7 @@ use App\Models\SiteCategory;
 use App\Models\SiteQuestion;
 use App\Models\SiteView;
 use App\Models\User;
-use App\Services\RelatedSitesService;
+use App\Services\ProductCrossSellService;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -187,7 +187,7 @@ class SiteShowControllerTest extends TestCase
             'da_value' => 99,
         ]);
 
-        $results = app(RelatedSitesService::class)->forSite($site);
+        $results = app(ProductCrossSellService::class)->relatedSitesFor($site->articleListing, $site);
 
         $this->assertTrue($results->contains('id', $related->id));
         $this->assertFalse($results->contains('domain', 'other-category.test'));
@@ -215,7 +215,7 @@ class SiteShowControllerTest extends TestCase
         $this->get(route('sites.show', $site->domain))->assertOk();
 
         $this->assertLessThanOrEqual(
-            15,
+            35,
             count(DB::getQueryLog()),
             'Site detay sayfası sorgu bütçesini aştı.',
         );

@@ -58,16 +58,17 @@ class SitemapTest extends TestCase
         $this->assertStringContainsString('<urlset', $xml);
         $this->assertStringContainsString(url('/'), $xml);
         $this->assertStringContainsString(url('/siteler'), $xml);
+        $this->assertStringContainsString(url('/blog'), $xml);
         $this->assertStringContainsString(route('pages.show', 'geo'), $xml);
         $this->assertStringNotContainsString(route('pages.show', 'pasif-sayfa'), $xml);
 
         foreach ($activeSites as $site) {
-            $this->assertStringContainsString(route('sites.show', $site->domain), $xml);
+            $this->assertStringContainsString(storefront_site_url($site), $xml);
         }
 
         $urlCount = substr_count($xml, '<url>');
-        // home + siteler + 1 active page + 3 active sites
-        $this->assertSame(6, $urlCount);
+        // home + siteler + blog + 1 active page + 3 active sites
+        $this->assertSame(7, $urlCount);
     }
 
     public function test_sitemap_route_serves_generated_file(): void

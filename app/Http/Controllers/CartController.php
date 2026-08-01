@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\ContentMode;
 use App\Enums\ProductType;
 use App\Exceptions\InvalidCouponException;
+use App\Exceptions\MissingExchangeRateException;
 use App\Models\ArticleWordPackage;
 use App\Models\BacklinkPackage;
 use App\Models\CartItem;
@@ -34,7 +35,21 @@ class CartController extends Controller
         $cart = $this->carts->resolveOrCreateCart($request);
         $cart->load(['items.site', 'items.articleWordPackage', 'items.siteBundle', 'items.footerLinkDurationOption', 'items.seoPackage', 'items.seoPackageDurationOption', 'items.backlinkPackage']);
 
-        $summary = $this->carts->summarize($cart, $this->carts->rememberedCoupon());
+        try {
+            $summary = $this->carts->summarize($cart, $this->carts->rememberedCoupon());
+        } catch (MissingExchangeRateException $exception) {
+            $summary = [
+                'subtotal' => 0.0,
+                'tier' => null,
+                'tier_discount' => 0.0,
+                'coupon' => null,
+                'coupon_discount' => 0.0,
+                'coupon_code' => null,
+                'coupon_error' => $exception->getMessage(),
+                'total' => 0.0,
+            ];
+            session()->flash('error', $exception->getMessage());
+        }
 
         $wordPackages = ArticleWordPackage::query()
             ->where('is_active', true)
@@ -44,7 +59,7 @@ class CartController extends Controller
 
         return view('cart.index', [
             'meta' => $this->seo->forDefault(),
-            'cart' => $cart,
+            'cart' => $cart->fresh(['items.site', 'items.articleWordPackage', 'items.siteBundle', 'items.footerLinkDurationOption', 'items.seoPackage', 'items.seoPackageDurationOption', 'items.backlinkPackage']) ?? $cart,
             'summary' => $summary,
             'wordPackages' => $wordPackages,
         ]);
@@ -60,6 +75,7 @@ class CartController extends Controller
 
         $data = $request->validate([
             'product_type' => ['required', Rule::enum(ProductType::class)],
+            'redirect' => ['nullable', Rule::in(['cart', 'checkout'])],
             'site_id' => [
                 'nullable', 'integer', 'exists:sites,id',
                 Rule::requiredIf(fn (): bool => in_array($request->input('product_type'), [
@@ -107,45 +123,57 @@ class CartController extends Controller
 
         $cart = $this->carts->resolveOrCreateCart($request);
 
-        match ($productType) {
-            ProductType::SiteArticle => $this->carts->addSiteArticle(
-                $cart,
-                Site::query()->findOrFail($data['site_id']),
-            ),
-            ProductType::PressRelease => $this->carts->addPressRelease(
-                $cart,
-                Site::query()->findOrFail($data['site_id']),
-            ),
-            ProductType::Bundle => $this->carts->addBundle(
-                $cart,
-                SiteBundle::query()->findOrFail($data['site_bundle_id']),
-            ),
-            ProductType::FooterLink => $this->carts->addFooterLink(
-                $cart,
-                Site::query()->findOrFail($data['site_id']),
-                FooterLinkDurationOption::query()->findOrFail($data['footer_link_duration_option_id']),
-            ),
-            ProductType::SeoPackage => $this->carts->addSeoPackage(
-                $cart,
-                SeoPackage::query()->findOrFail($data['seo_package_id']),
-                SeoPackageDurationOption::query()->findOrFail($data['seo_package_duration_option_id']),
-            ),
-            ProductType::BacklinkPackage => $this->carts->addBacklinkPackage(
-                $cart,
-                BacklinkPackage::query()->findOrFail($data['backlink_package_id']),
-            ),
-            ProductType::Balance => $this->carts->addWalletTopup(
-                $cart,
-                filled($data['wallet_topup_package_id'] ?? null)
-                    ? WalletTopupPackage::query()->findOrFail($data['wallet_topup_package_id'])
-                    : null,
-                filled($data['custom_topup_amount'] ?? null) ? (float) $data['custom_topup_amount'] : null,
-            ),
-        };
+        try {
+            match ($productType) {
+                ProductType::SiteArticle => $this->carts->addSiteArticle(
+                    $cart,
+                    Site::query()->findOrFail($data['site_id']),
+                ),
+                ProductType::PressRelease => $this->carts->addPressRelease(
+                    $cart,
+                    Site::query()->findOrFail($data['site_id']),
+                ),
+                ProductType::Bundle => $this->carts->addBundle(
+                    $cart,
+                    SiteBundle::query()->findOrFail($data['site_bundle_id']),
+                ),
+                ProductType::FooterLink => $this->carts->addFooterLink(
+                    $cart,
+                    Site::query()->findOrFail($data['site_id']),
+                    FooterLinkDurationOption::query()->findOrFail($data['footer_link_duration_option_id']),
+                ),
+                ProductType::SeoPackage => $this->carts->addSeoPackage(
+                    $cart,
+                    SeoPackage::query()->findOrFail($data['seo_package_id']),
+                    SeoPackageDurationOption::query()->findOrFail($data['seo_package_duration_option_id']),
+                ),
+                ProductType::BacklinkPackage => $this->carts->addBacklinkPackage(
+                    $cart,
+                    BacklinkPackage::query()->findOrFail($data['backlink_package_id']),
+                ),
+                ProductType::Balance => $this->carts->addWalletTopup(
+                    $cart,
+                    filled($data['wallet_topup_package_id'] ?? null)
+                        ? WalletTopupPackage::query()->findOrFail($data['wallet_topup_package_id'])
+                        : null,
+                    filled($data['custom_topup_amount'] ?? null) ? (float) $data['custom_topup_amount'] : null,
+                ),
+            };
+        } catch (MissingExchangeRateException $exception) {
+            return redirect()
+                ->back()
+                ->with('error', $exception->getMessage());
+        }
+
+        $redirectTo = ($data['redirect'] ?? 'cart') === 'checkout'
+            ? 'checkout.show'
+            : 'cart.index';
 
         return redirect()
-            ->route('cart.index')
-            ->with('status', 'Ürün sepete eklendi.');
+            ->route($redirectTo)
+            ->with('status', $redirectTo === 'checkout.show'
+                ? 'Ürün sepete eklendi, ödeme adımına yönlendirildiniz.'
+                : 'Ürün sepete eklendi.');
     }
 
     public function removeItem(Request $request, CartItem $cartItem): RedirectResponse

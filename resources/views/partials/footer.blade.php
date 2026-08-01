@@ -20,6 +20,7 @@
 
     $companyLinks = [
         ['label' => 'Hakkımızda', 'url' => route('about.show')],
+        ['label' => 'Blog', 'url' => route('blog.index')],
         ['label' => 'İletişim', 'url' => route('contact.show')],
         ['label' => 'Destek', 'url' => auth()->check() ? route('account.support-tickets') : route('login')],
         ['label' => 'Siteniz Ekle', 'url' => route('account.site-submissions')],
@@ -87,93 +88,93 @@
 </style>
 
 <footer class="mt-auto px-2 pb-2 sm:px-3 sm:pb-3">
-    <div class="panel-footer overflow-hidden rounded-3xl text-white">
-        <div class="mx-auto w-full max-w-6xl px-5 pt-14 sm:px-8">
+    <div class="panel-footer overflow-hidden rounded-3xl bg-paper text-ink">
+        <div class="mx-auto w-full max-w-7xl px-5 pt-14 sm:px-8">
             {{-- Üst CTA --}}
             <div class="mx-auto max-w-2xl text-center">
                 <h2 class="font-display text-3xl font-semibold leading-tight sm:text-4xl">
                     Yayınlarınızı, sitelerinizi ve bütçenizi bir araya getirin
                 </h2>
                 <div class="mt-7 flex flex-wrap items-center justify-center gap-3">
-                    <a href="{{ route('register') }}" class="group inline-flex items-center gap-x-3 rounded-2xl bg-white p-1 pe-4 text-sm font-medium text-ink transition hover:scale-[1.03] active:scale-[0.98]">
+                    <a href="{{ route('register') }}" class="group inline-flex items-center gap-x-3 rounded-2xl bg-white p-1 pe-4 text-sm font-medium text-ink shadow-soft transition hover:scale-[1.03] active:scale-[0.98]">
                         <span class="inline-flex size-8 items-center justify-center rounded-xl bg-ink text-white">
                             <svg class="size-3.5 transition group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
                         </span>
                         Hemen Başla
                     </a>
-                    <a href="tel:{{ $phone }}" class="group inline-flex items-center gap-x-3 rounded-2xl border border-white/15 bg-white/5 p-1 pe-4 text-sm font-medium text-white transition hover:bg-white/10 hover:scale-[1.03] active:scale-[0.98]">
-                        <span class="inline-flex size-8 items-center justify-center rounded-xl bg-white/10 text-white">
+                    <a href="tel:{{ $phone }}" class="group inline-flex items-center gap-x-3 rounded-2xl border border-ink/10 bg-white p-1 pe-4 text-sm font-medium text-ink transition hover:bg-paper-2 hover:scale-[1.03] active:scale-[0.98]">
+                        <span class="inline-flex size-8 items-center justify-center rounded-xl bg-ink/5 text-ink">
                             <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"/></svg>
                         </span>
                         {{ $phoneDisplay }}
                     </a>
                 </div>
-                <p class="mt-4 text-xs text-white/45">Kayıt ücretsiz. Kart bilgisi gerekmez.</p>
+                <p class="mt-4 text-xs text-ink-3">Kayıt ücretsiz. Kart bilgisi gerekmez.</p>
             </div>
 
             {{-- Link kolonları: her zaman 5 kolon (mobilde 2) --}}
-            <div class="ty-footer-cols mt-14 border-t border-white/10 pt-10">
+            <div class="ty-footer-cols mt-14 border-t border-ink/10 pt-10">
                 <div>
-                    <h4 class="text-[13px] font-semibold text-white">Ürünler</h4>
+                    <h4 class="text-[13px] font-semibold text-ink">Ürünler</h4>
                     <ul class="mt-4 space-y-2.5 text-[13px]">
                         @foreach ($productLinks as $item)
-                            <li><a href="{{ $item['url'] }}" class="text-white/55 transition hover:text-white">{{ $item['label'] }}</a></li>
+                            <li><a href="{{ $item['url'] }}" class="text-ink-2 transition hover:text-ink">{{ $item['label'] }}</a></li>
                         @endforeach
                     </ul>
                 </div>
 
                 <div>
-                    <h4 class="text-[13px] font-semibold text-white">Hizmetler</h4>
+                    <h4 class="text-[13px] font-semibold text-ink">Hizmetler</h4>
                     <ul class="mt-4 space-y-2.5 text-[13px]">
                         @foreach ($serviceLinks as $item)
-                            <li><a href="{{ $item['url'] }}" class="text-white/55 transition hover:text-white">{{ $item['label'] }}</a></li>
+                            <li><a href="{{ $item['url'] }}" class="text-ink-2 transition hover:text-ink">{{ $item['label'] }}</a></li>
                         @endforeach
                     </ul>
                 </div>
 
                 <div>
-                    <h4 class="text-[13px] font-semibold text-white">Medya &amp; Reklam</h4>
+                    <h4 class="text-[13px] font-semibold text-ink">Medya &amp; Reklam</h4>
                     <ul class="mt-4 space-y-2.5 text-[13px]">
-                        <li><a href="{{ route('agency-services.index') }}" class="text-white/55 transition hover:text-white">Diğer Hizmetlerimiz</a></li>
+                        <li><a href="{{ route('agency-services.index') }}" class="text-ink-2 transition hover:text-ink">Diğer Hizmetlerimiz</a></li>
                         @foreach ($agencyServiceLinks as $item)
-                            <li><a href="{{ $item['url'] }}" class="text-white/55 transition hover:text-white">{{ $item['label'] }}</a></li>
+                            <li><a href="{{ $item['url'] }}" class="text-ink-2 transition hover:text-ink">{{ $item['label'] }}</a></li>
                         @endforeach
                     </ul>
                 </div>
 
                 <div>
-                    <h4 class="text-[13px] font-semibold text-white">Kurumsal</h4>
+                    <h4 class="text-[13px] font-semibold text-ink">Kurumsal</h4>
                     <ul class="mt-4 space-y-2.5 text-[13px]">
                         @foreach ($companyLinks as $item)
-                            <li><a href="{{ $item['url'] }}" class="text-white/55 transition hover:text-white">{{ $item['label'] }}</a></li>
+                            <li><a href="{{ $item['url'] }}" class="text-ink-2 transition hover:text-ink">{{ $item['label'] }}</a></li>
                         @endforeach
                     </ul>
                 </div>
 
                 <div>
-                    <h4 class="text-[13px] font-semibold text-white">Hesap</h4>
+                    <h4 class="text-[13px] font-semibold text-ink">Hesap</h4>
                     <ul class="mt-4 space-y-2.5 text-[13px]">
                         @foreach ($accountLinks as $item)
-                            <li><a href="{{ $item['url'] }}" class="text-white/55 transition hover:text-white">{{ $item['label'] }}</a></li>
+                            <li><a href="{{ $item['url'] }}" class="text-ink-2 transition hover:text-ink">{{ $item['label'] }}</a></li>
                         @endforeach
                     </ul>
                 </div>
 
                 <div>
-                    <h4 class="text-[13px] font-semibold text-white">Yasal</h4>
+                    <h4 class="text-[13px] font-semibold text-ink">Yasal</h4>
                     <ul class="mt-4 space-y-2.5 text-[13px]">
                         @foreach ($legalLinks as $item)
-                            <li><a href="{{ $item['url'] }}" class="text-white/55 transition hover:text-white">{{ $item['label'] }}</a></li>
+                            <li><a href="{{ $item['url'] }}" class="text-ink-2 transition hover:text-ink">{{ $item['label'] }}</a></li>
                         @endforeach
                     </ul>
                 </div>
             </div>
 
             {{-- Güvenlik şeridi --}}
-            <div class="mt-12 flex flex-col gap-5 rounded-2xl border border-white/10 bg-white/5 p-6 sm:flex-row sm:items-center sm:justify-between">
+            <div class="mt-12 flex flex-col gap-5 rounded-2xl border border-ink/10 bg-white p-6 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h4 class="text-[13px] font-semibold text-white">Güvenebileceğiniz altyapı</h4>
-                    <p class="mt-1 max-w-md text-[12px] leading-relaxed text-white/55">
+                    <h4 class="text-[13px] font-semibold text-ink">Güvenebileceğiniz altyapı</h4>
+                    <p class="mt-1 max-w-md text-[12px] leading-relaxed text-ink-2">
                         Ödemeler PayTR güvencesinde, tüm trafik SSL ile şifreli; verileriniz her seviyede korunur.
                     </p>
                 </div>
@@ -213,7 +214,7 @@
             </div>
 
             {{-- Alt bar --}}
-            <div class="mt-8 flex flex-col gap-4 border-t border-white/10 py-6 text-xs text-white/45 sm:flex-row sm:items-center sm:justify-between">
+            <div class="mt-8 flex flex-col gap-4 border-t border-ink/10 py-6 text-xs text-ink-3 sm:flex-row sm:items-center sm:justify-between">
                 <p>&copy; {{ date('Y') }} {{ $siteSettings->siteName() }}. Her hakkı saklıdır.</p>
                 <div class="flex items-center gap-2">
                     @foreach ($social as $item)
@@ -221,7 +222,7 @@
                             href="{{ $item['url'] }}"
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="inline-flex size-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/60 transition hover:bg-white/10 hover:text-white"
+                            class="inline-flex size-8 items-center justify-center rounded-full border border-ink/10 bg-white text-ink-2 transition hover:border-ink/25 hover:text-ink"
                             aria-label="{{ $item['label'] }}"
                         >
                             <svg class="size-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">

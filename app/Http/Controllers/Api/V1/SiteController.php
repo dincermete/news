@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Enums\PromotionalListingType;
 use App\Enums\SiteStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\SiteResource;
 use App\Models\Site;
+use App\Support\CatalogQuery;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
@@ -30,32 +32,33 @@ class SiteController extends Controller
             'max_da' => ['sometimes', 'numeric', 'min:0'],
         ]);
 
-        $query = Site::query()
-            ->with('category')
-            ->where('status', SiteStatus::Active)
+        $query = CatalogQuery::activeSitesWithListing(PromotionalListingType::SiteArticle)
             ->when(
                 isset($validated['category_id']),
-                fn ($q) => $q->where('site_category_id', $validated['category_id']),
+                fn ($q) => $q->where('sites.site_category_id', $validated['category_id']),
             )
             ->when(
                 isset($validated['min_price']),
-                fn ($q) => $q->where('price', '>=', $validated['min_price']),
+                fn ($q) => $q->where('promotional_listings.price', '>=', $validated['min_price']),
             )
             ->when(
                 isset($validated['max_price']),
-                fn ($q) => $q->where('price', '<=', $validated['max_price']),
+                fn ($q) => $q->where('promotional_listings.price', '<=', $validated['max_price']),
             )
             ->when(
                 isset($validated['min_da']),
-                fn ($q) => $q->where('da_value', '>=', $validated['min_da']),
+                fn ($q) => $q->where('sites.da_value', '>=', $validated['min_da']),
             )
             ->when(
                 isset($validated['max_da']),
-                fn ($q) => $q->where('da_value', '<=', $validated['max_da']),
+                fn ($q) => $q->where('sites.da_value', '<=', $validated['max_da']),
             )
-            ->orderBy('domain');
+            ->orderBy('sites.domain');
 
-        return SiteResource::collection($query->paginate(50));
+        $paginator = $query->paginate(50);
+        $paginator->getCollection()->each(fn (Site $site) => $site->normalizeJoinedPricingAttributes());
+
+        return SiteResource::collection($paginator);
     }
 
     /**
@@ -65,7 +68,14 @@ class SiteController extends Controller
     {
         abort_unless($site->status === SiteStatus::Active, 404);
 
+        $listing = $site->articleListing()
+            ->where('status', SiteStatus::Active)
+            ->first();
+
+        abort_unless($listing !== null, 404);
+
         $site->loadMissing('category');
+        $site->applyListingPricing($listing);
 
         return new SiteResource($site);
     }

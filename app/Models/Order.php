@@ -29,6 +29,10 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'due_date',
     'price',
     'currency',
+    'source_price',
+    'source_currency',
+    'exchange_rate',
+    'exchange_rate_id',
     'assigned_editor_id',
     'product_type',
     'site_bundle_id',
@@ -52,7 +56,7 @@ class Order extends Model
      */
     protected $attributes = [
         'status' => 'payment_pending',
-        'currency' => 'USD',
+        'currency' => 'TRY',
         'product_type' => 'site_article',
     ];
 
@@ -67,11 +71,26 @@ class Order extends Model
             'due_date' => 'date',
             'price' => 'decimal:2',
             'currency' => Currency::class,
+            'source_price' => 'decimal:2',
+            'source_currency' => Currency::class,
+            'exchange_rate' => 'decimal:6',
             'site_package_id' => 'integer',
             'product_type' => ProductType::class,
             'content_mode' => ContentMode::class,
             'content_payload' => 'array',
         ];
+    }
+
+    public function exchangeRateRecord(): BelongsTo
+    {
+        return $this->belongsTo(ExchangeRate::class, 'exchange_rate_id');
+    }
+
+    public function hasForeignSourceCurrency(): bool
+    {
+        $source = $this->source_currency ?? null;
+
+        return $source instanceof Currency && $source !== Currency::Try;
     }
 
     public function user(): BelongsTo
@@ -157,6 +176,34 @@ class Order extends Model
     public function canTransitionTo(OrderStatus $status): bool
     {
         return $this->status->canTransitionTo($status);
+    }
+
+    public function canEditContent(): bool
+    {
+        if ($this->product_type === ProductType::Balance) {
+            return false;
+        }
+
+        return in_array($this->status, [
+            OrderStatus::PaymentPending,
+            OrderStatus::ContentPending,
+        ], true);
+    }
+
+    public function isContentConfigured(): bool
+    {
+        $payload = is_array($this->content_payload) ? $this->content_payload : [];
+
+        return match ($this->product_type) {
+            ProductType::Balance => true,
+            ProductType::FooterLink => filled($payload['target_url'] ?? null),
+            ProductType::SeoPackage, ProductType::BacklinkPackage => filled($payload['site_address'] ?? null)
+                && ! empty($payload['keywords']),
+            default => match ($this->content_mode) {
+                ContentMode::AiArticle => $this->article_word_package_id !== null,
+                default => filled($payload['file_path'] ?? null) || filled($payload['target_url'] ?? null),
+            },
+        };
     }
 
     public function transitionTo(OrderStatus $status): bool

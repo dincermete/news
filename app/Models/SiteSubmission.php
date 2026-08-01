@@ -76,13 +76,12 @@ class SiteSubmission extends Model
     }
 
     /**
-     * @return array{domain: string, price: string, site_category_id?: int, age?: int}
+     * @return array{domain: string, site_category_id?: int, age?: int}
      */
     public function siteCreateQuery(): array
     {
         $query = [
             'domain' => $this->domainFromUrl(),
-            'price' => (string) $this->price,
         ];
 
         if ($this->site_category_id !== null) {

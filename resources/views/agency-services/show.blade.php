@@ -54,7 +54,7 @@
     </section>
 
     {{-- ================= KAPSAM ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
+    <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
         <div class="mx-auto max-w-2xl text-center">
             <p data-reveal><span class="{{ $chip }}">Kapsam</span></p>
             <h2 class="mt-5 {{ $h2 }}" data-reveal>Neler sunuyoruz</h2>
@@ -71,7 +71,7 @@
     </section>
 
     {{-- ================= NEDEN BİZ ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
+    <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
         <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
             <div>
                 <p data-reveal><span class="{{ $chip }}">Neden biz</span></p>
@@ -90,7 +90,7 @@
     </section>
 
     {{-- ================= DİĞER HİZMETLER ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
+    <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
         <div class="mx-auto max-w-2xl text-center">
             <p data-reveal><span class="{{ $chip }}">Diğer hizmetler</span></p>
             <h2 class="mt-5 {{ $h2 }}" data-reveal>Kampanyanızı büyüten diğer hizmetlerimiz</h2>
@@ -111,7 +111,7 @@
     </section>
 
     {{-- ================= SSS ================= --}}
-    <section class="mx-auto max-w-6xl px-4 pb-16 sm:px-6 lg:px-8">
+    <section class="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
         <div class="grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
             <div class="lg:sticky lg:top-28 lg:self-start" data-reveal-group>
                 <p data-reveal><span class="{{ $chip }}">SSS</span></p>

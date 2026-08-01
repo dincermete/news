@@ -9,6 +9,7 @@ use App\Enums\ProductType;
 use App\Exceptions\EmptyCartException;
 use App\Exceptions\InsufficientWalletBalanceException;
 use App\Exceptions\InvalidCouponException;
+use App\Exceptions\MissingExchangeRateException;
 use App\Models\BankAccount;
 use App\Models\CartItem;
 use App\Models\Order;
@@ -22,6 +23,7 @@ use App\Services\PaymentDiscountCalculator;
 use App\Services\PaytrService;
 use App\Services\SeoMetaService;
 use App\Services\WalletPaymentService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -51,15 +53,16 @@ class CheckoutController extends Controller
                 ->withErrors(['cart' => 'Sepetiniz boş.']);
         }
 
-        if ($cart->items->contains(fn (CartItem $item): bool => ! $item->isConfigured())) {
-            return redirect()
-                ->route('cart.index')
-                ->withErrors(['cart' => 'Ödemeye geçmeden önce sepetinizdeki tüm ürünleri yapılandırmalısınız.']);
-        }
-
         $user = $request->user();
 
-        $summary = $this->carts->summarize($cart, $this->carts->rememberedCoupon());
+        try {
+            $summary = $this->carts->summarize($cart, $this->carts->rememberedCoupon());
+        } catch (MissingExchangeRateException $exception) {
+            return redirect()
+                ->route('cart.index')
+                ->with('error', $exception->getMessage());
+        }
+
         $payable = $this->payableByMethod($summary['total']);
         $wallet = Wallet::forUser($user, Currency::Try);
 
@@ -72,6 +75,7 @@ class CheckoutController extends Controller
             'bankTransferDiscountPercent' => (float) config('payment.bank_transfer_discount_percent', 0),
             'banks' => $this->activeBanks(),
             'hasWalletTopupItem' => $cart->items->contains(fn (CartItem $item): bool => $item->product_type === ProductType::Balance),
+            'billingProfiles' => $user->billingProfiles()->latest('id')->get(),
             'postSubmitMethod' => null,
             'paytrToken' => null,
             'bankTransferPayment' => null,
@@ -90,15 +94,28 @@ class CheckoutController extends Controller
                 'integer',
                 Rule::exists('billing_profiles', 'id')->where('user_id', $user->id),
             ],
-            'billing_type' => ['nullable', Rule::enum(BillingProfileType::class)],
-            'tax_id' => ['nullable', 'string', 'max:32'],
-            'company_name' => ['nullable', 'string', 'max:255'],
-            'address' => ['nullable', 'string', 'max:2000'],
-            'tax_office' => ['nullable', 'string', 'max:255'],
+            'billing_type' => ['required_without:billing_profile_id', Rule::enum(BillingProfileType::class)],
+            'tax_id' => ['required_without:billing_profile_id', 'string', 'max:32'],
+            'company_name' => [
+                'nullable',
+                'required_if:billing_type,'.BillingProfileType::Corporate->value,
+                'string',
+                'max:255',
+            ],
+            'tax_office' => [
+                'nullable',
+                'required_if:billing_type,'.BillingProfileType::Corporate->value,
+                'string',
+                'max:255',
+            ],
             'payment_method' => ['required', Rule::enum(PaymentMethod::class)],
             'contracts_accepted' => ['accepted'],
         ], [
             'contracts_accepted.accepted' => 'Devam etmek için sözleşmeleri onaylamalısınız.',
+            'billing_type.required_without' => 'Fatura tipi zorunludur.',
+            'tax_id.required_without' => 'TCKN / VKN zorunludur.',
+            'company_name.required_if' => 'Kurumsal faturalarda ünvan zorunludur.',
+            'tax_office.required_if' => 'Kurumsal faturalarda vergi dairesi zorunludur.',
         ]);
 
         $cart = $this->carts->resolveOrCreateCart($request);
@@ -110,16 +127,18 @@ class CheckoutController extends Controller
                 ->withErrors(['cart' => 'Sepetiniz boş.']);
         }
 
-        if ($cart->items->contains(fn (CartItem $item): bool => ! $item->isConfigured())) {
-            return redirect()
-                ->route('cart.index')
-                ->withErrors(['cart' => 'Ödemeye geçmeden önce sepetinizdeki tüm ürünleri yapılandırmalısınız.']);
-        }
-
-        $billingProfile = $this->billingProfiles->resolveOptional($request, $data);
+        $billingProfile = $this->billingProfiles->resolveRequired($request, $data);
         $method = PaymentMethod::from($data['payment_method']);
         $couponCode = $this->carts->rememberedCoupon();
-        $summary = $this->carts->summarize($cart, $couponCode);
+
+        try {
+            $summary = $this->carts->summarize($cart, $couponCode);
+        } catch (MissingExchangeRateException $exception) {
+            return redirect()
+                ->route('cart.index')
+                ->with('error', $exception->getMessage());
+        }
+
         $payableAmount = $this->discounts->applyDiscount($summary['total'], $method);
 
         $hasWalletTopupItem = $cart->items->contains(fn (CartItem $item): bool => $item->product_type === ProductType::Balance);
@@ -149,6 +168,8 @@ class CheckoutController extends Controller
             $orderGroup = $this->checkout->checkout($cart, $billingProfile, $couponCode, $method);
         } catch (EmptyCartException $exception) {
             return redirect()->route('cart.index')->withErrors(['cart' => $exception->getMessage()]);
+        } catch (MissingExchangeRateException $exception) {
+            return redirect()->route('cart.index')->with('error', $exception->getMessage());
         } catch (InvalidCouponException $exception) {
             $this->carts->rememberCoupon(null);
 
@@ -236,6 +257,8 @@ class CheckoutController extends Controller
                 'subtotal' => (float) $orderGroup->subtotal,
                 'tier_discount' => (float) $orderGroup->discount_tier_amount,
                 'coupon_discount' => (float) $orderGroup->coupon_discount_amount,
+                'vat_amount' => (float) ($orderGroup->vat_amount ?? 0),
+                'vat_rate' => (float) config('payment.vat_rate', 20),
                 'coupon' => null,
                 'coupon_code' => null,
                 'coupon_error' => null,
@@ -246,6 +269,7 @@ class CheckoutController extends Controller
             'bankTransferDiscountPercent' => (float) config('payment.bank_transfer_discount_percent', 0),
             'banks' => $this->activeBanks(),
             'hasWalletTopupItem' => $orderGroup->orders->contains(fn (Order $order): bool => $order->product_type === ProductType::Balance),
+            'billingProfiles' => $orderGroup->user->billingProfiles()->latest('id')->get(),
             'postSubmitMethod' => $method,
             'paytrToken' => null,
             'bankTransferPayment' => null,
@@ -255,9 +279,9 @@ class CheckoutController extends Controller
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, BankAccount>
+     * @return Collection<int, BankAccount>
      */
-    protected function activeBanks(): \Illuminate\Database\Eloquent\Collection
+    protected function activeBanks(): Collection
     {
         return BankAccount::query()->active()->ordered()->get();
     }

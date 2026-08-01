@@ -4,11 +4,16 @@ namespace App\Filament\Resources\SiteBundles\Schemas;
 
 use App\Enums\Currency;
 use App\Enums\SiteStatus;
+use App\Filament\Actions\AiSuggestFieldAction;
+use App\Filament\Schemas\StorefrontSeoForm;
+use App\Support\BundleIconOptions;
 use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -67,11 +72,63 @@ class SiteBundleForm
                                     Textarea::make('description')
                                         ->label('Kısa açıklama')
                                         ->rows(4)
-                                        ->hintAction(\App\Filament\Actions\AiSuggestFieldAction::make(
+                                        ->hintAction(AiSuggestFieldAction::make(
                                             'description',
                                             contextField: 'name',
                                         ))
                                         ->columnSpanFull(),
+                                    ToggleButtons::make('icon')
+                                        ->label('İkon')
+                                        ->options(BundleIconOptions::labels())
+                                        ->icons(BundleIconOptions::icons())
+                                        ->colors(BundleIconOptions::iconFilamentColors())
+                                        ->default(BundleIconOptions::default())
+                                        ->columns(6)
+                                        ->columnSpanFull()
+                                        ->live()
+                                        ->afterStateUpdated(function (Set $set, ?string $state): void {
+                                            if (blank($state)) {
+                                                return;
+                                            }
+
+                                            $paletteKey = BundleIconOptions::paletteKeyForIcon($state);
+                                            $swatch = BundleIconOptions::palette()[$paletteKey];
+
+                                            $set('bg_palette', $paletteKey);
+                                            $set('bg_color_from', $swatch['from']);
+                                            $set('bg_color_to', $swatch['to']);
+                                        })
+                                        ->helperText('Her ikonun kendi rengi vardır; seçince arka plan rengi de eşleşir.'),
+                                    ToggleButtons::make('bg_palette')
+                                        ->label('Arka plan rengi')
+                                        ->options(BundleIconOptions::paletteLabels())
+                                        ->colors(BundleIconOptions::paletteFilamentColors())
+                                        ->default(BundleIconOptions::defaultPaletteKey())
+                                        ->columns(6)
+                                        ->columnSpanFull()
+                                        ->dehydrated(false)
+                                        ->live()
+                                        ->afterStateHydrated(function (ToggleButtons $component, Get $get): void {
+                                            $matched = BundleIconOptions::matchPaletteKey(
+                                                $get('bg_color_from'),
+                                                $get('bg_color_to'),
+                                            );
+
+                                            $component->state($matched ?? BundleIconOptions::defaultPaletteKey());
+                                        })
+                                        ->afterStateUpdated(function (Set $set, ?string $state): void {
+                                            if (blank($state) || ! array_key_exists($state, BundleIconOptions::palette())) {
+                                                return;
+                                            }
+
+                                            $swatch = BundleIconOptions::palette()[$state];
+                                            $set('bg_color_from', $swatch['from']);
+                                            $set('bg_color_to', $swatch['to']);
+                                        }),
+                                    Hidden::make('bg_color_from')
+                                        ->default(BundleIconOptions::palette()[BundleIconOptions::defaultPaletteKey()]['from']),
+                                    Hidden::make('bg_color_to')
+                                        ->default(BundleIconOptions::palette()[BundleIconOptions::defaultPaletteKey()]['to']),
                                     RichEditor::make('content')
                                         ->label('Paket detay yazısı')
                                         ->helperText('Paket detay sayfasında "Paket Hakkında" bölümünde gösterilir.')
@@ -88,6 +145,9 @@ class SiteBundleForm
                                     ->bulkToggleable()
                                     ->columns(2),
                             ]),
+                        Tab::make('SEO')
+                            ->icon(Heroicon::OutlinedMagnifyingGlass)
+                            ->schema(StorefrontSeoForm::section()),
                     ])
                     ->columnSpanFull()
                     ->persistTabInQueryString(),

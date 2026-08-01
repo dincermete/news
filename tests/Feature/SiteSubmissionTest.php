@@ -3,8 +3,8 @@
 namespace Tests\Feature;
 
 use App\Enums\SiteSubmissionStatus;
-use App\Filament\Resources\SiteSubmissions\Pages\ListSiteSubmissions;
 use App\Filament\Resources\Sites\SiteResource;
+use App\Filament\Resources\SiteSubmissions\Pages\ListSiteSubmissions;
 use App\Models\SiteCategory;
 use App\Models\SiteSubmission;
 use App\Models\User;
@@ -140,7 +140,7 @@ class SiteSubmissionTest extends TestCase
 
         $this->assertSame('donustur-ornek.com', $submission->domainFromUrl());
         $this->assertStringContainsString('domain=donustur-ornek.com', $expectedUrl);
-        $this->assertStringContainsString('price=200', $expectedUrl);
+        $this->assertStringNotContainsString('price=', $expectedUrl);
         $this->assertStringContainsString('site_category_id='.$category->id, $expectedUrl);
         $this->assertStringContainsString('age=8', $expectedUrl);
 

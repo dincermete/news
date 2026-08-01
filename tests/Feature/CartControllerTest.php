@@ -67,6 +67,30 @@ class CartControllerTest extends TestCase
             ->assertSee('150,00');
     }
 
+    public function test_buy_now_redirects_to_checkout(): void
+    {
+        $user = User::factory()->create();
+        $site = Site::factory()->create([
+            'status' => SiteStatus::Active,
+            'price' => 120,
+            'discount_price' => null,
+            'currency' => Currency::Try,
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('cart.add'), [
+                'product_type' => 'site_article',
+                'site_id' => $site->id,
+                'redirect' => 'checkout',
+            ])
+            ->assertRedirect(route('checkout.show'));
+
+        $this->assertDatabaseHas(CartItem::class, [
+            'site_id' => $site->id,
+            'product_type' => ProductType::SiteArticle->value,
+        ]);
+    }
+
     public function test_authenticated_user_cart_uses_user_id(): void
     {
         $user = User::factory()->create();
@@ -152,7 +176,7 @@ class CartControllerTest extends TestCase
             'site_id' => $site->id,
             'footer_link_duration_option_id' => $option->id,
             'product_type' => ProductType::FooterLink->value,
-            'price' => 350,
+            'price' => 100,
         ]);
     }
 

@@ -32,10 +32,14 @@ class AnnouncementForm
                     ->default(NotificationAudience::All),
                 DateTimePicker::make('starts_at')
                     ->label('Başlangıç')
-                    ->seconds(false),
+                    ->seconds(false)
+                    ->native(false)
+                    ->helperText('Boş bırakılırsa duyuru hemen yayınlanır.'),
                 DateTimePicker::make('ends_at')
                     ->label('Bitiş')
-                    ->seconds(false),
+                    ->seconds(false)
+                    ->native(false)
+                    ->helperText('Boş bırakılırsa duyuru süresiz yayınlanır.'),
                 Toggle::make('is_active')
                     ->label('Aktif')
                     ->default(true),

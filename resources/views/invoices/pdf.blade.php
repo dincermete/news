@@ -28,7 +28,9 @@
             @if ($billingProfile->tax_office)
                 <strong>Vergi dairesi:</strong> {{ $billingProfile->tax_office }}<br>
             @endif
-            <strong>Adres:</strong> {{ $billingProfile->address }}
+            @if (filled($billingProfile->address))
+                <strong>Adres:</strong> {{ $billingProfile->address }}
+            @endif
         </p>
     @endif
 
@@ -51,6 +53,12 @@
                     <td>{{ number_format((float) $lineOrder->price, 2) }} {{ $lineOrder->currency?->value ?? $payment->currency?->value }}</td>
                 </tr>
             @endforeach
+            @if (($orderGroup ?? null)?->vat_amount)
+                <tr>
+                    <td>KDV</td>
+                    <td>{{ number_format((float) $orderGroup->vat_amount, 2) }} {{ $payment->currency?->value }}</td>
+                </tr>
+            @endif
             <tr>
                 <td><strong>Ödeme toplamı</strong></td>
                 <td><strong>{{ number_format((float) $payment->amount, 2) }} {{ $payment->currency?->value }}</strong></td>

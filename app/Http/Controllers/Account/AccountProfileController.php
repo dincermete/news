@@ -39,7 +39,7 @@ class AccountProfileController extends Controller
             'company_name' => ['nullable', 'string', 'max:255'],
             'city' => ['nullable', 'string', 'max:120'],
             'district' => ['nullable', 'string', 'max:120'],
-            'address' => ['required', 'string', 'max:2000'],
+            'address' => ['nullable', 'string', 'max:2000'],
             'tax_office' => ['nullable', 'string', 'max:255'],
             'email_consent' => ['sometimes', 'boolean'],
             'sms_consent' => ['sometimes', 'boolean'],
@@ -74,7 +74,7 @@ class AccountProfileController extends Controller
             'company_name' => $type === BillingProfileType::Corporate ? ($data['company_name'] ?? null) : null,
             'city' => $data['city'] ?? null,
             'district' => $data['district'] ?? null,
-            'address' => $data['address'],
+            'address' => filled($data['address'] ?? null) ? $data['address'] : null,
             'tax_office' => $type === BillingProfileType::Corporate ? ($data['tax_office'] ?? null) : null,
         ];
 

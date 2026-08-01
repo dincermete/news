@@ -49,6 +49,45 @@
         max-height: 56px !important;
     }
 
+    /* Header sabit kalsın (tema position: relative override ediyor) */
+    .fi-topbar-ctn {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 30 !important;
+        background: var(--sidebar) !important;
+        backdrop-filter: none;
+    }
+
+    .fi-topbar {
+        position: relative !important;
+        background: transparent !important;
+        border-bottom-color: var(--border) !important;
+    }
+
+    /*
+     | Shadcn: .fi-main-ctn { z-index: 1 } modal overlay'i main içinde hapsediyor;
+     | header/sidebar modalın üstünde kalıyor. Main stacking'i kaldır, modal z-40
+     | tüm shell'i örtsün.
+     */
+    .fi-body-has-topbar .fi-main-ctn {
+        z-index: auto !important;
+    }
+
+    .fi-body-has-topbar .fi-main-sidebar.fi-sidebar {
+        z-index: 20 !important;
+    }
+
+    .fi-modal,
+    .fi-modal > .fi-modal-close-overlay,
+    .fi-modal > .fi-modal-window-ctn {
+        z-index: 50 !important;
+    }
+
+    .fi-modal.fi-modal-open ~ .fi-modal.fi-modal-open > .fi-modal-close-overlay,
+    .fi-modal.fi-modal-open ~ .fi-modal.fi-modal-open > .fi-modal-window-ctn {
+        z-index: 60 !important;
+    }
+
     /* ── Sticky sidebar shell ───────────────────────────────── */
     @media (min-width: 1024px) {
         .fi-body-has-topbar .fi-main-sidebar.fi-sidebar {
@@ -132,14 +171,56 @@
         opacity: 1 !important;
     }
 
-    .fi-sidebar-item:not(.fi-active) > .fi-sidebar-item-btn .fi-sidebar-item-icon {
-        color: color-mix(in oklch, var(--sidebar-foreground) 55%, transparent) !important;
+    /* Sidebar metinleri sabit (opacity mix yok) */
+    .fi-sidebar,
+    .fi-sidebar-item-btn,
+    .fi-sidebar-item-btn .fi-sidebar-item-label,
+    .fi-sidebar-group-btn,
+    .fi-sidebar-group-label,
+    .fi-sidebar-footer {
+        color: var(--sidebar-foreground) !important;
+    }
+
+    .fi-sidebar-item-btn,
+    .fi-sidebar-item-btn .fi-sidebar-item-label {
+        font-size: 13px !important;
+        line-height: 1.35 !important;
+    }
+
+    .fi-sidebar-item-btn .fi-sidebar-item-icon,
+    .fi-sidebar-item:not(.fi-active) > .fi-sidebar-item-btn .fi-sidebar-item-icon,
+    .fi-sidebar-group-btn .fi-icon,
+    .fi-sidebar svg {
+        color: var(--sidebar-foreground) !important;
+        opacity: 1 !important;
+    }
+
+    .fi-sidebar-group-btn,
+    .fi-sidebar-group-label {
+        font-size: 13px !important;
+        line-height: 1.35 !important;
+        font-weight: 500 !important;
     }
 
     .fi-sidebar-item.fi-active > .fi-sidebar-item-btn .fi-badge {
         background: color-mix(in oklch, var(--sidebar-foreground) 10%, transparent) !important;
         color: var(--sidebar-accent-foreground) !important;
         border-color: transparent !important;
+    }
+
+    /* Panel-wide border token */
+    .fi-section:not(.fi-section-not-contained),
+    .fi-ta-ctn,
+    .fi-wi-widget:not(.fi-wi-stats-overview),
+    .fi-wi-chart,
+    .fi-wi-table,
+    .fi-wi-stats-overview-stat,
+    .fi-fo-repeater-item,
+    .fi-fieldset,
+    .fi-input-wrp,
+    .fi-select-input,
+    .fi-textarea {
+        border-color: var(--border) !important;
     }
 
     /* ── Cards / sections: border only, no shadow ───────────── */

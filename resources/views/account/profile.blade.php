@@ -75,7 +75,7 @@
                         <input type="text" name="district" value="{{ old('district', $billing?->district) }}" class="{{ $input }}">
                     </div>
                     <div class="sm:col-span-2">
-                        <label class="{{ $label }}">Adres</label>
+                        <label class="{{ $label }}">Adres <span class="font-normal normal-case tracking-normal text-ink-3">(opsiyonel)</span></label>
                         <textarea name="address" rows="2" class="{{ $input }}">{{ old('address', $billing?->address) }}</textarea>
                     </div>
                 </div>

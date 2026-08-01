@@ -170,7 +170,7 @@
     </section>
 
     {{-- ================= GÜVEN ŞERİDİ ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8" data-reveal-group>
+    <section class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8" data-reveal-group>
         <div class="grid gap-6 rounded-[20px] bg-paper p-6 sm:grid-cols-3 sm:p-8" data-reveal>
             @foreach ($trustBadges as $badge)
                 <div class="text-center sm:text-start">
@@ -187,7 +187,7 @@
     </section>
 
     {{-- ================= YÖNTEMİMİZ ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
+    <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
         <div class="mx-auto max-w-2xl text-center">
             <p data-reveal><span class="{{ $chip }}">Yöntemimiz</span></p>
             <h2 class="mt-5 {{ $h2 }}" data-reveal>4 adımda ölçülebilir büyüme</h2>
@@ -206,7 +206,7 @@
 
     {{-- ================= PAKET KARTLARI ================= --}}
     <section id="paketler" class="px-2 sm:px-3" x-data="{ cycle: '{{ (string) ($durationOptions->first()?->id) }}' }">
-        <div class="mx-auto max-w-6xl px-2 py-10 sm:px-4">
+        <div class="mx-auto max-w-7xl px-2 py-10 sm:px-4">
             <div class="mx-auto max-w-2xl text-center">
                 <p><span class="{{ $chip }}">Paketler</span></p>
                 <h2 class="mt-5 {{ $h2 }}">İhtiyacınıza uygun paketi seçin</h2>
@@ -302,7 +302,7 @@
     </section>
 
     {{-- ================= KARŞILAŞTIRMA TABLOSU ================= --}}
-    <section id="karsilastir" class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+    <section id="karsilastir" class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-2xl text-center">
             <p><span class="{{ $chip }}">Paketleri karşılaştır</span></p>
             <h2 class="mt-5 {{ $h2 }}">Her pakette neyin dahil olduğunu tek bakışta gör</h2>
@@ -350,7 +350,7 @@
     </section>
 
     {{-- ================= ARAÇ SETİMİZ ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+    <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-2xl text-center">
             <p><span class="{{ $chip }}">Araç Setimiz</span></p>
             <h2 class="mt-5 {{ $h2 }}">İşin mutfağında profesyonel araçlar</h2>
@@ -385,7 +385,7 @@
     </section>
 
     {{-- ================= DİĞER HİZMETLER ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+    <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-2xl text-center">
             <p><span class="{{ $chip }}">Diğer Hizmetler</span></p>
             <h2 class="mt-5 {{ $h2 }}">SEO paketinizi tamamlayan hizmetler</h2>
@@ -410,7 +410,7 @@
     </section>
 
     {{-- ================= SSS ================= --}}
-    <section class="mx-auto max-w-6xl px-4 pb-16 sm:px-6 lg:px-8">
+    <section class="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
         <div class="grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
             <div class="lg:sticky lg:top-28 lg:self-start">
                 <p><span class="{{ $chip }}">Sıkça Sorulan Sorular</span></p>

@@ -28,7 +28,7 @@
         </div>
     </section>
 
-    <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         @if ($errors->any())
             <div class="mb-6 rounded-[20px] border border-brand-200 bg-brand-50 px-5 py-3.5 text-sm text-brand-800" role="alert">
                 <ul class="list-disc space-y-0.5 ps-4">
@@ -76,6 +76,8 @@
                     >
                         @csrf
                         <input type="hidden" name="payment_method" :value="tab">
+
+                        @include('checkout.partials.billing-form')
 
                         <div class="rounded-[20px] border border-ink/10 bg-paper p-5">
                             <h2 class="font-display text-base font-semibold text-ink">Ödeme Yöntemi</h2>
@@ -153,7 +155,15 @@
                                         @include('partials.cart-item-badge', ['item' => $item])
                                     </div>
                                 </div>
-                                <span class="shrink-0 font-display text-sm font-bold text-ink">{{ number_format((float) $item->price, 2, ',', '.') }} ₺</span>
+                                <div class="shrink-0 text-right">
+                                    <span class="font-display text-sm font-bold text-ink">{{ number_format((float) $item->price, 2, ',', '.') }} ₺</span>
+                                    @if ($item->hasForeignSourceCurrency() && $item->source_price !== null && $item->exchange_rate !== null)
+                                        <p class="mt-0.5 text-[11px] text-ink-3">
+                                            {{ number_format((float) $item->source_price, 2, ',', '.') }} {{ $item->source_currency?->value }}
+                                            × {{ number_format((float) $item->exchange_rate, 4, ',', '.') }}
+                                        </p>
+                                    @endif
+                                </div>
                             </div>
                         @endforeach
                     </div>
@@ -173,6 +183,12 @@
                             <div class="flex justify-between gap-3">
                                 <dt class="text-ink-2">Kupon indirimi</dt>
                                 <dd class="font-semibold text-emerald-600">−{{ number_format($summary['coupon_discount'], 2, ',', '.') }} ₺</dd>
+                            </div>
+                        @endif
+                        @if (($summary['vat_amount'] ?? 0) > 0)
+                            <div class="flex justify-between gap-3">
+                                <dt class="text-ink-2">KDV (%{{ rtrim(rtrim(number_format((float) ($summary['vat_rate'] ?? 20), 2, '.', ''), '0'), '.') }})</dt>
+                                <dd class="font-semibold text-ink">{{ number_format($summary['vat_amount'], 2, ',', '.') }} ₺</dd>
                             </div>
                         @endif
                         @if ($postSubmitMethod === PaymentMethod::BankTransfer && $bankTransferDiscountPercent > 0)

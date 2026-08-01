@@ -20,6 +20,7 @@ class SiteResource extends JsonResource
             'id' => $this->id,
             'domain' => $this->domain,
             'description' => $this->description,
+            'short_description' => $this->short_description,
             'category' => $this->whenLoaded('category', fn (): ?array => $this->category === null ? null : [
                 'id' => $this->category->id,
                 'name' => $this->category->name,

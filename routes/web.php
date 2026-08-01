@@ -1,12 +1,12 @@
 <?php
 
 use App\Http\Controllers\AboutController;
-use App\Http\Controllers\AgencyServiceController;
 use App\Http\Controllers\Account\AccountAffiliateController;
 use App\Http\Controllers\Account\AccountDashboardController;
 use App\Http\Controllers\Account\AccountFavoriteController;
 use App\Http\Controllers\Account\AccountInvoiceController;
 use App\Http\Controllers\Account\AccountOrderBillingController;
+use App\Http\Controllers\Account\AccountOrderContentController;
 use App\Http\Controllers\Account\AccountOrderController;
 use App\Http\Controllers\Account\AccountPaymentNotificationController;
 use App\Http\Controllers\Account\AccountProfileController;
@@ -15,12 +15,15 @@ use App\Http\Controllers\Account\AccountSiteSubmissionController;
 use App\Http\Controllers\Account\AccountSpinWheelController;
 use App\Http\Controllers\Account\AccountSupportTicketController;
 use App\Http\Controllers\Account\AccountWalletTopupController;
+use App\Http\Controllers\AgencyServiceController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BacklinkPackageCatalogController;
+use App\Http\Controllers\BacklinkPackageShowController;
 use App\Http\Controllers\BankTransferNotificationController;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ChatbotMessageController;
 use App\Http\Controllers\CheckoutController;
@@ -31,15 +34,17 @@ use App\Http\Controllers\GeoPageController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LiveHeartbeatController;
 use App\Http\Controllers\MarkNotificationReadController;
-use App\Http\Controllers\PageController;
 use App\Http\Controllers\PaytrCallbackController;
 use App\Http\Controllers\PressReleaseCatalogController;
+use App\Http\Controllers\ProductPublicPathController;
 use App\Http\Controllers\SeoPackageCatalogController;
+use App\Http\Controllers\SeoPackageShowController;
 use App\Http\Controllers\SiteBundleCatalogController;
 use App\Http\Controllers\SiteCatalogController;
 use App\Http\Controllers\SiteExportController;
 use App\Http\Controllers\SiteFavoriteController;
 use App\Http\Controllers\SiteQuestionController;
+use App\Http\Controllers\SiteReviewController;
 use App\Http\Controllers\SiteShowController;
 use App\Http\Controllers\SiteViewController;
 use Illuminate\Support\Facades\Route;
@@ -60,16 +65,31 @@ Route::get('/tanitim-paketleri/{slug}', [SiteBundleCatalogController::class, 'sh
 Route::get('/footer-linkler', FooterLinkCatalogController::class)->name('footer-links.index');
 Route::get('/geo', GeoPageController::class)->name('geo.index');
 Route::get('/seo-paketleri', SeoPackageCatalogController::class)->name('seo-packages.index');
+Route::get('/seo-paketleri/{slug}', SeoPackageShowController::class)->name('seo-packages.show');
 Route::get('/backlink-paketleri', BacklinkPackageCatalogController::class)->name('backlink-packages.index');
+Route::get('/backlink-paketleri/{slug}', BacklinkPackageShowController::class)->name('backlink-packages.show');
 Route::get('/hizmetler', [AgencyServiceController::class, 'index'])->name('agency-services.index');
 Route::get('/hizmetler/{slug}', [AgencyServiceController::class, 'show'])->name('agency-services.show');
 Route::get('/ucretsiz-analiz', [FreeAnalysisController::class, 'show'])->name('free-analysis.show');
 Route::get('/hakkimizda', AboutController::class)->name('about.show');
 Route::get('/iletisim', ContactController::class)->name('contact.show');
+
+Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/kategori/{slug}', [BlogController::class, 'category'])
+    ->where('slug', '^[a-z0-9]+(?:-[a-z0-9]+)*$')
+    ->name('blog.category');
+Route::get('/blog/etiket/{slug}', [BlogController::class, 'tag'])
+    ->where('slug', '^[a-z0-9]+(?:-[a-z0-9]+)*$')
+    ->name('blog.tag');
+Route::get('/blog/{slug}', [BlogController::class, 'show'])
+    ->where('slug', '^[a-z0-9]+(?:-[a-z0-9]+)*$')
+    ->name('blog.show');
+
 // {slug} = Site.domain (public URL); do not change Site::getRouteKeyName (breaks /site/{site}/view id binding)
 Route::get('/site/{slug}', SiteShowController::class)->name('sites.show');
 Route::post('/site/{site}/favori', SiteFavoriteController::class)->name('sites.favorite');
 Route::post('/site/{site}/soru', SiteQuestionController::class)->name('sites.question');
+Route::post('/site/{site}/yorum', SiteReviewController::class)->name('sites.review');
 
 Route::get('/sepet', [CartController::class, 'index'])->name('cart.index');
 Route::post('/sepet/ekle', [CartController::class, 'addItem'])->name('cart.add');
@@ -115,6 +135,7 @@ Route::middleware('auth')->group(function (): void {
         Route::put('/profil', [AccountProfileController::class, 'update'])->name('profile.update');
         Route::get('/siparisler', AccountOrderController::class)->name('orders');
         Route::get('/siparisler/{orderGroup}', [AccountOrderController::class, 'show'])->name('orders.show');
+        Route::patch('/siparisler/{orderGroup}/urun/{order}', AccountOrderContentController::class)->name('orders.content.update');
         Route::post('/siparisler/{orderGroup}/fatura', AccountOrderBillingController::class)->name('orders.billing.store');
         Route::get('/faturalar', [AccountInvoiceController::class, 'index'])->name('invoices');
         Route::get('/faturalar/{invoice}/pdf', [AccountInvoiceController::class, 'download'])->name('invoices.download');
@@ -149,9 +170,9 @@ Route::get('/sitemap.xml', function () {
     ]);
 })->name('sitemap');
 
-// Faz 11f CMS pages — keep after specific routes so /siteler etc. win
-Route::get('/{slug}', PageController::class)
-    ->where('slug', '^[a-z0-9]+(?:-[a-z0-9]+)*$')
+// Product vanity paths + CMS pages share /{slug}. Products resolve first.
+Route::get('/{publicPath}', ProductPublicPathController::class)
+    ->where('publicPath', '^[a-z0-9]+(?:-[a-z0-9]+)*$')
     ->name('pages.show');
 
 /*

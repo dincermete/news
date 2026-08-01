@@ -19,6 +19,7 @@
     "dependencies": {
         "alpinejs": "^3.15.12",
         "motion": "^12.42.2",
-        "preline": "^4.2.0"
+        "preline": "^4.2.0",
+        "rough-notation": "^0.5.1"
     }
 }

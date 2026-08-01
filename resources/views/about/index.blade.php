@@ -91,7 +91,7 @@
     @endif
 
     {{-- ================= ETKİMİZ ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
+    <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
         <div class="mx-auto max-w-2xl text-center">
             <p data-reveal><span class="{{ $chip }}">Rakamlarla</span></p>
             <h2 class="mt-5 {{ $h2 }}" data-reveal>Bugüne kadar oluşturduğumuz etki</h2>
@@ -108,7 +108,7 @@
     </section>
 
     {{-- ================= NEDEN ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+    <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
             <div data-reveal-group>
                 <p data-reveal><span class="{{ $chip }}">Neden {{ $siteSettings->siteName() }}</span></p>
@@ -132,7 +132,7 @@
     </section>
 
     {{-- ================= ODAĞIMIZ ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
+    <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
         <div class="mx-auto max-w-2xl text-center">
             <p data-reveal><span class="{{ $chip }}">Odağımız</span></p>
             <h2 class="mt-5 {{ $h2 }}" data-reveal>Her şeyi bu ilkelere göre kuruyoruz</h2>
@@ -150,7 +150,7 @@
     </section>
 
     {{-- ================= KİMLER KULLANIYOR ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
+    <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
         <div class="mx-auto max-w-2xl text-center">
             <p data-reveal><span class="{{ $chip }}">Kimler kullanıyor</span></p>
             <h2 class="mt-5 {{ $h2 }}" data-reveal>Farklı ekipler, tek platform</h2>
@@ -164,7 +164,7 @@
     </section>
 
     {{-- ================= EKİBİMİZ ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
+    <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
         <div class="mx-auto max-w-2xl text-center">
             <p data-reveal><span class="{{ $chip }}">Ekibimiz</span></p>
             <h2 class="mt-5 {{ $h2 }}" data-reveal>Ürünün arkasındaki ekipler</h2>

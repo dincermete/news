@@ -35,6 +35,14 @@ class SiteCatalogControllerTest extends TestCase
         $response->assertSee('active-list.test');
         $response->assertDontSee('draft-list.test');
         $response->assertViewHas('sites', fn ($sites) => $sites->contains('id', $active->id));
+        $response->assertSee('x-data="siteTable()"', false);
+        $response->assertSee('data-sort-group', false);
+        $response->assertSee("sortBy('da')", false);
+        $response->assertSee("sortBy('dr')", false);
+        $response->assertSee("sortBy('semrush')", false);
+        $response->assertSee('Ahrefs Kelime', false);
+        $response->assertDontSee('Ahrefs Rank', false);
+        $response->assertDontSee('Tahmini Teslimat', false);
     }
 
     public function test_filters_by_category_slug(): void

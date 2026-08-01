@@ -25,6 +25,7 @@ class CartCheckoutService
 {
     public function __construct(
         protected PaymentDiscountCalculator $discountCalculator,
+        protected CartService $cartService,
     ) {}
 
     public function checkout(
@@ -47,8 +48,11 @@ class CartCheckoutService
             $cart = Cart::query()->whereKey($cart->id)->lockForUpdate()->firstOrFail();
             $cart->load('items');
 
+            $this->cartService->repriceCart($cart);
+            $cart->load('items');
+
             $subtotal = round((float) $cart->items->sum(fn (CartItem $item): float => (float) $item->price), 2);
-            $currency = $cart->items->first()?->currency ?? Currency::Try;
+            $currency = Currency::Try;
 
             $tier = DiscountTier::bestForAmount($subtotal);
             $tierDiscount = $tier?->discountAmount($subtotal) ?? 0.0;
@@ -70,16 +74,16 @@ class CartCheckoutService
                 $couponDiscount = $coupon->discountAmount($subtotal);
             }
 
-            $total = max(0, round($subtotal - $tierDiscount - $couponDiscount, 2));
+            $totals = $this->cartService->applyVat($subtotal, $tierDiscount, $couponDiscount);
 
             $orderGroup = OrderGroup::query()->create([
                 'user_id' => $cart->user_id ?? $billingProfile?->user_id,
                 'subtotal' => $subtotal,
                 'discount_tier_amount' => $tierDiscount,
                 'coupon_discount_amount' => $couponDiscount,
-                'vat_amount' => null,
+                'vat_amount' => $totals['vat_amount'],
                 'vat_withholding_amount' => null,
-                'total' => $total,
+                'total' => $totals['total'],
                 'currency' => $currency,
                 'billing_profile_id' => $billingProfile?->id,
                 'contract_accepted_at' => now(),
@@ -92,7 +96,11 @@ class CartCheckoutService
                     'status' => OrderStatus::PaymentPending,
                     'content_source' => ContentSource::CustomerProvided,
                     'price' => $item->price,
-                    'currency' => $item->currency,
+                    'currency' => Currency::Try,
+                    'source_price' => $item->source_price,
+                    'source_currency' => $item->source_currency,
+                    'exchange_rate' => $item->exchange_rate,
+                    'exchange_rate_id' => $item->exchange_rate_id,
                     'product_type' => $item->product_type,
                     'site_bundle_id' => $item->site_bundle_id,
                     'footer_link_duration_option_id' => $item->footer_link_duration_option_id,

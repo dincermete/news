@@ -1,5 +1,6 @@
 <?php
 
+use App\Console\Commands\FetchTcmbExchangeRates;
 use App\Console\Commands\GenerateSitemap;
 use App\Console\Commands\PruneStaleLiveSessions;
 use App\Console\Commands\RefreshPublicStats;
@@ -16,3 +17,6 @@ Schedule::command(VerifyPublishedLinks::class)->daily();
 Schedule::command(GenerateSitemap::class)->daily();
 Schedule::command(PruneStaleLiveSessions::class)->everyMinute();
 Schedule::command(RefreshPublicStats::class)->everyFiveMinutes();
+Schedule::command(FetchTcmbExchangeRates::class)
+    ->dailyAt('16:00')
+    ->timezone('Europe/Istanbul');

@@ -3,10 +3,12 @@
 namespace Database\Factories;
 
 use App\Enums\SiteStatus;
+use App\Models\BacklinkPackage;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
- * @extends Factory<\App\Models\BacklinkPackage>
+ * @extends Factory<BacklinkPackage>
  */
 class BacklinkPackageFactory extends Factory
 {
@@ -15,8 +17,11 @@ class BacklinkPackageFactory extends Factory
      */
     public function definition(): array
     {
+        $name = fake()->unique()->words(2, true);
+
         return [
-            'name' => fake()->words(2, true),
+            'name' => $name,
+            'slug' => Str::slug($name).'-'.fake()->unique()->numerify('###'),
             'description' => fake()->sentence(),
             'competition_label' => '%50 Orta Rekabet',
             'price' => fake()->randomFloat(2, 3000, 20000),

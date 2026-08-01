@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Enums\SiteStatus;
 use App\Models\FaqEntry;
 use App\Models\SiteBundle;
+use App\Services\ProductPublicUrl;
 use App\Services\SeoMetaService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -18,7 +20,7 @@ class SiteBundleCatalogController extends Controller
 
         $query = SiteBundle::query()
             ->withCount('sites')
-            ->with(['sites' => fn ($sites) => $sites->orderBy('domain')])
+            ->with(['sites' => fn ($sites) => $sites->orderBy('domain')->with('category')])
             ->where('status', SiteStatus::Active);
 
         if ($q !== '') {
@@ -35,18 +37,29 @@ class SiteBundleCatalogController extends Controller
         ]);
     }
 
-    public function show(string $slug, SeoMetaService $seo): View
+    public function show(string $slug, SeoMetaService $seo, ProductPublicUrl $publicUrls): View|RedirectResponse
     {
         $bundle = SiteBundle::query()
             ->where('slug', $slug)
             ->where('status', SiteStatus::Active)
-            ->withCount('sites')
-            ->with(['sites' => fn ($sites) => $sites->orderBy('domain')->with('category')])
             ->first();
 
         if ($bundle === null) {
             throw new NotFoundHttpException;
         }
+
+        $canonical = $publicUrls->redirectTargetIfCanonicalDiffers($bundle);
+        if ($canonical !== null) {
+            return redirect()->to($canonical, 301);
+        }
+
+        return $this->showBundle($bundle, $seo);
+    }
+
+    public function showBundle(SiteBundle $bundle, SeoMetaService $seo): View
+    {
+        $bundle->loadCount('sites');
+        $bundle->load(['sites' => fn ($sites) => $sites->orderBy('domain')->with('category')]);
 
         $faqs = FaqEntry::query()
             ->active()
@@ -58,25 +71,16 @@ class SiteBundleCatalogController extends Controller
             ->where('status', SiteStatus::Active)
             ->where('id', '!=', $bundle->id)
             ->withCount('sites')
-            ->with(['sites' => fn ($sites) => $sites->orderBy('domain')])
+            ->with(['sites' => fn ($sites) => $sites->orderBy('domain')->with('category')])
             ->orderBy('price')
             ->limit(4)
             ->get();
-
-        $brand = site_setting('site_name');
 
         return view('bundles.show', [
             'bundle' => $bundle,
             'faqs' => $faqs,
             'relatedBundles' => $relatedBundles,
-            'meta' => [
-                'title' => $bundle->name.' | '.$brand,
-                'description' => $bundle->description
-                    ?: $bundle->sites_count.' siteyi içeren '.$bundle->name.' tanıtım paketi.',
-                'keywords' => null,
-                'og_image' => null,
-                'og_url' => route('bundles.show', $bundle->slug),
-            ],
+            'meta' => $seo->forBundle($bundle),
         ]);
     }
 }

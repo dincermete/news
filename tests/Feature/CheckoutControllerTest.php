@@ -53,9 +53,10 @@ class CheckoutControllerTest extends TestCase
             ->assertRedirect(route('login'));
     }
 
-    public function test_checkout_blocked_when_cart_has_unconfigured_item(): void
+    public function test_checkout_allows_unconfigured_cart_item(): void
     {
         $user = User::factory()->create();
+        $billing = BillingProfile::factory()->create(['user_id' => $user->id]);
         $cart = Cart::factory()->create(['user_id' => $user->id, 'status' => CartStatus::Active]);
 
         CartItem::factory()->create([
@@ -64,23 +65,37 @@ class CheckoutControllerTest extends TestCase
             'price' => 100,
             'currency' => Currency::Try,
             'configured_at' => null,
+            'content_payload' => null,
+            'content_mode' => null,
         ]);
+
+        $this->mock(PaytrService::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('getIframeToken')
+                ->once()
+                ->andReturnUsing(function (Payment $payment): array {
+                    $payment->forceFill(['paytr_token' => 'test-token'])->save();
+
+                    return [
+                        'token' => 'test-token',
+                        'merchant_oid' => 'GRPTEST',
+                        'payment' => $payment,
+                    ];
+                });
+        });
 
         $this->actingAs($user)
             ->get(route('checkout.show'))
-            ->assertRedirect(route('cart.index'))
-            ->assertSessionHasErrors('cart');
+            ->assertOk();
 
         $this->actingAs($user)
-            ->from(route('cart.index'))
             ->post(route('checkout.process'), [
+                'billing_profile_id' => $billing->id,
                 'payment_method' => PaymentMethod::Card->value,
                 'contracts_accepted' => '1',
             ])
-            ->assertRedirect(route('cart.index'))
-            ->assertSessionHasErrors('cart');
+            ->assertOk();
 
-        $this->assertDatabaseCount('order_groups', 0);
+        $this->assertDatabaseCount('order_groups', 1);
     }
 
     public function test_process_requires_contract_acceptance(): void
@@ -131,13 +146,14 @@ class CheckoutControllerTest extends TestCase
 
         $this->assertDatabaseHas(OrderGroup::class, [
             'user_id' => $user->id,
-            'total' => 100,
+            'total' => 120,
+            'vat_amount' => 20,
         ]);
 
         $this->assertDatabaseHas(Payment::class, [
             'method' => PaymentMethod::Card->value,
             'status' => PaymentStatus::Pending->value,
-            'amount' => 100,
+            'amount' => 120,
         ]);
     }
 
@@ -163,12 +179,33 @@ class CheckoutControllerTest extends TestCase
 
         $this->assertDatabaseHas(Payment::class, [
             'method' => PaymentMethod::BankTransfer->value,
-            'amount' => 98,
+            'amount' => 117.6,
             'status' => PaymentStatus::Pending->value,
         ]);
     }
 
-    public function test_checkout_succeeds_without_any_billing_info(): void
+    public function test_checkout_requires_billing_info(): void
+    {
+        $user = User::factory()->create();
+        $this->seedCart($user, 100);
+
+        $this->mock(PaytrService::class, function (MockInterface $mock): void {
+            $mock->shouldNotReceive('getIframeToken');
+        });
+
+        $this->actingAs($user)
+            ->from(route('checkout.show'))
+            ->post(route('checkout.process'), [
+                'payment_method' => PaymentMethod::Card->value,
+                'contracts_accepted' => '1',
+            ])
+            ->assertRedirect(route('checkout.show'))
+            ->assertSessionHasErrors(['billing_type', 'tax_id']);
+
+        $this->assertDatabaseCount('order_groups', 0);
+    }
+
+    public function test_checkout_accepts_new_billing_profile_without_address(): void
     {
         $user = User::factory()->create();
         $this->seedCart($user, 100);
@@ -189,6 +226,8 @@ class CheckoutControllerTest extends TestCase
 
         $this->actingAs($user)
             ->post(route('checkout.process'), [
+                'billing_type' => 'individual',
+                'tax_id' => '12345678901',
                 'payment_method' => PaymentMethod::Card->value,
                 'contracts_accepted' => '1',
             ])
@@ -197,7 +236,12 @@ class CheckoutControllerTest extends TestCase
         $group = OrderGroup::query()->where('user_id', $user->id)->first();
 
         $this->assertNotNull($group);
-        $this->assertNull($group->billing_profile_id);
+        $this->assertNotNull($group->billing_profile_id);
+        $this->assertDatabaseHas(BillingProfile::class, [
+            'id' => $group->billing_profile_id,
+            'tax_id' => '12345678901',
+            'address' => null,
+        ]);
     }
 
     public function test_balance_checkout_calls_wallet_payment_service(): void
@@ -277,7 +321,13 @@ class CheckoutControllerTest extends TestCase
         $this->actingAs($user)
             ->get(route('checkout.show'))
             ->assertOk()
-            ->assertSee('196');
+            ->assertSee('KDV')
+            ->assertSee('40,00')
+            ->assertSee('Fatura Bilgileri')
+            ->assertViewHas('payable', function (array $payable): bool {
+                return abs($payable[PaymentMethod::Card->value] - 240.0) < 0.01
+                    && abs($payable[PaymentMethod::BankTransfer->value] - 235.2) < 0.01;
+            });
     }
 
     public function test_legal_page_route_serves_seeded_contract_page(): void

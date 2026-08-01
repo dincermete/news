@@ -3,9 +3,9 @@
     $payload = is_array($item->content_payload) ? $item->content_payload : [];
 @endphp
 <div class="bg-paper p-5">
-    <form method="post" action="{{ route('cart.update-content', $item) }}" class="space-y-3">
+    <form method="post" action="{{ $updateUrl ?? route('cart.update-content', $item) }}" class="space-y-3">
         @csrf
-        @method('PATCH')
+        @method($updateMethod ?? 'PATCH')
 
         <div class="grid gap-3 sm:grid-cols-2">
             <div>

@@ -31,9 +31,18 @@ class AccountOrderBillingController extends Controller
             ],
             'billing_type' => ['required_without:billing_profile_id', Rule::enum(BillingProfileType::class)],
             'tax_id' => ['required_without:billing_profile_id', 'string', 'max:32'],
-            'company_name' => ['nullable', 'string', 'max:255'],
-            'address' => ['required_without:billing_profile_id', 'string', 'max:2000'],
-            'tax_office' => ['nullable', 'string', 'max:255'],
+            'company_name' => [
+                'nullable',
+                'required_if:billing_type,'.BillingProfileType::Corporate->value,
+                'string',
+                'max:255',
+            ],
+            'tax_office' => [
+                'nullable',
+                'required_if:billing_type,'.BillingProfileType::Corporate->value,
+                'string',
+                'max:255',
+            ],
         ]);
 
         $billingProfile = $this->billingProfiles->resolveRequired($request, $data);

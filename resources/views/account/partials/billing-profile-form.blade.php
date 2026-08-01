@@ -57,10 +57,6 @@
                 <input type="text" name="company_name" value="{{ old('company_name') }}" class="{{ $input }}" :disabled="billingMode !== 'new'">
             </div>
             <div>
-                <label class="{{ $label }}">Adres</label>
-                <textarea name="address" rows="2" class="{{ $input }}" :disabled="billingMode !== 'new'">{{ old('address') }}</textarea>
-            </div>
-            <div>
                 <label class="{{ $label }}">Vergi dairesi</label>
                 <input type="text" name="tax_office" value="{{ old('tax_office') }}" class="{{ $input }}" :disabled="billingMode !== 'new'">
             </div>

@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources\SiteBundles\Tables;
 
-use Filament\Actions\BulkActionGroup;
+use App\Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Tables\Columns\ColorColumn;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -18,6 +20,12 @@ class SiteBundlesTable
                     ->label('Ad')
                     ->searchable()
                     ->sortable(),
+                IconColumn::make('icon')
+                    ->label('İkon')
+                    ->icon(fn ($state): ?string => filled($state) ? (string) $state : 'heroicon-o-cube')
+                    ->color('gray'),
+                ColorColumn::make('bg_color_from')
+                    ->label('Renk'),
                 TextColumn::make('price')
                     ->label('Fiyat')
                     ->money(fn ($record) => $record->currency?->value ?? 'TRY')

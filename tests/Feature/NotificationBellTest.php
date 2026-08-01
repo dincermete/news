@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Enums\NotificationAudience;
+use App\Models\Announcement;
 use App\Models\User;
 use App\Models\UserNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -53,6 +55,23 @@ class NotificationBellTest extends TestCase
         $this->assertNull($notification->fresh()->read_at);
     }
 
+    public function test_header_shows_notification_bell_for_guests(): void
+    {
+        Announcement::factory()->create([
+            'title' => 'Herkese açık duyuru',
+            'audience' => NotificationAudience::All,
+            'is_active' => true,
+            'starts_at' => null,
+            'ends_at' => null,
+        ]);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('aria-label="Bildirimler"', false)
+            ->assertSee('notificationBell', false)
+            ->assertSee('Herkese açık duyuru');
+    }
+
     public function test_header_shows_unread_badge_for_authenticated_user(): void
     {
         $user = User::factory()->customer()->create();
@@ -66,5 +85,20 @@ class NotificationBellTest extends TestCase
             ->assertOk()
             ->assertSee('aria-label="Bildirimler"', false)
             ->assertSee('notificationBell', false);
+    }
+
+    public function test_guest_does_not_see_logged_in_only_announcements(): void
+    {
+        Announcement::factory()->create([
+            'title' => 'Sadece üyeler',
+            'audience' => NotificationAudience::LoggedInOnly,
+            'is_active' => true,
+            'starts_at' => null,
+            'ends_at' => null,
+        ]);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertDontSee('Sadece üyeler');
     }
 }

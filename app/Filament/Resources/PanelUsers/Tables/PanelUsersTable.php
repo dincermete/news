@@ -4,8 +4,8 @@ namespace App\Filament\Resources\PanelUsers\Tables;
 
 use App\Enums\CustomerStatus;
 use App\Enums\UserRole;
+use App\Filament\Actions\BulkActionGroup;
 use App\Filament\Resources\PanelUsers\PanelUserResource;
-use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;

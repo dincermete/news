@@ -123,8 +123,11 @@
                                 @if (! empty($payload['target_url']))
                                     <div><dt class="text-ink-3">Hedef URL</dt><dd class="text-ink">{{ $payload['target_url'] }}</dd></div>
                                 @endif
+                                @if (! empty($payload['site_address']))
+                                    <div><dt class="text-ink-3">Site adresi</dt><dd class="text-ink">{{ $payload['site_address'] }}</dd></div>
+                                @endif
                                 @if (! empty($payload['keywords']))
-                                    <div><dt class="text-ink-3">Anahtar kelimeler</dt><dd class="text-ink">{{ $payload['keywords'] }}</dd></div>
+                                    <div><dt class="text-ink-3">Anahtar kelimeler</dt><dd class="text-ink">{{ is_array($payload['keywords']) ? collect($payload['keywords'])->pluck('word')->filter()->implode(', ') : $payload['keywords'] }}</dd></div>
                                 @endif
                                 @if (! empty($payload['publish_at']))
                                     <div><dt class="text-ink-3">Yayın zamanı</dt><dd class="text-ink">{{ $payload['publish_at'] }}</dd></div>
@@ -142,6 +145,40 @@
                                     <div class="sm:col-span-2"><dt class="text-ink-3">Not</dt><dd class="text-ink">{{ $payload['note'] }}</dd></div>
                                 @endif
                             </dl>
+                        @elseif ($order->canEditContent())
+                            <p class="mt-4 border-t border-ink/10 pt-4 text-xs text-amber-700">Bu ürün henüz yapılandırılmadı. Aşağıdan içeriği tamamlayabilirsiniz.</p>
+                        @endif
+
+                        @if ($order->canEditContent())
+                            <div class="mt-4 overflow-hidden rounded-2xl border border-ink/10" x-data="{ open: {{ $order->isContentConfigured() ? 'false' : 'true' }} }">
+                                <button
+                                    type="button"
+                                    class="flex w-full items-center justify-between gap-3 bg-paper px-4 py-3 text-left text-sm font-semibold text-ink"
+                                    @click="open = !open"
+                                >
+                                    <span>{{ $order->isContentConfigured() ? 'Yapılandırmayı düzenle' : 'Ürünü yapılandır' }}</span>
+                                    <svg class="size-4 text-ink-3 transition" :class="open ? 'rotate-180' : ''" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+                                </button>
+                                <div x-show="open" x-cloak>
+                                    @php
+                                        $updateUrl = route('account.orders.content.update', [$orderGroup, $order]);
+                                        $updateMethod = 'PATCH';
+                                        $pricingLocked = true;
+                                        $item = $order;
+                                    @endphp
+                                    @switch($order->product_type)
+                                        @case(\App\Enums\ProductType::FooterLink)
+                                            @include('cart.partials.footer-link-editor', compact('item', 'updateUrl', 'updateMethod'))
+                                            @break
+                                        @case(\App\Enums\ProductType::SeoPackage)
+                                        @case(\App\Enums\ProductType::BacklinkPackage)
+                                            @include('cart.partials.seo-package-editor', compact('item', 'updateUrl', 'updateMethod'))
+                                            @break
+                                        @default
+                                            @include('cart.partials.content-editor-tabs', compact('item', 'wordPackages', 'updateUrl', 'updateMethod', 'pricingLocked'))
+                                    @endswitch
+                                </div>
+                            </div>
                         @endif
 
                         @if ($order->publishedLink)
@@ -181,7 +218,9 @@
                         @if ($orderGroup->billingProfile->company_name)
                             <div class="flex justify-between gap-3"><dt class="text-ink-2">Ünvan</dt><dd class="text-ink">{{ $orderGroup->billingProfile->company_name }}</dd></div>
                         @endif
-                        <div class="flex justify-between gap-3"><dt class="text-ink-2">Adres</dt><dd class="text-end text-ink">{{ $orderGroup->billingProfile->address }}</dd></div>
+                        @if (filled($orderGroup->billingProfile->address))
+                            <div class="flex justify-between gap-3"><dt class="text-ink-2">Adres</dt><dd class="text-end text-ink">{{ $orderGroup->billingProfile->address }}</dd></div>
+                        @endif
                         @if ($orderGroup->billingProfile->tax_office)
                             <div class="flex justify-between gap-3"><dt class="text-ink-2">Vergi dairesi</dt><dd class="text-ink">{{ $orderGroup->billingProfile->tax_office }}</dd></div>
                         @endif

@@ -88,7 +88,7 @@
     </section>
 
     {{-- ================= NEDEN ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
+    <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
         <div class="mx-auto max-w-2xl text-center">
             <p data-reveal><span class="{{ $chip }}">Neden ücretsiz analiz?</span></p>
             <h2 class="mt-5 {{ $h2 }}" data-reveal>Doğru hizmeti tahmin etmek yerine ölçüyoruz</h2>
@@ -111,7 +111,7 @@
     </section>
 
     {{-- ================= SÜREÇ ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
+    <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
         <div class="mx-auto max-w-2xl text-center">
             <p data-reveal><span class="{{ $chip }}">Süreç</span></p>
             <h2 class="mt-5 {{ $h2 }}" data-reveal>4 adımda ücretsiz analiz</h2>
@@ -129,7 +129,7 @@
     </section>
 
     {{-- ================= ANALİZDE NELER VAR ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
+    <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
         <div class="grid gap-10 lg:grid-cols-2 lg:items-center">
             <div>
                 <p data-reveal><span class="{{ $chip }}">Kapsam</span></p>
@@ -216,7 +216,7 @@
     </section>
 
     {{-- ================= SSS ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+    <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div class="grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
             <div class="lg:sticky lg:top-28 lg:self-start" data-reveal-group>
                 <p data-reveal><span class="{{ $chip }}">SSS</span></p>

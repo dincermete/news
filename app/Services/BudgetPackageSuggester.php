@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\PromotionalListingType;
 use App\Enums\SiteStatus;
 use App\Models\Site;
 use Illuminate\Support\Collection;
@@ -24,16 +25,35 @@ class BudgetPackageSuggester
 
         /** @var Collection<int, Site> $candidates */
         $candidates = Site::query()
+            ->select([
+                'sites.*',
+                'promotional_listings.price as price',
+                'promotional_listings.discount_price as discount_price',
+                'promotional_listings.currency as currency',
+            ])
+            ->join('promotional_listings', function ($join): void {
+                $join->on('promotional_listings.site_id', '=', 'sites.id')
+                    ->where('promotional_listings.type', '=', PromotionalListingType::SiteArticle->value)
+                    ->where('promotional_listings.status', '=', SiteStatus::Active->value);
+            })
             ->with('category')
-            ->where('status', SiteStatus::Active)
+            ->where('sites.status', SiteStatus::Active)
             ->when(
                 $categoryId !== null,
-                fn ($query) => $query->where('site_category_id', $categoryId),
+                fn ($query) => $query->where('sites.site_category_id', $categoryId),
             )
-            ->where('price', '>', 0)
-            ->where('price', '<=', $budget)
-            ->orderBy('price')
-            ->get();
+            ->whereRaw('COALESCE(promotional_listings.discount_price, promotional_listings.price) > 0')
+            ->whereRaw('COALESCE(promotional_listings.discount_price, promotional_listings.price) <= ?', [$budget])
+            ->orderByRaw('COALESCE(promotional_listings.discount_price, promotional_listings.price)')
+            ->get()
+            ->each(function (Site $site): void {
+                $site->normalizeJoinedPricingAttributes();
+                $effective = $site->discount_price !== null
+                    && (float) $site->discount_price < (float) $site->price
+                    ? (float) $site->discount_price
+                    : (float) $site->price;
+                $site->setAttribute('price', $effective);
+            });
 
         if ($candidates->isEmpty()) {
             return ['sites' => [], 'total' => 0.0];

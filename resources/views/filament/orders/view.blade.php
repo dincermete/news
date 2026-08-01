@@ -420,6 +420,12 @@
                         <div>
                             <div class="ty-line__price">{{ OrderPresentation::money($record->price, $currency) }}</div>
                             <div class="ty-line__qty">× 1</div>
+                            @if ($record->hasForeignSourceCurrency() && $record->source_price !== null && $record->exchange_rate !== null)
+                                <div class="ty-line__sub" style="margin-top:4px;">
+                                    {{ OrderPresentation::money($record->source_price, $record->source_currency?->value) }}
+                                    × {{ number_format((float) $record->exchange_rate, 4, ',', '.') }}
+                                </div>
+                            @endif
                         </div>
                     </div>
 

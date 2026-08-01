@@ -23,7 +23,7 @@
 @section('content')
     <section class="px-2 pt-2 sm:px-3">
         <div class="panel-light relative overflow-hidden rounded-3xl text-ink">
-            <div class="relative mx-auto flex max-w-6xl flex-col items-center px-5 pb-10 pt-14 text-center sm:px-8 sm:pb-12 sm:pt-16">
+            <div class="relative mx-auto flex max-w-7xl flex-col items-center px-5 pb-10 pt-14 text-center sm:px-8 sm:pb-12 sm:pt-16">
                 <p class="inline-flex items-center gap-x-2 rounded-full border border-ink/10 bg-white py-1 pe-3.5 ps-1 text-xs text-ink-2 shadow-soft">
                     <span class="rounded-full bg-brand-500 px-2.5 py-0.5 text-[10px] font-semibold text-white">Footer Link</span>
                     {{ $sites->total() }}+ site
@@ -56,7 +56,7 @@
         </div>
     </section>
 
-    <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         @if ($sites->isEmpty())
             <div class="rounded-[20px] border border-ink/10 bg-paper px-6 py-16 text-center">
                 <p class="font-display text-lg font-semibold text-ink">Bu filtrelere uygun site bulunamadı.</p>
@@ -92,20 +92,21 @@
                             @foreach ($sites as $site)
                                     @php
                                         $optionPrices = $durationOptions->mapWithKeys(
-                                            fn ($option) => [(string) $option->id => $money($option->resolvePrice($site->base_price), $site->currency?->value ?? 'TRY')]
+                                            fn ($option) => [(string) $option->id => $money((float) $site->base_price, $site->currency?->value ?? 'TRY')]
                                         );
                                         $isFavorited = in_array($site->id, $favoritedSiteIds, true);
 
                                         $metrics = [
+                                            ['label' => 'Aylık Trafik', 'value' => $num($site->monthly_traffic_value !== null ? (float) $site->monthly_traffic_value : null), 'icon' => 'google'],
                                             ['label' => 'Moz Rank', 'value' => $num($site->moz_rank_value !== null ? (float) $site->moz_rank_value : null), 'icon' => 'moz'],
                                             ['label' => 'Majestic CF', 'value' => $num($site->majestic_cf_value !== null ? (float) $site->majestic_cf_value : null), 'icon' => 'majestic'],
                                             ['label' => 'Majestic TF', 'value' => $num($site->majestic_tf_value !== null ? (float) $site->majestic_tf_value : null), 'icon' => 'majestic'],
-                                            ['label' => 'Ahrefs DR', 'value' => $num($site->ahrefs_dr_value !== null ? (float) $site->ahrefs_dr_value : null), 'icon' => 'ahrefs'],
-                                            ['label' => 'Ahrefs Rank', 'value' => $num($site->ahrefs_rank_value !== null ? (float) $site->ahrefs_rank_value : null), 'icon' => 'ahrefs'],
-                                            ['label' => 'Aylık Trafik', 'value' => $num($site->monthly_traffic_value !== null ? (float) $site->monthly_traffic_value : null), 'icon' => 'google'],
                                             ['label' => 'Backlink', 'value' => $num($site->backlinks_value !== null ? (float) $site->backlinks_value : null), 'icon' => 'ahrefs'],
-                                            ['label' => 'Max Link Çıkışı', 'value' => $site->max_link_count !== null ? (string) $site->max_link_count : '—', 'icon' => null],
-                                            ['label' => 'Tahmini Teslimat', 'value' => $site->estimated_delivery ?: '—', 'icon' => null],
+                                            ['label' => 'Link Çıkışı', 'value' => $site->max_link_count !== null ? (string) $site->max_link_count : '—', 'icon' => null],
+                                            ['label' => 'Spam Score', 'value' => $num($site->spam_score_value !== null ? (float) $site->spam_score_value : null), 'icon' => 'moz'],
+                                            ['label' => 'Ahrefs Kelime', 'value' => $num($site->ahrefs_keywords_value !== null ? (float) $site->ahrefs_keywords_value : null), 'icon' => 'ahrefs'],
+                                            ['label' => 'Ahrefs DR', 'value' => $num($site->ahrefs_dr_value !== null ? (float) $site->ahrefs_dr_value : null), 'icon' => 'ahrefs'],
+                                            ['label' => 'Semrush AS', 'value' => $num($site->semrush_authority_score_value !== null ? (float) $site->semrush_authority_score_value : null), 'icon' => 'semrush'],
                                         ];
                                     @endphp
                                     <tr
@@ -113,7 +114,7 @@
                                         x-data="{ optionId: '{{ $durationOptions->first()?->id }}', prices: {{ $optionPrices->toJson() }} }"
                                     >
                                         <td class="sticky start-0 z-10 bg-white px-5 py-3.5 transition group-hover:bg-paper">
-                                            <a href="{{ route('sites.show', $site->domain) }}" class="flex items-center gap-x-3">
+                                            <a href="{{ storefront_site_url($site) }}" class="flex items-center gap-x-3">
                                                 <x-site-logo :site="$site" :height="28" class="shrink-0 rounded-lg" />
                                                 <span class="min-w-0">
                                                     <span class="block truncate text-sm font-semibold text-ink transition group-hover:text-accent-700">{{ $site->domain }}</span>
@@ -169,6 +170,8 @@
                                         </td>
                                     <td class="px-5 py-3.5">
                                         <div class="flex items-center justify-end gap-2">
+                                            <x-visit-site-button :site="$site" compact />
+
                                             <button
                                                 type="button"
                                                 @click="openRows[{{ $site->id }}] = !openRows[{{ $site->id }}]"

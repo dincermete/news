@@ -17,13 +17,15 @@ class SiteExportController extends Controller
     {
         $filters = SiteCatalogFilters::fromRequest($request);
 
-        $sites = $filters->apply(CatalogQuery::activeSites())->get();
+        $sites = CatalogQuery::catalog($filters)->get();
+        $sites->each(fn ($site) => $site->normalizeJoinedPricingAttributes());
 
         $columns = [
-            'Site Adı', 'Kategori', 'Google Index', 'Google News', 'Site Yaşı',
-            'Moz DA', 'Moz PA', 'Moz Rank', 'Majestic CF', 'Majestic TF',
-            'Ahrefs DR', 'Ahrefs Rank', 'Aylık Trafik', 'Backlink',
-            'Link Türü', 'Max Link Çıkışı', 'Tahmini Teslimat', 'Fiyat', 'Para Birimi',
+            'Site Adı', 'Kategori', 'Google Index', 'Google News',
+            'Moz DA', 'Moz PA', 'Ahrefs DR', 'Semrush Authority Score', 'Site Yaşı',
+            'Link Türü', 'Fiyat', 'Para Birimi',
+            'Aylık Trafik', 'Moz Rank', 'Majestic CF', 'Majestic TF',
+            'Backlink', 'Link Çıkışı', 'Spam Score', 'Ahrefs Kelime',
         ];
 
         $filename = 'siteler-'.now()->format('Y-m-d').'.csv';
@@ -39,21 +41,22 @@ class SiteExportController extends Controller
                     $site->category?->name ?? 'Kategorisiz',
                     $site->is_google_indexed ? 'Var' : 'Yok',
                     $site->is_news_approved ? 'Var' : 'Yok',
-                    $site->age,
                     $site->da_value,
                     $site->pa_value,
+                    $site->ahrefs_dr_value,
+                    $site->semrush_authority_score_value,
+                    $site->age,
+                    $site->is_dofollow ? 'Dofollow' : 'Nofollow',
+                    $site->price,
+                    $site->currency?->value ?? (string) $site->currency,
+                    $site->monthly_traffic_value,
                     $site->moz_rank_value,
                     $site->majestic_cf_value,
                     $site->majestic_tf_value,
-                    $site->ahrefs_dr_value,
-                    $site->ahrefs_rank_value,
-                    $site->monthly_traffic_value,
                     $site->backlinks_value,
-                    $site->is_dofollow ? 'Dofollow' : 'Nofollow',
                     $site->max_link_count,
-                    $site->estimated_delivery,
-                    $site->price,
-                    $site->currency?->value ?? (string) $site->currency,
+                    $site->spam_score_value,
+                    $site->ahrefs_keywords_value,
                 ]);
             }
 

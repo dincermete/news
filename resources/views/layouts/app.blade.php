@@ -30,7 +30,7 @@
 <body class="storefront flex min-h-screen flex-col bg-white font-sans text-ink antialiased">
     @include('partials.header')
 
-    <main id="main" class="@yield('mainClass', 'mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 lg:px-8')">
+    <main id="main" class="@yield('mainClass', 'mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:px-8')">
         @yield('content')
     </main>
 

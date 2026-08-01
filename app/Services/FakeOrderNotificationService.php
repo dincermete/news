@@ -55,7 +55,7 @@ class FakeOrderNotificationService
     ];
 
     /**
-     * @return array{message: string, display_interval_seconds: int, name: string, city: string}|null
+     * @return array{message: string, display_interval_seconds: int, name: string, city: string, product: string}|null
      */
     public function next(): ?array
     {
@@ -76,6 +76,7 @@ class FakeOrderNotificationService
             'display_interval_seconds' => self::DISPLAY_INTERVAL_SECONDS,
             'name' => $name,
             'city' => $city,
+            'product' => $product,
         ];
     }
 

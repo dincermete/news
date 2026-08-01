@@ -27,6 +27,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'configured_at',
     'price',
     'currency',
+    'source_price',
+    'source_currency',
+    'exchange_rate',
+    'exchange_rate_id',
 ])]
 class CartItem extends Model
 {
@@ -55,8 +59,23 @@ class CartItem extends Model
             'configured_at' => 'datetime',
             'price' => 'decimal:2',
             'currency' => Currency::class,
+            'source_price' => 'decimal:2',
+            'source_currency' => Currency::class,
+            'exchange_rate' => 'decimal:6',
             'created_at' => 'datetime',
         ];
+    }
+
+    public function exchangeRateRecord(): BelongsTo
+    {
+        return $this->belongsTo(ExchangeRate::class, 'exchange_rate_id');
+    }
+
+    public function hasForeignSourceCurrency(): bool
+    {
+        $source = $this->source_currency ?? $this->currency;
+
+        return $source instanceof Currency && $source !== Currency::Try;
     }
 
     public function isConfigured(): bool

@@ -48,9 +48,6 @@ class SiteResourceTest extends TestCase
                 'is_dofollow' => true,
                 'is_news_approved' => false,
                 'status' => SiteStatus::Active->value,
-                'price' => 100,
-                'discount_price' => 80,
-                'currency' => 'USD',
                 'da_value' => 40,
                 'da_source' => 'manual',
                 'pa_value' => 35,
@@ -64,7 +61,6 @@ class SiteResourceTest extends TestCase
         $this->assertDatabaseHas(Site::class, [
             'domain' => 'example-test.com',
             'site_category_id' => $category->id,
-            'price' => 100,
             'status' => SiteStatus::Active->value,
         ]);
     }

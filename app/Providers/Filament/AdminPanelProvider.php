@@ -48,17 +48,18 @@ class AdminPanelProvider extends PanelProvider
             ->plugin(FilamentShadcnThemePlugin::make())
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
+            ->collapsibleNavigationGroups()
             ->navigationGroups([
-                NavigationGroup::make('Siparişler'),
-                NavigationGroup::make('Ödemeler'),
-                NavigationGroup::make('Müşteriler'),
-                NavigationGroup::make('Siteler'),
-                NavigationGroup::make('Ürünler'),
-                NavigationGroup::make('Kampanyalar'),
-                NavigationGroup::make('Destek'),
-                NavigationGroup::make('İçerik'),
-                NavigationGroup::make('Bildirimler'),
-                NavigationGroup::make('Sistem'),
+                NavigationGroup::make('Siparişler')->collapsible(),
+                NavigationGroup::make('Ödemeler')->collapsible(),
+                NavigationGroup::make('Müşteriler')->collapsible(),
+                NavigationGroup::make('Siteler')->collapsible(),
+                NavigationGroup::make('Ürünler')->collapsible(),
+                NavigationGroup::make('Kampanyalar')->collapsible(),
+                NavigationGroup::make('Destek')->collapsible(),
+                NavigationGroup::make('İçerik')->collapsible(),
+                NavigationGroup::make('Bildirimler')->collapsible(),
+                NavigationGroup::make('Sistem')->collapsible(),
             ])
             ->pages([
                 Dashboard::class,

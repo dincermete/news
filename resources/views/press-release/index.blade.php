@@ -20,7 +20,7 @@
 @section('content')
     <section class="px-2 pt-2 sm:px-3">
         <div class="panel-light relative overflow-hidden rounded-3xl text-ink">
-            <div class="relative mx-auto flex max-w-6xl flex-col items-center px-5 pb-10 pt-14 text-center sm:px-8 sm:pb-12 sm:pt-16">
+            <div class="relative mx-auto flex max-w-7xl flex-col items-center px-5 pb-10 pt-14 text-center sm:px-8 sm:pb-12 sm:pt-16">
                 <p class="inline-flex items-center gap-x-2 rounded-full border border-ink/10 bg-white py-1 pe-3.5 ps-1 text-xs text-ink-2 shadow-soft">
                     <span class="rounded-full bg-brand-500 px-2.5 py-0.5 text-[10px] font-semibold text-white">Basın Bülteni</span>
                     {{ $sites->total() }}+ site
@@ -53,7 +53,7 @@
         </div>
     </section>
 
-    <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div class="flex flex-wrap items-center justify-between gap-3 rounded-[20px] border border-ink/10 bg-paper p-4 sm:p-5">
             <form method="get" action="{{ route('press-release.index') }}" class="flex items-center gap-2">
                 <input type="hidden" name="q" value="{{ $q }}">
@@ -78,7 +78,7 @@
                     :sites="$sites"
                     :favoritedSiteIds="$favoritedSiteIds"
                     product-type="press_release"
-                    :price="fn ($site) => (float) $site->press_release_price"
+                    :price="fn ($site) => (float) $site->price"
                 />
 
                 <div class="mt-6">

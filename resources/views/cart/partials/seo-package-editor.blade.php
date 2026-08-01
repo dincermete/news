@@ -26,9 +26,9 @@
         },
     }"
 >
-    <form method="post" action="{{ route('cart.update-content', $item) }}" class="space-y-4">
+    <form method="post" action="{{ $updateUrl ?? route('cart.update-content', $item) }}" class="space-y-4">
         @csrf
-        @method('PATCH')
+        @method($updateMethod ?? 'PATCH')
 
         <div>
             <label class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-ink-3">Site Adresi</label>

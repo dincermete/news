@@ -4,10 +4,10 @@ namespace App\Filament\Resources\Customers\Tables;
 
 use App\Enums\Currency;
 use App\Enums\CustomerStatus;
+use App\Filament\Actions\BulkActionGroup;
 use App\Filament\Resources\Customers\Actions\CustomerActions;
 use App\Models\User;
 use App\Models\Wallet;
-use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;

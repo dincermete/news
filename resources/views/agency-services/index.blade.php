@@ -46,7 +46,7 @@
     </section>
 
     {{-- ================= HİZMETLER ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
+    <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
         <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             @foreach ($services as $service)
                 <a href="{{ route('agency-services.show', $service['slug']) }}" class="group flex flex-col rounded-[20px] bg-paper p-6 transition hover:-translate-y-0.5 hover:shadow-pop" data-reveal>

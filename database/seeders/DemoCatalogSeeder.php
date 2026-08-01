@@ -6,11 +6,11 @@ use App\Enums\CouponType;
 use App\Enums\Currency;
 use App\Enums\SiteStatus;
 use App\Enums\SpinPrizeType;
+use App\Models\BacklinkPackage;
 use App\Models\Coupon;
 use App\Models\DiscountTier;
 use App\Models\FooterLink;
 use App\Models\FooterLinkDurationOption;
-use App\Models\BacklinkPackage;
 use App\Models\Label;
 use App\Models\Page;
 use App\Models\SeoPackage;
@@ -20,7 +20,9 @@ use App\Models\SiteBundle;
 use App\Models\SiteCategory;
 use App\Models\SpinWheelPrize;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 /**
  * Demo / local catalog data: 100 active sites + product catalog models.
@@ -64,9 +66,9 @@ class DemoCatalogSeeder extends Seeder
     }
 
     /**
-     * @return \Illuminate\Support\Collection<int, SiteCategory>
+     * @return Collection<int, SiteCategory>
      */
-    protected function seedCategories(): \Illuminate\Support\Collection
+    protected function seedCategories(): Collection
     {
         $items = [
             ['name' => 'Haber', 'slug' => 'haber'],
@@ -91,9 +93,9 @@ class DemoCatalogSeeder extends Seeder
     }
 
     /**
-     * @return \Illuminate\Support\Collection<int, Label>
+     * @return Collection<int, Label>
      */
-    protected function seedLabels(): \Illuminate\Support\Collection
+    protected function seedLabels(): Collection
     {
         $items = [
             ['name' => 'Premium', 'color' => '#d97706'],
@@ -112,13 +114,13 @@ class DemoCatalogSeeder extends Seeder
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int, SiteCategory>  $categories
-     * @param  \Illuminate\Support\Collection<int, Label>  $labels
+     * @param  Collection<int, SiteCategory>  $categories
+     * @param  Collection<int, Label>  $labels
      * @return \Illuminate\Database\Eloquent\Collection<int, Site>
      */
     protected function seedSites(
-        \Illuminate\Support\Collection $categories,
-        \Illuminate\Support\Collection $labels,
+        Collection $categories,
+        Collection $labels,
     ): \Illuminate\Database\Eloquent\Collection {
         $existingActive = Site::query()->where('status', SiteStatus::Active)->count();
         $needed = max(0, 100 - $existingActive);
@@ -185,6 +187,7 @@ class DemoCatalogSeeder extends Seeder
             $bundle = SiteBundle::query()->updateOrCreate(
                 ['name' => $data['name']],
                 [
+                    'slug' => Str::slug($data['name']),
                     'description' => $data['name'].' — demo paket açıklaması.',
                     'price' => $data['price'],
                     'currency' => Currency::Try,

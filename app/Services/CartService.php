@@ -6,15 +6,17 @@ use App\Enums\CartStatus;
 use App\Enums\ContentMode;
 use App\Enums\Currency;
 use App\Enums\ProductType;
+use App\Enums\PromotionalListingType;
 use App\Enums\SiteStatus;
 use App\Exceptions\InvalidCouponException;
 use App\Models\ArticleWordPackage;
+use App\Models\BacklinkPackage;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Coupon;
 use App\Models\DiscountTier;
 use App\Models\FooterLinkDurationOption;
-use App\Models\BacklinkPackage;
+use App\Models\PromotionalListing;
 use App\Models\SeoPackage;
 use App\Models\SeoPackageDurationOption;
 use App\Models\Site;
@@ -22,6 +24,7 @@ use App\Models\SiteBundle;
 use App\Models\User;
 use App\Models\WalletTopupPackage;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -33,6 +36,10 @@ class CartService
     public const SESSION_COUPON_KEY = 'cart_coupon_code';
 
     public const MIN_WALLET_TOPUP_AMOUNT = 50.0;
+
+    public function __construct(
+        protected CurrencyConverter $converter,
+    ) {}
 
     public function sessionToken(Request $request): string
     {
@@ -126,46 +133,28 @@ class CartService
 
     public function addSiteArticle(Cart $cart, Site $site): CartItem
     {
-        if ($site->status !== SiteStatus::Active) {
-            throw ValidationException::withMessages([
-                'site_id' => 'Bu site sepete eklenemez.',
-            ]);
-        }
+        $listing = $this->resolveActiveListing($site, PromotionalListingType::SiteArticle);
 
-        return CartItem::query()->create([
+        return CartItem::query()->create(array_merge([
             'cart_id' => $cart->id,
             'product_type' => ProductType::SiteArticle,
             'site_id' => $site->id,
             'content_mode' => ContentMode::FileUpload,
             'content_payload' => null,
-            'price' => $this->siteBasePrice($site),
-            'currency' => $site->currency,
-        ]);
+        ], $this->converter->pricingPayload($listing->effectivePrice(), $listing->currency)));
     }
 
     public function addPressRelease(Cart $cart, Site $site): CartItem
     {
-        if ($site->status !== SiteStatus::Active) {
-            throw ValidationException::withMessages([
-                'site_id' => 'Bu site sepete eklenemez.',
-            ]);
-        }
+        $listing = $this->resolveActiveListing($site, PromotionalListingType::PressRelease);
 
-        if ($site->press_release_price === null) {
-            throw ValidationException::withMessages([
-                'site_id' => 'Bu site basın bülteni satmıyor.',
-            ]);
-        }
-
-        return CartItem::query()->create([
+        return CartItem::query()->create(array_merge([
             'cart_id' => $cart->id,
             'product_type' => ProductType::PressRelease,
             'site_id' => $site->id,
             'content_mode' => ContentMode::FileUpload,
             'content_payload' => null,
-            'price' => round((float) $site->press_release_price, 2),
-            'currency' => $site->currency,
-        ]);
+        ], $this->converter->pricingPayload($listing->effectivePrice(), $listing->currency)));
     }
 
     public function addBundle(Cart $cart, SiteBundle $bundle): CartItem
@@ -176,24 +165,18 @@ class CartService
             ]);
         }
 
-        return CartItem::query()->create([
+        return CartItem::query()->create(array_merge([
             'cart_id' => $cart->id,
             'product_type' => ProductType::Bundle,
             'site_bundle_id' => $bundle->id,
             'content_mode' => ContentMode::FileUpload,
             'content_payload' => null,
-            'price' => round((float) $bundle->price, 2),
-            'currency' => $bundle->currency,
-        ]);
+        ], $this->converter->pricingPayload(round((float) $bundle->price, 2), $bundle->currency)));
     }
 
     public function addFooterLink(Cart $cart, Site $site, FooterLinkDurationOption $option): CartItem
     {
-        if ($site->status !== SiteStatus::Active) {
-            throw ValidationException::withMessages([
-                'site_id' => 'Bu site sepete eklenemez.',
-            ]);
-        }
+        $listing = $this->resolveActiveListing($site, PromotionalListingType::FooterLink);
 
         if (! $option->is_active) {
             throw ValidationException::withMessages([
@@ -201,16 +184,17 @@ class CartService
             ]);
         }
 
-        return CartItem::query()->create([
+        return CartItem::query()->create(array_merge([
             'cart_id' => $cart->id,
             'product_type' => ProductType::FooterLink,
             'site_id' => $site->id,
             'footer_link_duration_option_id' => $option->id,
             'content_mode' => ContentMode::None,
             'content_payload' => null,
-            'price' => $option->resolvePrice($this->siteBasePrice($site)),
-            'currency' => $site->currency,
-        ]);
+        ], $this->converter->pricingPayload(
+            $listing->effectivePrice(),
+            $listing->currency,
+        )));
     }
 
     public function addSeoPackage(Cart $cart, SeoPackage $package, SeoPackageDurationOption $option): CartItem
@@ -227,16 +211,17 @@ class CartService
             ]);
         }
 
-        return CartItem::query()->create([
+        return CartItem::query()->create(array_merge([
             'cart_id' => $cart->id,
             'product_type' => ProductType::SeoPackage,
             'seo_package_id' => $package->id,
             'seo_package_duration_option_id' => $option->id,
             'content_mode' => ContentMode::None,
             'content_payload' => null,
-            'price' => $option->resolvePrice($package->monthly_price),
-            'currency' => $package->currency,
-        ]);
+        ], $this->converter->pricingPayload(
+            $option->resolvePrice($package->monthly_price),
+            $package->currency,
+        )));
     }
 
     public function addBacklinkPackage(Cart $cart, BacklinkPackage $package): CartItem
@@ -247,15 +232,13 @@ class CartService
             ]);
         }
 
-        return CartItem::query()->create([
+        return CartItem::query()->create(array_merge([
             'cart_id' => $cart->id,
             'product_type' => ProductType::BacklinkPackage,
             'backlink_package_id' => $package->id,
             'content_mode' => ContentMode::None,
             'content_payload' => null,
-            'price' => round((float) $package->price, 2),
-            'currency' => $package->currency,
-        ]);
+        ], $this->converter->pricingPayload(round((float) $package->price, 2), $package->currency)));
     }
 
     public function addWalletTopup(Cart $cart, ?WalletTopupPackage $package, ?float $customAmount): CartItem
@@ -278,16 +261,14 @@ class CartService
             }
         }
 
-        return CartItem::query()->create([
+        return CartItem::query()->create(array_merge([
             'cart_id' => $cart->id,
             'product_type' => ProductType::Balance,
             'wallet_topup_package_id' => $package?->id,
             'content_mode' => ContentMode::None,
             'content_payload' => null,
-            'price' => $amount,
-            'currency' => Currency::Try,
             'configured_at' => now(),
-        ]);
+        ], $this->converter->pricingPayload($amount, Currency::Try)));
     }
 
     public function removeItem(CartItem $item): void
@@ -302,8 +283,8 @@ class CartService
      *     keywords?: string|null,
      *     brief?: string|null,
      *     article_word_package_id?: int|null,
-     *     file?: \Illuminate\Http\UploadedFile|null,
-     *     image?: \Illuminate\Http\UploadedFile|null,
+     *     file?: UploadedFile|null,
+     *     image?: UploadedFile|null,
      *     publish_at?: string|null,
      *     note?: string|null
      * }  $data
@@ -337,7 +318,7 @@ class CartService
         }
 
         $packageId = null;
-        $price = $this->itemBasePrice($item);
+        $addonTry = 0.0;
 
         if ($mode === ContentMode::FileUpload) {
             if (isset($data['file']) && $data['file'] !== null) {
@@ -369,7 +350,7 @@ class CartService
                 : ($payload['brief'] ?? null);
 
             unset($payload['file_path']);
-            $price = round($price + (float) $package->price, 2);
+            $addonTry = round((float) $package->price, 2);
             $packageId = $package->id;
         }
 
@@ -377,15 +358,20 @@ class CartService
             ? $packageId !== null
             : (filled($payload['file_path'] ?? null) || filled($payload['target_url'] ?? null));
 
-        $item->forceFill([
+        $pricing = $this->pricingForSourceAmount(
+            $this->itemSourceBasePrice($item),
+            $this->itemSourceCurrency($item),
+            $addonTry,
+        );
+
+        $item->forceFill(array_merge([
             'content_mode' => $mode,
             'content_payload' => $payload,
             'article_word_package_id' => $packageId,
-            'price' => $price,
             'configured_at' => $configured ? now() : null,
-        ])->save();
+        ], $pricing))->save();
 
-        return $item->fresh(['site', 'siteBundle', 'articleWordPackage']) ?? $item;
+        return $item->fresh(['site', 'siteBundle', 'articleWordPackage', 'exchangeRateRecord']) ?? $item;
     }
 
     protected function updateFooterLinkContent(CartItem $item, array $data): CartItem
@@ -445,6 +431,33 @@ class CartService
     }
 
     /**
+     * Reprice foreign-currency cart lines with the latest TCMB rate.
+     */
+    public function repriceCart(Cart $cart): Cart
+    {
+        $cart->loadMissing(['items.articleWordPackage']);
+
+        foreach ($cart->items as $item) {
+            $this->repriceItem($item);
+        }
+
+        return $cart->load('items');
+    }
+
+    public function repriceItem(CartItem $item): CartItem
+    {
+        $sourceCurrency = $this->itemSourceCurrency($item);
+        $sourcePrice = $this->resolveStoredSourcePrice($item);
+        $addonTry = $this->wordPackageAddonTry($item);
+
+        $pricing = $this->pricingForSourceAmount($sourcePrice, $sourceCurrency, $addonTry);
+
+        $item->forceFill($pricing)->save();
+
+        return $item;
+    }
+
+    /**
      * @return array{
      *     subtotal: float,
      *     tier: ?DiscountTier,
@@ -453,11 +466,15 @@ class CartService
      *     coupon_discount: float,
      *     coupon_code: ?string,
      *     coupon_error: ?string,
+     *     net: float,
+     *     vat_rate: float,
+     *     vat_amount: float,
      *     total: float
      * }
      */
     public function summarize(Cart $cart, ?string $couponCode = null): array
     {
+        $this->repriceCart($cart);
         $cart->loadMissing('items');
 
         $subtotal = round((float) $cart->items->sum(fn (CartItem $item): float => (float) $item->price), 2);
@@ -479,7 +496,7 @@ class CartService
             }
         }
 
-        $total = max(0, round($subtotal - $tierDiscount - $couponDiscount, 2));
+        $totals = $this->applyVat($subtotal, $tierDiscount, $couponDiscount);
 
         return [
             'subtotal' => $subtotal,
@@ -489,7 +506,26 @@ class CartService
             'coupon_discount' => $couponDiscount,
             'coupon_code' => $normalizedCode,
             'coupon_error' => $couponError,
-            'total' => $total,
+            ...$totals,
+        ];
+    }
+
+    /**
+     * Apply VAT on top of the discounted net amount.
+     *
+     * @return array{net: float, vat_rate: float, vat_amount: float, total: float}
+     */
+    public function applyVat(float $subtotal, float $tierDiscount = 0.0, float $couponDiscount = 0.0): array
+    {
+        $net = max(0, round($subtotal - $tierDiscount - $couponDiscount, 2));
+        $vatRate = (float) config('payment.vat_rate', 20);
+        $vatAmount = round($net * ($vatRate / 100), 2);
+
+        return [
+            'net' => $net,
+            'vat_rate' => $vatRate,
+            'vat_amount' => $vatAmount,
+            'total' => round($net + $vatAmount, 2),
         ];
     }
 
@@ -524,30 +560,143 @@ class CartService
 
     public function siteBasePrice(Site $site): float
     {
-        if ($site->discount_price !== null && (float) $site->discount_price < (float) $site->price) {
-            return round((float) $site->discount_price, 2);
-        }
-
-        return round((float) $site->price, 2);
+        return $this->listingBasePrice($site, PromotionalListingType::SiteArticle);
     }
 
-    protected function itemBasePrice(CartItem $item): float
+    public function listingBasePrice(Site $site, PromotionalListingType $type): float
     {
-        $item->loadMissing(['site', 'siteBundle']);
+        return $this->resolveActiveListing($site, $type)->effectivePrice();
+    }
 
-        if ($item->product_type === ProductType::PressRelease && $item->site instanceof Site) {
-            return round((float) ($item->site->press_release_price ?? $item->price), 2);
+    public function resolveActiveListing(Site $site, PromotionalListingType $type): PromotionalListing
+    {
+        if ($site->status !== SiteStatus::Active) {
+            throw ValidationException::withMessages([
+                'site_id' => 'Bu site sepete eklenemez.',
+            ]);
+        }
+
+        $listing = PromotionalListing::query()
+            ->where('site_id', $site->id)
+            ->where('type', $type)
+            ->where('status', SiteStatus::Active)
+            ->first();
+
+        if ($listing === null) {
+            $message = match ($type) {
+                PromotionalListingType::PressRelease => 'Bu site basın bülteni satmıyor.',
+                PromotionalListingType::FooterLink => 'Bu site footer link satmıyor.',
+                default => 'Bu site sepete eklenemez.',
+            };
+
+            throw ValidationException::withMessages([
+                'site_id' => $message,
+            ]);
+        }
+
+        return $listing;
+    }
+
+    /**
+     * Catalog base price in the product's native currency (no FX, no AI add-on).
+     */
+    protected function itemSourceBasePrice(CartItem $item): float
+    {
+        $item->loadMissing(['site', 'siteBundle', 'seoPackage', 'seoPackageDurationOption', 'backlinkPackage']);
+
+        $listingType = PromotionalListingType::fromProductType($item->product_type);
+
+        if ($listingType !== null && $item->site instanceof Site) {
+            $listing = PromotionalListing::query()
+                ->where('site_id', $item->site->id)
+                ->where('type', $listingType)
+                ->where('status', SiteStatus::Active)
+                ->first();
+
+            if ($listing !== null) {
+                return $listing->effectivePrice();
+            }
         }
 
         if ($item->product_type === ProductType::Bundle && $item->siteBundle instanceof SiteBundle) {
             return round((float) $item->siteBundle->price, 2);
         }
 
-        if ($item->site instanceof Site) {
-            return $this->siteBasePrice($item->site);
+        if ($item->product_type === ProductType::SeoPackage && $item->seoPackage && $item->seoPackageDurationOption) {
+            return $item->seoPackageDurationOption->resolvePrice($item->seoPackage->monthly_price);
         }
 
+        if ($item->product_type === ProductType::BacklinkPackage && $item->backlinkPackage) {
+            return round((float) $item->backlinkPackage->price, 2);
+        }
+
+        return round((float) ($item->source_price ?? $item->price), 2);
+    }
+
+    protected function itemSourceCurrency(CartItem $item): Currency
+    {
+        if ($item->source_currency instanceof Currency) {
+            return $item->source_currency;
+        }
+
+        if ($item->currency instanceof Currency) {
+            return $item->currency;
+        }
+
+        $item->loadMissing(['site', 'siteBundle', 'seoPackage', 'backlinkPackage']);
+
+        $listingType = PromotionalListingType::fromProductType($item->product_type);
+
+        if ($listingType !== null && $item->site instanceof Site) {
+            $listing = PromotionalListing::query()
+                ->where('site_id', $item->site->id)
+                ->where('type', $listingType)
+                ->first();
+
+            if ($listing?->currency instanceof Currency) {
+                return $listing->currency;
+            }
+        }
+
+        return match ($item->product_type) {
+            ProductType::Bundle => $item->siteBundle?->currency ?? Currency::Try,
+            ProductType::SeoPackage => $item->seoPackage?->currency ?? Currency::Try,
+            ProductType::BacklinkPackage => $item->backlinkPackage?->currency ?? Currency::Try,
+            ProductType::Balance => Currency::Try,
+            default => Currency::Try,
+        };
+    }
+
+    protected function resolveStoredSourcePrice(CartItem $item): float
+    {
+        if ($item->source_price !== null) {
+            return round((float) $item->source_price, 2);
+        }
+
+        // Legacy cart lines: price is already in item.currency
         return round((float) $item->price, 2);
+    }
+
+    protected function wordPackageAddonTry(CartItem $item): float
+    {
+        $item->loadMissing('articleWordPackage');
+
+        if ($item->articleWordPackage === null) {
+            return 0.0;
+        }
+
+        return round((float) $item->articleWordPackage->price, 2);
+    }
+
+    /**
+     * @return array{price: float, currency: Currency, source_price: float, source_currency: Currency, exchange_rate: float, exchange_rate_id: ?int}
+     */
+    protected function pricingForSourceAmount(float $sourceAmount, Currency $sourceCurrency, float $addonTry = 0.0): array
+    {
+        $pricing = $this->converter->pricingPayload($sourceAmount, $sourceCurrency);
+        $pricing['price'] = round((float) $pricing['price'] + $addonTry, 2);
+
+        return $pricing;
     }
 
     protected function findApplicableCoupon(string $code, float $subtotal): Coupon

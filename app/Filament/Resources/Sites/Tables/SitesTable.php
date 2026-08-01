@@ -3,15 +3,14 @@
 namespace App\Filament\Resources\Sites\Tables;
 
 use App\Enums\SiteStatus;
+use App\Filament\Actions\BulkActionGroup;
 use App\Models\Site;
+use App\Services\SeoMetaService;
 use Filament\Actions\BulkAction;
-use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
@@ -22,7 +21,6 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\DB;
 
 class SitesTable
 {
@@ -36,7 +34,7 @@ class SitesTable
                     ->height(24)
                     ->width(107)
                     ->extraImgAttributes(['class' => 'object-contain'])
-                    ->defaultImageUrl(fn (Site $record): string => app(\App\Services\SeoMetaService::class)->faviconUrl($record->domain)),
+                    ->defaultImageUrl(fn (Site $record): string => app(SeoMetaService::class)->faviconUrl($record->domain)),
                 TextColumn::make('domain')
                     ->label('Domain')
                     ->searchable()
@@ -64,8 +62,18 @@ class SitesTable
                     ->sortable()
                     ->numeric(decimalPlaces: 0)
                     ->toggleable(),
-                TextColumn::make('organic_traffic_value')
-                    ->label('Organic Traffic')
+                TextColumn::make('ahrefs_dr_value')
+                    ->label('Ahrefs DR')
+                    ->sortable()
+                    ->numeric(decimalPlaces: 0)
+                    ->toggleable(),
+                TextColumn::make('ahrefs_keywords_value')
+                    ->label('Ahrefs Kelime')
+                    ->sortable()
+                    ->numeric(decimalPlaces: 0)
+                    ->toggleable(),
+                TextColumn::make('monthly_traffic_value')
+                    ->label('Aylık Trafik')
                     ->sortable()
                     ->numeric(decimalPlaces: 0)
                     ->toggleable(),
@@ -74,15 +82,6 @@ class SitesTable
                     ->sortable()
                     ->numeric(decimalPlaces: 0)
                     ->toggleable(),
-                TextColumn::make('price')
-                    ->label('Fiyat')
-                    ->sortable()
-                    ->money(fn (Site $record): string => $record->currency?->value ?? 'USD'),
-                TextColumn::make('discount_price')
-                    ->label('İndirimli')
-                    ->sortable()
-                    ->money(fn (Site $record): string => $record->currency?->value ?? 'USD')
-                    ->placeholder('—'),
                 TextColumn::make('status')
                     ->label('Durum')
                     ->badge()
@@ -122,42 +121,6 @@ class SitesTable
                     ->trueLabel('Onaylı')
                     ->falseLabel('Onaysız')
                     ->placeholder('Tümü'),
-                Filter::make('price_range')
-                    ->label('Fiyat aralığı')
-                    ->schema([
-                        TextInput::make('price_min')
-                            ->label('Min fiyat')
-                            ->numeric()
-                            ->minValue(0),
-                        TextInput::make('price_max')
-                            ->label('Max fiyat')
-                            ->numeric()
-                            ->minValue(0),
-                    ])
-                    ->query(function (Builder $query, array $data): Builder {
-                        return $query
-                            ->when(
-                                filled($data['price_min'] ?? null),
-                                fn (Builder $query): Builder => $query->where('price', '>=', $data['price_min']),
-                            )
-                            ->when(
-                                filled($data['price_max'] ?? null),
-                                fn (Builder $query): Builder => $query->where('price', '<=', $data['price_max']),
-                            );
-                    })
-                    ->indicateUsing(function (array $data): array {
-                        $indicators = [];
-
-                        if (filled($data['price_min'] ?? null)) {
-                            $indicators[] = 'Min fiyat: ' . $data['price_min'];
-                        }
-
-                        if (filled($data['price_max'] ?? null)) {
-                            $indicators[] = 'Max fiyat: ' . $data['price_max'];
-                        }
-
-                        return $indicators;
-                    }),
                 Filter::make('da_range')
                     ->label('DA aralığı')
                     ->schema([
@@ -185,11 +148,11 @@ class SitesTable
                         $indicators = [];
 
                         if (filled($data['da_min'] ?? null)) {
-                            $indicators[] = 'Min DA: ' . $data['da_min'];
+                            $indicators[] = 'Min DA: '.$data['da_min'];
                         }
 
                         if (filled($data['da_max'] ?? null)) {
-                            $indicators[] = 'Max DA: ' . $data['da_max'];
+                            $indicators[] = 'Max DA: '.$data['da_max'];
                         }
 
                         return $indicators;
@@ -203,56 +166,6 @@ class SitesTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    BulkAction::make('updatePrices')
-                        ->label('Toplu fiyat güncelle')
-                        ->icon(Heroicon::CurrencyDollar)
-                        ->schema([
-                            Select::make('mode')
-                                ->label('Güncelleme tipi')
-                                ->options([
-                                    'percentage_increase' => 'Yüzde artış',
-                                    'percentage_decrease' => 'Yüzde azalış',
-                                    'fixed' => 'Sabit yeni değer',
-                                ])
-                                ->required()
-                                ->live(),
-                            TextInput::make('value')
-                                ->label(fn (Get $get): string => match ($get('mode')) {
-                                    'fixed' => 'Yeni fiyat',
-                                    default => 'Yüzde (%)',
-                                })
-                                ->numeric()
-                                ->required()
-                                ->minValue(0)
-                                ->step(0.01),
-                        ])
-                        ->action(function (Collection $records, array $data): void {
-                            $mode = $data['mode'];
-                            $value = (float) $data['value'];
-
-                            DB::transaction(function () use ($records, $mode, $value): void {
-                                foreach ($records as $record) {
-                                    /** @var Site $record */
-                                    $newPrice = match ($mode) {
-                                        'percentage_increase' => (float) $record->price * (1 + ($value / 100)),
-                                        'percentage_decrease' => (float) $record->price * (1 - ($value / 100)),
-                                        'fixed' => $value,
-                                        default => (float) $record->price,
-                                    };
-
-                                    $record->update([
-                                        'price' => max(0, round($newPrice, 2)),
-                                    ]);
-                                }
-                            });
-
-                            Notification::make()
-                                ->title('Fiyatlar güncellendi')
-                                ->body($records->count() . ' site için fiyat güncellendi.')
-                                ->success()
-                                ->send();
-                        })
-                        ->deselectRecordsAfterCompletion(),
                     BulkAction::make('activate')
                         ->label('Aktif et')
                         ->icon(Heroicon::CheckCircle)

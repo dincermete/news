@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\SiteStatus;
-use App\Models\Site;
+use App\Enums\PromotionalListingType;
 use App\Models\SiteCategory;
 use App\Services\SeoMetaService;
+use App\Support\CatalogQuery;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -20,14 +20,11 @@ class PressReleaseCatalogController extends Controller
         $kategori = is_string($kategori) && $kategori !== '' ? $kategori : null;
         $sort = (string) $request->query('sort', 'price_asc');
 
-        $query = Site::query()
-            ->with(['category'])
-            ->where('status', SiteStatus::Active)
-            ->whereNotNull('press_release_price');
+        $query = CatalogQuery::activeSitesWithListing(PromotionalListingType::PressRelease);
 
         if ($q !== '') {
             $escaped = addcslashes($q, '%_\\');
-            $query->where('domain', 'like', "%{$escaped}%");
+            $query->where('sites.domain', 'like', "%{$escaped}%");
         }
 
         if ($kategori !== null) {
@@ -35,12 +32,13 @@ class PressReleaseCatalogController extends Controller
         }
 
         match ($sort) {
-            'price_desc' => $query->orderByDesc('press_release_price')->orderBy('id'),
-            'newest' => $query->orderByDesc('created_at')->orderByDesc('id'),
-            default => $query->orderBy('press_release_price')->orderBy('id'),
+            'price_desc' => $query->orderByDesc('promotional_listings.price')->orderBy('sites.id'),
+            'newest' => $query->orderByDesc('sites.created_at')->orderByDesc('sites.id'),
+            default => $query->orderBy('promotional_listings.price')->orderBy('sites.id'),
         };
 
         $sites = $query->paginate(self::PER_PAGE)->withQueryString();
+        $sites->getCollection()->each(fn ($site) => $site->normalizeJoinedPricingAttributes());
 
         $categories = SiteCategory::query()->orderBy('name')->get(['id', 'name', 'slug']);
 

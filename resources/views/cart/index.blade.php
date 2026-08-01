@@ -22,7 +22,7 @@
     {{-- ================= HERO ================= --}}
     <section class="px-2 pt-2 sm:px-3">
         <div class="panel-light relative overflow-hidden rounded-3xl text-ink">
-            <div class="relative mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-5 py-9 sm:px-8" data-reveal-group>
+            <div class="relative mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-9 sm:px-8" data-reveal-group>
                 <div data-reveal>
                     <p class="inline-flex items-center gap-x-2 rounded-full border border-ink/10 bg-white py-1 pe-3.5 ps-1 text-xs text-ink-2 shadow-soft">
                         <span class="rounded-full bg-brand-500 px-2.5 py-0.5 text-[10px] font-semibold text-white">Sepet</span>
@@ -38,10 +38,16 @@
         </div>
     </section>
 
-    <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         @if (session('status'))
             <div class="mb-6 rounded-[20px] border border-emerald-200 bg-emerald-50 px-5 py-3.5 text-sm font-medium text-emerald-800" role="alert">
                 {{ session('status') }}
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="mb-6 rounded-[20px] border border-brand-200 bg-brand-50 px-5 py-3.5 text-sm font-medium text-brand-800" role="alert">
+                {{ session('error') }}
             </div>
         @endif
 
@@ -75,8 +81,9 @@
                     <div>
                         <p class="font-display text-sm font-semibold text-orange-900">{{ $unconfiguredCount }} ürün yapılandırma bekliyor</p>
                         <p class="mt-1 text-sm text-orange-800">
-                            Tanıtım yazılarınız için makale/dosya yüklemeniz veya yazım seçeneğini belirlemeniz gerekiyor. Her ürünün yanındaki
-                            <span class="font-semibold text-orange-900">Yapılandır</span> butonuna tıklayın, yapılandırılmadan ödeme adımına geçilemez.
+                            İsterseniz şimdi
+                            <span class="font-semibold text-orange-900">Yapılandır</span>
+                            ile içeriği tamamlayın; ödeme sonrası sipariş detayından da yapılandırabilirsiniz.
                         </p>
                     </div>
                 </div>
@@ -132,10 +139,18 @@
                                             </div>
                                         </div>
 
-                                        <div class="flex shrink-0 items-center gap-2">
+                                        <div class="flex shrink-0 flex-col items-end gap-0.5">
                                             <p class="font-display text-sm font-bold text-ink">
-                                                {{ number_format((float) $item->price, 2, ',', '.') }} {{ $item->currency?->value ?? $currency }}
+                                                {{ number_format((float) $item->price, 2, ',', '.') }} ₺
                                             </p>
+                                            @if ($item->hasForeignSourceCurrency() && $item->source_price !== null && $item->exchange_rate !== null)
+                                                <p class="text-[11px] text-ink-3">
+                                                    {{ number_format((float) $item->source_price, 2, ',', '.') }} {{ $item->source_currency?->value }}
+                                                    × {{ number_format((float) $item->exchange_rate, 4, ',', '.') }}
+                                                </p>
+                                            @endif
+                                        </div>
+                                        <div class="flex shrink-0 items-center gap-2">
                                             <button
                                                 type="button"
                                                 class="inline-flex items-center gap-x-1.5 rounded-full px-3.5 py-2 text-xs font-semibold text-white transition hover:scale-[1.03] active:scale-[0.98] {{ $configured ? 'bg-ink hover:bg-black' : 'bg-gradient-to-b from-orange-500 to-orange-600' }}"
@@ -247,6 +262,12 @@
                                     <dd class="font-semibold text-emerald-600">−{{ number_format($summary['coupon_discount'], 2, ',', '.') }} ₺</dd>
                                 </div>
                             @endif
+                            @if (($summary['vat_amount'] ?? 0) > 0)
+                                <div class="flex justify-between gap-3">
+                                    <dt class="text-ink-2">KDV (%{{ rtrim(rtrim(number_format((float) ($summary['vat_rate'] ?? 20), 2, '.', ''), '0'), '.') }})</dt>
+                                    <dd class="font-semibold text-ink">{{ number_format($summary['vat_amount'], 2, ',', '.') }} ₺</dd>
+                                </div>
+                            @endif
                             <div class="flex justify-between gap-3 border-t border-ink/10 pt-3">
                                 <dt class="font-display text-base font-semibold text-ink">Genel toplam</dt>
                                 <dd class="font-display text-base font-bold text-ink">{{ number_format($summary['total'], 2, ',', '.') }} ₺</dd>
@@ -254,21 +275,14 @@
                         </dl>
 
                         @auth
+                            <a href="{{ route('checkout.show') }}" class="{{ $btnDark }} mt-5">
+                                <span class="{{ $btnChip }} bg-white/15 text-white">
+                                    <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
+                                </span>
+                                Ödemeye geç
+                            </a>
                             @if ($unconfiguredCount > 0)
-                                <button type="button" disabled class="{{ $btnDark }} mt-5 cursor-not-allowed opacity-50">
-                                    <span class="{{ $btnChip }} bg-white/15 text-white">
-                                        <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
-                                    </span>
-                                    Ödemeye geç
-                                </button>
-                                <p class="mt-2 text-center text-xs text-ink-3">Devam etmek için tüm ürünleri yapılandırın.</p>
-                            @else
-                                <a href="{{ route('checkout.show') }}" class="{{ $btnDark }} mt-5">
-                                    <span class="{{ $btnChip }} bg-white/15 text-white">
-                                        <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
-                                    </span>
-                                    Ödemeye geç
-                                </a>
+                                <p class="mt-2 text-center text-xs text-ink-3">Yapılandırma opsiyonel — ödeme sonrası da tamamlanabilir.</p>
                             @endif
                         @else
                             <a href="{{ route('login') }}" class="{{ $btnDark }} mt-5">

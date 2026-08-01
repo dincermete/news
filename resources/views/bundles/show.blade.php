@@ -55,7 +55,7 @@
 
 @section('content')
     {{-- ================= BAŞLIK: sadece breadcrumb + ürün adı ================= --}}
-    <section class="mx-auto max-w-6xl px-4 pt-8 sm:px-6 lg:px-8" data-reveal-group>
+    <section class="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8" data-reveal-group>
         <nav class="flex items-center gap-x-1.5 text-xs text-ink-3" aria-label="Konum" data-reveal>
             <a href="{{ route('home') }}" class="transition hover:text-ink">Anasayfa</a>
             <svg class="size-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
@@ -66,14 +66,17 @@
     </section>
 
     {{-- ================= İÇERİK: kimlik/veriler/detaylar solda, satın alma sağda ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-        <div class="grid gap-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-start" data-reveal-group>
+    <section class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div class="grid gap-6 lg:grid-cols-[1.75fr_.85fr] lg:items-start" data-reveal-group>
             <div class="space-y-6">
                 {{-- Paket kimliği: ikon, ad, rozetler --}}
                 <div class="rounded-[20px] border border-ink/10 bg-white p-5" data-reveal>
                     <div class="flex items-center gap-x-4">
-                        <span class="inline-flex size-[52px] shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-600 text-white">
-                            <svg class="size-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/></svg>
+                        <span
+                            class="inline-flex size-[52px] shrink-0 items-center justify-center rounded-2xl text-white shadow-soft"
+                            style="{{ $bundle->iconBadgeStyle() }}"
+                        >
+                            {{ svg($bundle->resolvedIcon(), 'size-6') }}
                         </span>
                         <div class="min-w-0">
                             <h1 class="truncate font-display text-3xl font-medium leading-tight text-ink sm:text-4xl">{{ $bundle->name }}</h1>
@@ -167,7 +170,7 @@
                                 <ul class="divide-y divide-ink/5 overflow-hidden rounded-2xl border border-ink/10">
                                     @foreach ($bundle->sites as $site)
                                         <li>
-                                            <a href="{{ route('sites.show', $site->domain) }}" class="flex items-center gap-4 px-4 py-3.5 transition hover:bg-paper">
+                                            <a href="{{ storefront_site_url($site) }}" class="flex items-center gap-4 px-4 py-3.5 transition hover:bg-paper">
                                                 <x-site-logo :site="$site" :height="36" class="shrink-0 rounded-lg" />
                                                 <div class="min-w-0 flex-1">
                                                     <p class="truncate text-sm font-semibold text-ink">{{ $site->domain }}</p>
@@ -249,7 +252,7 @@
                         <button
                             type="button"
                             class="flex w-full items-center justify-center gap-x-1.5 rounded-2xl border border-ink/10 bg-white px-3 py-3 text-sm font-medium text-ink transition hover:border-ink/25"
-                            data-share-url="{{ route('bundles.show', $bundle->slug) }}"
+                            data-share-url="{{ $bundle->canonicalUrl() }}"
                             onclick="const btn=this; const url=btn.dataset.shareUrl; if (navigator.share) { navigator.share({title: document.title, url}); } else { navigator.clipboard.writeText(url); const label = btn.querySelector('[data-share-label]'); const original = label.textContent; label.textContent = 'Kopyalandı'; setTimeout(() => { label.textContent = original; }, 1500); }"
                         >
                             <svg class="size-4 text-ink-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z"/></svg>
@@ -283,7 +286,7 @@
                         <ul class="mt-3 space-y-1">
                             @foreach ($relatedBundles as $related)
                                 <li>
-                                    <a href="{{ route('bundles.show', $related->slug) }}" class="flex items-center gap-x-2.5 rounded-xl px-1.5 py-2 transition hover:bg-paper">
+                                    <a href="{{ $related->canonicalUrl() }}" class="flex items-center gap-x-2.5 rounded-xl px-1.5 py-2 transition hover:bg-paper">
                                         <span class="inline-flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 text-white">
                                             <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z"/></svg>
                                         </span>
@@ -299,7 +302,7 @@
         </div>
     </section>
 
-    <div class="mx-auto max-w-6xl px-4 pb-14 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-7xl px-4 pb-14 sm:px-6 lg:px-8">
         {{-- ================= BENZER PAKETLER ================= --}}
         @if ($relatedBundles->isNotEmpty())
             <section data-reveal-group>

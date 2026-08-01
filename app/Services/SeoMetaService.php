@@ -2,8 +2,16 @@
 
 namespace App\Services;
 
+use App\Enums\SiteStatus;
+use App\Models\BacklinkPackage;
+use App\Models\BlogCategory;
+use App\Models\BlogPost;
+use App\Models\BlogTag;
 use App\Models\Page;
+use App\Models\PromotionalListing;
+use App\Models\SeoPackage;
 use App\Models\Site;
+use App\Models\SiteBundle;
 use App\Models\SiteSetting;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -11,11 +19,23 @@ use Illuminate\Support\Str;
 
 class SeoMetaService
 {
+    public function __construct(
+        protected ProductPublicUrl $publicUrls,
+    ) {}
+
     /**
      * @return array{title: string, description: string, keywords: string|null, og_image: string|null, og_url: string|null}
      */
-    public function forSite(Site $site): array
+    public function forSite(Site $site, ?PromotionalListing $listing = null): array
     {
+        $listing ??= $site->relationLoaded('articleListing')
+            ? $site->articleListing
+            : $site->articleListing()->where('status', SiteStatus::Active)->first();
+
+        if ($listing instanceof PromotionalListing) {
+            return $this->forPromotionalListing($listing);
+        }
+
         $brand = site_setting('site_name');
         $title = $site->domain.' | '.$brand;
         $description = filled($site->description)
@@ -27,7 +47,95 @@ class SeoMetaService
             'description' => $description,
             'keywords' => null,
             'og_image' => $this->faviconUrl($site->domain),
-            'og_url' => url('/site/'.$site->slug),
+            'og_url' => route('sites.show', $site->domain),
+        ];
+    }
+
+    /**
+     * @return array{title: string, description: string, keywords: string|null, og_image: string|null, og_url: string|null}
+     */
+    public function forPromotionalListing(PromotionalListing $listing): array
+    {
+        $listing->loadMissing('site');
+        $site = $listing->site;
+        $brand = site_setting('site_name');
+        $domain = $site?->domain ?? 'Site';
+
+        $title = filled($listing->meta_title)
+            ? $listing->meta_title
+            : $domain.' | '.$brand;
+
+        $description = filled($listing->meta_description)
+            ? $listing->meta_description
+            : (filled($listing->short_description)
+                ? Str::limit(strip_tags($listing->short_description), 160)
+                : (filled($listing->description)
+                    ? Str::limit(strip_tags($listing->description), 160)
+                    : (filled($site?->description)
+                        ? Str::limit(strip_tags((string) $site->description), 160)
+                        : $domain.' — '.$this->publicUrls->listingTypeLabel($listing))));
+
+        return [
+            'title' => $title,
+            'description' => $description,
+            'keywords' => $listing->meta_keywords,
+            'og_image' => $listing->ogImageUrl() ?? ($site ? $this->faviconUrl($site->domain) : null),
+            'og_url' => $this->publicUrls->urlFor($listing),
+        ];
+    }
+
+    /**
+     * @return array{title: string, description: string, keywords: string|null, og_image: string|null, og_url: string|null}
+     */
+    public function forBundle(SiteBundle $bundle): array
+    {
+        $brand = site_setting('site_name');
+
+        return [
+            'title' => filled($bundle->meta_title) ? $bundle->meta_title : ($bundle->name.' | '.$brand),
+            'description' => filled($bundle->meta_description)
+                ? $bundle->meta_description
+                : ($bundle->description
+                    ?: (($bundle->sites_count ?? $bundle->sites()->count()).' siteyi içeren '.$bundle->name.' tanıtım paketi.')),
+            'keywords' => $bundle->meta_keywords,
+            'og_image' => $bundle->ogImageUrl() ?? SiteSetting::current()->ogImageUrl(),
+            'og_url' => $this->publicUrls->urlFor($bundle),
+        ];
+    }
+
+    /**
+     * @return array{title: string, description: string, keywords: string|null, og_image: string|null, og_url: string|null}
+     */
+    public function forSeoPackage(SeoPackage $package): array
+    {
+        $brand = site_setting('site_name');
+
+        return [
+            'title' => filled($package->meta_title) ? $package->meta_title : ($package->name.' | '.$brand),
+            'description' => filled($package->meta_description)
+                ? $package->meta_description
+                : Str::limit(strip_tags((string) ($package->description ?: $package->name.' SEO paketi')), 160),
+            'keywords' => $package->meta_keywords,
+            'og_image' => $package->ogImageUrl() ?? SiteSetting::current()->ogImageUrl(),
+            'og_url' => $this->publicUrls->urlFor($package),
+        ];
+    }
+
+    /**
+     * @return array{title: string, description: string, keywords: string|null, og_image: string|null, og_url: string|null}
+     */
+    public function forBacklinkPackage(BacklinkPackage $package): array
+    {
+        $brand = site_setting('site_name');
+
+        return [
+            'title' => filled($package->meta_title) ? $package->meta_title : ($package->name.' | '.$brand),
+            'description' => filled($package->meta_description)
+                ? $package->meta_description
+                : Str::limit(strip_tags((string) ($package->description ?: $package->name.' backlink paketi')), 160),
+            'keywords' => $package->meta_keywords,
+            'og_image' => $package->ogImageUrl() ?? SiteSetting::current()->ogImageUrl(),
+            'og_url' => $this->publicUrls->urlFor($package),
         ];
     }
 
@@ -52,6 +160,67 @@ class SeoMetaService
             'keywords' => $page->meta_keywords,
             'og_image' => $this->resolveOgImage($page->og_image, $settings),
             'og_url' => $ogUrl,
+        ];
+    }
+
+    /**
+     * @return array{title: string, description: string, keywords: string|null, og_image: string|null, og_url: string|null, og_type?: string, published_time?: string|null, modified_time?: string|null, author?: string|null}
+     */
+    public function forBlogPost(BlogPost $post): array
+    {
+        $brand = site_setting('site_name');
+        $settings = SiteSetting::current();
+
+        $description = $post->meta_description
+            ?: ($post->excerpt
+                ?: Str::limit(strip_tags((string) $post->content), 160));
+
+        return [
+            'title' => $post->meta_title ?: ($post->title.' | Blog | '.$brand),
+            'description' => (string) ($description ?: $settings->meta_description),
+            'keywords' => $post->meta_keywords,
+            'og_image' => $post->ogImageUrl() ?: $settings->ogImageUrl(),
+            'og_url' => $post->url(),
+            'og_type' => 'article',
+            'published_time' => $post->published_at?->toAtomString(),
+            'modified_time' => $post->updated_at?->toAtomString(),
+            'author' => $post->author?->name,
+        ];
+    }
+
+    /**
+     * @return array{title: string, description: string, keywords: string|null, og_image: string|null, og_url: string|null}
+     */
+    public function forBlogCategory(BlogCategory $category): array
+    {
+        $brand = site_setting('site_name');
+        $settings = SiteSetting::current();
+
+        return [
+            'title' => $category->name.' | Blog | '.$brand,
+            'description' => filled($category->description)
+                ? Str::limit(strip_tags($category->description), 160)
+                : $category->name.' kategorisindeki blog yazıları — '.$brand,
+            'keywords' => $category->name,
+            'og_image' => $settings->ogImageUrl(),
+            'og_url' => route('blog.category', $category),
+        ];
+    }
+
+    /**
+     * @return array{title: string, description: string, keywords: string|null, og_image: string|null, og_url: string|null}
+     */
+    public function forBlogTag(BlogTag $tag): array
+    {
+        $brand = site_setting('site_name');
+        $settings = SiteSetting::current();
+
+        return [
+            'title' => '#'.$tag->name.' | Blog | '.$brand,
+            'description' => $tag->name.' etiketli blog yazıları — '.$brand,
+            'keywords' => $tag->name,
+            'og_image' => $settings->ogImageUrl(),
+            'og_url' => route('blog.tag', $tag),
         ];
     }
 

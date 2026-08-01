@@ -6,6 +6,7 @@ use App\Models\SiteSetting;
 use App\Models\User;
 use BackedEnum;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -87,6 +88,10 @@ class ManageSiteSettings extends Page
                                             ->label('Varsayılan meta açıklama')
                                             ->rows(3)
                                             ->maxLength(500)
+                                            ->columnSpanFull(),
+                                        RichEditor::make('default_delivery_details')
+                                            ->label('Varsayılan teslimat detayları')
+                                            ->helperText('Ürün detayında teslimat metni yoksa bu metin kullanılır. Ürüne özel metin yazılırsa onu ezer.')
                                             ->columnSpanFull(),
                                     ]),
                                 Section::make('Görseller')

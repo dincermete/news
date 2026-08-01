@@ -23,6 +23,7 @@ class SiteSetting extends Model
         'legal_name',
         'tagline',
         'meta_description',
+        'default_delivery_details',
         'logo_path',
         'logo_dark_path',
         'favicon_path',
@@ -113,6 +114,21 @@ class SiteSetting extends Model
     public function siteDomain(): string
     {
         return filled($this->site_domain) ? (string) $this->site_domain : self::DEFAULT_SITE_DOMAIN;
+    }
+
+    public function defaultDeliveryDetails(): ?string
+    {
+        $html = $this->default_delivery_details;
+
+        if (! filled($html)) {
+            return null;
+        }
+
+        if (trim(strip_tags((string) $html)) === '') {
+            return null;
+        }
+
+        return (string) $html;
     }
 
     public function publicUrl(?string $path): ?string

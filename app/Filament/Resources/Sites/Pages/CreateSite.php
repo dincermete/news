@@ -15,7 +15,6 @@ class CreateSite extends CreateRecord
 
         $fill = array_filter([
             'domain' => request()->query('domain'),
-            'price' => request()->query('price'),
             'site_category_id' => request()->query('site_category_id'),
             'age' => request()->query('age'),
         ], fn (mixed $value): bool => filled($value));

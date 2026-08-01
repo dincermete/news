@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\PromotionalListingType;
 use App\Models\FooterLink;
 use App\Models\Label;
 use App\Models\Page;
@@ -25,9 +26,9 @@ class CatalogCache
 {
     public const TTL_SECONDS = 600;
 
-    public const KEY_SITE_LIST_PREFIX = 'catalog.sites.list.v2.';
+    public const KEY_SITE_LIST_PREFIX = 'catalog.sites.list.v3.';
 
-    public const KEY_SITE_DETAIL_PREFIX = 'catalog.sites.detail.v2.';
+    public const KEY_SITE_DETAIL_PREFIX = 'catalog.sites.detail.v3.';
 
     public const KEY_SITE_LIST_VERSION = 'catalog.sites.list_version';
 
@@ -169,9 +170,16 @@ class CatalogCache
             self::KEY_SITE_DETAIL_PREFIX.$domain,
             self::TTL_SECONDS,
             function () use ($domain): ?array {
-                $site = CatalogQuery::activeSites()
-                    ->where('domain', $domain)
+                $site = CatalogQuery::activeSitesWithListing(PromotionalListingType::SiteArticle)
+                    ->where('sites.domain', $domain)
                     ->first();
+
+                if ($site === null) {
+                    // Fall back to active resource site without a sale listing (detail may still show metrics).
+                    $site = CatalogQuery::activeSites()
+                        ->where('domain', $domain)
+                        ->first();
+                }
 
                 return $site === null ? null : $this->siteToCacheArray($site);
             },
@@ -217,6 +225,8 @@ class CatalogCache
 
         foreach ($sites as $index => $site) {
             $item = $items[$index] ?? [];
+
+            $site->normalizeJoinedPricingAttributes();
 
             $site->setRelation(
                 'category',

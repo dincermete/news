@@ -1,6 +1,7 @@
 import Alpine from 'alpinejs';
 import { HSStaticMethods } from 'preline/non-auto';
 import { animate, inView, stagger } from 'motion';
+import { annotate } from 'rough-notation';
 
 window.Alpine = Alpine;
 
@@ -36,18 +37,60 @@ document.addEventListener('alpine:init', () => {
         items: config.items || [],
         markUrlTemplate: config.markUrlTemplate || '',
         csrf: config.csrf || '',
+        dismissedAnnouncementIds: [],
+
+        init() {
+            try {
+                this.dismissedAnnouncementIds = JSON.parse(
+                    localStorage.getItem('nt_dismissed_announcements') || '[]',
+                );
+            } catch {
+                this.dismissedAnnouncementIds = [];
+            }
+
+            this.items = this.items.map((item) => {
+                if (item.kind !== 'announcement') {
+                    return item;
+                }
+
+                if (this.dismissedAnnouncementIds.includes(item.source_id)) {
+                    return { ...item, read_at: item.read_at || new Date().toISOString() };
+                }
+
+                return item;
+            });
+
+            this.recalcUnread();
+        },
+
+        recalcUnread() {
+            this.unread = this.items.filter((item) => !item.read_at).length;
+        },
+
         toggle() {
             this.open = !this.open;
         },
+
         close() {
             this.open = false;
         },
+
         async markRead(item) {
-            if (item.read_at || !this.markUrlTemplate) {
+            if (item.read_at) {
                 return;
             }
 
-            const url = this.markUrlTemplate.replace('__ID__', String(item.id));
+            if (item.kind === 'announcement') {
+                this.dismissAnnouncement(item);
+
+                return;
+            }
+
+            if (!this.markUrlTemplate) {
+                return;
+            }
+
+            const url = this.markUrlTemplate.replace('__ID__', String(item.source_id ?? item.id));
 
             try {
                 const response = await fetch(url, {
@@ -63,11 +106,37 @@ document.addEventListener('alpine:init', () => {
                     return;
                 }
 
-                const data = await response.json();
                 item.read_at = new Date().toISOString();
-                this.unread = Number(data.unread_count ?? Math.max(0, this.unread - 1));
+                this.recalcUnread();
             } catch {
                 // ignore network errors in UI
+            }
+        },
+
+        dismissAnnouncement(item) {
+            item.read_at = new Date().toISOString();
+
+            if (!this.dismissedAnnouncementIds.includes(item.source_id)) {
+                this.dismissedAnnouncementIds.push(item.source_id);
+
+                try {
+                    localStorage.setItem(
+                        'nt_dismissed_announcements',
+                        JSON.stringify(this.dismissedAnnouncementIds),
+                    );
+                } catch {
+                    // ignore quota / private mode
+                }
+            }
+
+            this.recalcUnread();
+        },
+
+        async markAllRead() {
+            const unread = this.items.filter((item) => !item.read_at);
+
+            for (const item of unread) {
+                await this.markRead(item);
             }
         },
     }));
@@ -81,6 +150,96 @@ document.addEventListener('alpine:init', () => {
         },
         close() {
             this.open = false;
+        },
+    }));
+
+    Alpine.data('siteTable', () => ({
+        openRows: {},
+        sortKey: null,
+        sortDir: 'asc',
+        orderedIds: [],
+        sorting: false,
+
+        init() {
+            this.syncOrder();
+        },
+
+        syncOrder() {
+            this.orderedIds = [...this.$refs.table.querySelectorAll('[data-sort-group]')].map(
+                (el) => Number(el.dataset.id),
+            );
+        },
+
+        isFirst(id) {
+            return this.orderedIds[0] === id;
+        },
+
+        isLast(id) {
+            return this.orderedIds[this.orderedIds.length - 1] === id;
+        },
+
+        sortBy(key) {
+            if (this.sortKey === key) {
+                this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
+            } else {
+                this.sortKey = key;
+                this.sortDir = key === 'domain' ? 'asc' : 'desc';
+            }
+
+            this.applySort();
+        },
+
+        applySort() {
+            const table = this.$refs.table;
+            const groups = [...table.querySelectorAll('[data-sort-group]')];
+            const key = this.sortKey;
+            const dir = this.sortDir === 'asc' ? 1 : -1;
+
+            groups.sort((a, b) => this.compareGroups(a, b, key, dir));
+
+            this.sorting = true;
+
+            requestAnimationFrame(() => {
+                groups.forEach((group) => table.appendChild(group));
+                this.syncOrder();
+
+                requestAnimationFrame(() => {
+                    this.sorting = false;
+                });
+            });
+        },
+
+        compareGroups(a, b, key, dir) {
+            const av = a.dataset[key] ?? '';
+            const bv = b.dataset[key] ?? '';
+            const aEmpty = av === '';
+            const bEmpty = bv === '';
+
+            if (aEmpty && bEmpty) {
+                return 0;
+            }
+
+            if (aEmpty) {
+                return 1;
+            }
+
+            if (bEmpty) {
+                return -1;
+            }
+
+            if (key === 'domain') {
+                return av.localeCompare(bv, 'tr', { sensitivity: 'base' }) * dir;
+            }
+
+            return (Number(av) - Number(bv)) * dir;
+        },
+
+        sortIconClass(key) {
+            if (this.sortKey !== key) {
+                return 'opacity-25';
+            }
+
+            return this.sortDir === 'desc' ? 'rotate-180 opacity-100' : 'opacity-100';
         },
     }));
 
@@ -137,6 +296,10 @@ document.addEventListener('alpine:init', () => {
         endpoint,
         visible: false,
         message: '',
+        name: '',
+        city: '',
+        product: '',
+        initials: '',
         intervalSeconds: 30,
         hideTimer: null,
         loopTimer: null,
@@ -171,6 +334,10 @@ document.addEventListener('alpine:init', () => {
                 }
 
                 this.message = data.message;
+                this.name = data.name || '';
+                this.city = data.city || '';
+                this.product = data.product || data.message;
+                this.initials = this.name ? Array.from(this.name)[0].toLocaleUpperCase('tr-TR') : '•';
                 this.intervalSeconds = Math.max(5, Number(data.display_interval_seconds || 30));
                 this.visible = true;
 
@@ -205,8 +372,53 @@ window.addEventListener('load', () => {
  | [data-typewriter]    : input placeholder typewriter (JSON dizi)
  | [data-step-card]     : süreç kartı görünüme girince "aktif" (koyu) stile döner
  | [data-order-stack]   : sipariş kartlarını slot'lar arasında layout-style döndürür
+ | [data-rough-underline]: Rough Notation ile elle çizilmiş alt çizgi
  */
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function initRoughUnderlines() {
+    const color =
+        getComputedStyle(document.documentElement).getPropertyValue('--color-accent-600').trim() ||
+        '#2248ab';
+    const isMobile = window.matchMedia('(max-width: 639px)').matches;
+
+    document.querySelectorAll('[data-rough-underline]').forEach((el) => {
+        const annotation = annotate(el, {
+            type: 'underline',
+            color,
+            strokeWidth: isMobile ? 2.5 : 3,
+            padding: isMobile ? 1 : 2,
+            iterations: 2,
+            multiline: true,
+            animationDuration: prefersReducedMotion ? 1 : 900,
+        });
+
+        const show = () => {
+            if (!annotation.isShowing()) {
+                annotation.show();
+            }
+        };
+
+        if (prefersReducedMotion) {
+            show();
+
+            return;
+        }
+
+        inView(
+            el,
+            () => {
+                const delay = el.closest('[data-reveal], [data-reveal-group]') ? 550 : 80;
+                const timer = setTimeout(show, delay);
+
+                return () => clearTimeout(timer);
+            },
+            { amount: 0.45 },
+        );
+    });
+}
+
+initRoughUnderlines();
 
 function initTypewriterPlaceholders() {
     document.querySelectorAll('[data-typewriter]').forEach((input) => {

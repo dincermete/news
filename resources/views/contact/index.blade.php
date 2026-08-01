@@ -60,7 +60,7 @@
     @endif
 
     {{-- ================= KANALLAR ================= --}}
-    <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
+    <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
         <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             @foreach ($channels as $channel)
                 <div class="rounded-[20px] border border-ink/10 bg-white p-6" data-reveal>

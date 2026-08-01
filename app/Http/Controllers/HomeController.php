@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\PromotionalListingType;
 use App\Enums\SiteStatus;
 use App\Models\BacklinkPackage;
 use App\Models\FaqEntry;
+use App\Models\PromotionalListing;
 use App\Models\SeoPackage;
 use App\Models\Site;
 use App\Models\SiteBundle;
@@ -12,14 +14,15 @@ use App\Models\SiteCategory;
 use App\Services\PublicStatsService;
 use App\Services\SeoMetaService;
 use App\Support\CatalogQuery;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class HomeController extends Controller
 {
-    public const CACHE_KEY = 'home.sections.v1';
+    public const CACHE_KEY = 'home.sections.v2';
 
-    public const PRODUCTS_CACHE_KEY = 'home.products.v1';
+    public const PRODUCTS_CACHE_KEY = 'home.products.v2';
 
     public const CACHE_TTL_SECONDS = 300;
 
@@ -31,25 +34,25 @@ class HomeController extends Controller
             self::CACHE_TTL_SECONDS,
             fn (): array => [
                 'newest' => $this->toRows(
-                    CatalogQuery::activeSites()
-                        ->orderByDesc('created_at')
-                        ->orderByDesc('id')
+                    CatalogQuery::activeSitesWithListing(PromotionalListingType::SiteArticle)
+                        ->orderByDesc('sites.created_at')
+                        ->orderByDesc('sites.id')
                         ->limit(6)
                         ->get(),
                 ),
                 'discounted' => $this->toRows(
-                    CatalogQuery::activeSites()
-                        ->whereNotNull('discount_price')
-                        ->whereColumn('discount_price', '<', 'price')
-                        ->orderByRaw('(price - discount_price) / price desc')
+                    CatalogQuery::activeSitesWithListing(PromotionalListingType::SiteArticle)
+                        ->whereNotNull('promotional_listings.discount_price')
+                        ->whereColumn('promotional_listings.discount_price', '<', 'promotional_listings.price')
+                        ->orderByRaw('(promotional_listings.price - promotional_listings.discount_price) / promotional_listings.price desc')
                         ->limit(6)
                         ->get(),
                 ),
                 'best_sellers' => $this->toRows(
-                    CatalogQuery::activeSites()
+                    CatalogQuery::activeSitesWithListing(PromotionalListingType::SiteArticle)
                         ->withCount('orders')
                         ->orderByDesc('orders_count')
-                        ->orderBy('id')
+                        ->orderBy('sites.id')
                         ->limit(6)
                         ->get(),
                 ),
@@ -67,23 +70,41 @@ class HomeController extends Controller
             ->limit(8)
             ->get(['id', 'question_topic', 'answer']);
 
-        $newestSites = CatalogQuery::activeSites()
-            ->orderByDesc('created_at')
-            ->orderByDesc('id')
-            ->limit(10)
-            ->get();
+        $popularSites = CatalogQuery::activeSitesWithListing(PromotionalListingType::SiteArticle)
+            ->withCount('favorites')
+            ->orderByDesc('favorites_count')
+            ->orderByDesc('sites.da_value')
+            ->orderBy('sites.id')
+            ->limit(5)
+            ->get()
+            ->each(fn (Site $site) => $site->normalizeJoinedPricingAttributes());
 
-        $bestSellerSites = CatalogQuery::activeSites()
+        $newestSites = CatalogQuery::activeSitesWithListing(PromotionalListingType::SiteArticle)
+            ->orderByDesc('sites.created_at')
+            ->orderByDesc('sites.id')
+            ->limit(5)
+            ->get()
+            ->each(fn (Site $site) => $site->normalizeJoinedPricingAttributes());
+
+        $pressReleaseSites = CatalogQuery::activeSitesWithListing(PromotionalListingType::PressRelease)
+            ->orderBy('promotional_listings.price')
+            ->orderBy('sites.id')
+            ->limit(5)
+            ->get()
+            ->each(fn (Site $site) => $site->normalizeJoinedPricingAttributes());
+
+        $bestSellerSites = CatalogQuery::activeSitesWithListing(PromotionalListingType::SiteArticle)
             ->withCount('orders')
             ->orderByDesc('orders_count')
-            ->orderBy('id')
-            ->limit(10)
-            ->get();
+            ->orderBy('sites.id')
+            ->limit(5)
+            ->get()
+            ->each(fn (Site $site) => $site->normalizeJoinedPricingAttributes());
 
         $featuredBundles = SiteBundle::query()
             ->where('status', SiteStatus::Active)
             ->withCount('sites')
-            ->with(['sites' => fn ($sites) => $sites->orderBy('domain')])
+            ->with(['sites' => fn ($sites) => $sites->orderBy('domain')->with('category')])
             ->orderBy('price')
             ->limit(8)
             ->get();
@@ -103,7 +124,9 @@ class HomeController extends Controller
             'categories' => $categories,
             'faqs' => $faqs,
             'productPrices' => $this->productPrices(),
+            'popularSites' => $popularSites,
             'newestSites' => $newestSites,
+            'pressReleaseSites' => $pressReleaseSites,
             'bestSellerSites' => $bestSellerSites,
             'featuredBundles' => $featuredBundles,
             'featuredBacklinkPackages' => $featuredBacklinkPackages,
@@ -123,12 +146,15 @@ class HomeController extends Controller
             self::PRODUCTS_CACHE_KEY,
             self::CACHE_TTL_SECONDS,
             fn (): array => [
-                'site_article' => (float) (CatalogQuery::activeSites()
+                'site_article' => (float) (PromotionalListing::query()
+                    ->activeForSale()
+                    ->ofType(PromotionalListingType::SiteArticle)
                     ->selectRaw('MIN(COALESCE(discount_price, price)) as min_price')
                     ->value('min_price') ?? 0) ?: null,
-                'press_release' => (float) (CatalogQuery::activeSites()
-                    ->whereNotNull('press_release_price')
-                    ->min('press_release_price') ?? 0) ?: null,
+                'press_release' => (float) (PromotionalListing::query()
+                    ->activeForSale()
+                    ->ofType(PromotionalListingType::PressRelease)
+                    ->min('price') ?? 0) ?: null,
                 'bundle' => (float) (SiteBundle::query()
                     ->where('status', SiteStatus::Active)
                     ->min('price') ?? 0) ?: null,
@@ -145,18 +171,21 @@ class HomeController extends Controller
     /**
      * Cache-safe scalar rows for home ranking lists (no Eloquent graphs in cache).
      *
-     * @param  \Illuminate\Database\Eloquent\Collection<int, Site>  $sites
+     * @param  Collection<int, Site>  $sites
      * @return list<array{domain: string, price: float, discount_price: float|null, currency: string, site_id: int}>
      */
     protected function toRows($sites): array
     {
         return $sites
+            ->each(fn (Site $site) => $site->normalizeJoinedPricingAttributes())
             ->map(fn (Site $site): array => [
                 'site_id' => $site->id,
                 'domain' => $site->domain,
                 'price' => (float) $site->price,
                 'discount_price' => $site->discount_price !== null ? (float) $site->discount_price : null,
-                'currency' => $site->currency?->value ?? (string) $site->currency,
+                'currency' => $site->currency instanceof \BackedEnum
+                    ? $site->currency->value
+                    : (string) $site->currency,
             ])
             ->values()
             ->all();

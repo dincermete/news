@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\SiteStatus;
+use App\Enums\PromotionalListingType;
 use App\Models\FooterLinkDurationOption;
-use App\Models\Site;
 use App\Models\SiteCategory;
-use App\Services\CartService;
 use App\Services\SeoMetaService;
+use App\Support\CatalogQuery;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -15,20 +14,18 @@ class FooterLinkCatalogController extends Controller
 {
     public const PER_PAGE = 24;
 
-    public function __invoke(Request $request, SeoMetaService $seo, CartService $carts): View
+    public function __invoke(Request $request, SeoMetaService $seo): View
     {
         $q = trim((string) $request->query('q', ''));
         $kategori = $request->query('kategori');
         $kategori = is_string($kategori) && $kategori !== '' ? $kategori : null;
         $sort = (string) $request->query('sort', 'price_asc');
 
-        $query = Site::query()
-            ->with(['category'])
-            ->where('status', SiteStatus::Active);
+        $query = CatalogQuery::activeSitesWithListing(PromotionalListingType::FooterLink);
 
         if ($q !== '') {
             $escaped = addcslashes($q, '%_\\');
-            $query->where('domain', 'like', "%{$escaped}%");
+            $query->where('sites.domain', 'like', "%{$escaped}%");
         }
 
         if ($kategori !== null) {
@@ -36,15 +33,15 @@ class FooterLinkCatalogController extends Controller
         }
 
         match ($sort) {
-            'price_desc' => $query->orderByDesc('price')->orderBy('id'),
-            default => $query->orderBy('price')->orderBy('id'),
+            'price_desc' => $query->orderByDesc('promotional_listings.price')->orderBy('sites.id'),
+            default => $query->orderBy('promotional_listings.price')->orderBy('sites.id'),
         };
 
         $sites = $query->paginate(self::PER_PAGE)->withQueryString();
-
-        foreach ($sites as $site) {
-            $site->setAttribute('base_price', $carts->siteBasePrice($site));
-        }
+        $sites->getCollection()->each(function ($site): void {
+            $site->normalizeJoinedPricingAttributes();
+            $site->setAttribute('base_price', (float) ($site->discount_price ?? $site->price));
+        });
 
         $categories = SiteCategory::query()->orderBy('name')->get(['id', 'name', 'slug']);
         $durationOptions = FooterLinkDurationOption::query()
