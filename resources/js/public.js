@@ -141,12 +141,36 @@ document.addEventListener('alpine:init', () => {
         },
     }));
 
-    Alpine.data('loginRequiredModal', () => ({
-        open: false,
+    // Sitedeki tüm "giriş gerekli" tetikleyicileri (sepete ekle, favorile, rapor
+    // gör…) hâlâ bu tek olayı fırlatıyor; artık ayrı bir onay adımı göstermeden
+    // doğrudan tabli auth modal'ı login sekmesinde açıyoruz.
+    window.addEventListener('open-login-modal', () => {
+        window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: { tab: 'login' } }));
+    });
+
+    Alpine.data('authModal', (options = {}) => ({
+        open: options.initialOpen ?? false,
+        tab: options.initialTab === 'register' ? 'register' : 'login',
+        showPassword: false,
+        showPasswordConfirm: false,
         init() {
-            window.addEventListener('open-login-modal', () => {
+            // Header dışından (JS event) açılış.
+            window.addEventListener('open-auth-modal', (event) => {
+                this.tab = event.detail?.tab === 'register' ? 'register' : 'login';
                 this.open = true;
             });
+
+            // /giris veya /kayitol'dan yönlendirilen ?auth=login|register — sunucu
+            // yerine burada, Alpine tarafında okunup modal buna göre açılıyor.
+            const authParam = new URLSearchParams(window.location.search).get('auth');
+            if (authParam === 'login' || authParam === 'register') {
+                this.tab = authParam;
+                this.open = true;
+
+                const url = new URL(window.location.href);
+                url.searchParams.delete('auth');
+                window.history.replaceState({}, '', url);
+            }
         },
         close() {
             this.open = false;

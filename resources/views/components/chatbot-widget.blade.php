@@ -20,11 +20,18 @@
     $greetingName = $chatbotUserFirstName ?? null;
 
     $tabBtn = 'flex flex-1 flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition';
+
+    $whatsappUrl = null;
+    try {
+        $whatsappUrl = app(\App\Services\WhatsAppRedirectService::class)->buildLink('Merhaba, bilgi almak istiyorum.');
+    } catch (\RuntimeException) {
+        $whatsappUrl = null;
+    }
 @endphp
 
 <div
     id="chatbot-widget"
-    class="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex flex-col items-end px-4 pb-4 sm:inset-x-auto sm:end-4 sm:w-[25rem]"
+    class="mobile-floating-widget pointer-events-none fixed inset-x-0 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-50 flex flex-col items-end px-4 xl:bottom-4 sm:inset-x-auto sm:end-4 sm:w-[25rem]"
     x-ignore
     data-chatbot-endpoint="{{ route('chatbot.message') }}"
     data-chatbot-conversation-endpoint="{{ route('chatbot.conversation') }}"
@@ -299,20 +306,35 @@
         </div>
     </div>
 
+    {{-- WhatsApp widget --}}
+    @if (filled($whatsappUrl))
+        <a
+            href="{{ $whatsappUrl }}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="pointer-events-auto mb-3 inline-flex size-12 shrink-0 items-center justify-center rounded-md bg-[#25D366] text-white transition hover:scale-105 hover:bg-[#20bd5a] active:scale-95 sm:size-14 sm:rounded-full"
+            aria-label="WhatsApp'tan yazın"
+        >
+            <svg class="size-5 sm:size-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                <path d="M20.52 3.449C12.831-3.984.106 1.407.101 11.892c0 2.096.549 4.14 1.595 5.945L0 24l6.335-1.652c1.746.95 3.71 1.454 5.71 1.455h.005c9.404 0 14.802-9.4 8.474-16.354M12.05 21.785h-.004c-1.783 0-3.532-.48-5.055-1.38l-.363-.214-3.755.98 1.002-3.657-.238-.375a9.86 9.86 0 0 1-1.512-5.24c0-5.445 4.436-9.876 9.885-9.876 2.638 0 5.117 1.028 6.982 2.895a9.788 9.788 0 0 1 2.893 6.977c-.003 5.445-4.44 9.877-9.885 9.877"/>
+            </svg>
+        </a>
+    @endif
+
     {{-- Launcher --}}
     <button
         type="button"
-        class="pointer-events-auto relative inline-flex size-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-ink to-panel text-white transition hover:scale-105 active:scale-95"
-        style="box-shadow: 0 12px 30px -6px rgb(237 31 32 / 0.45), 0 4px 12px -4px rgb(0 0 0 / 0.4);"
+        class="pointer-events-auto relative inline-flex size-12 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-ink to-panel text-white transition hover:scale-105 active:scale-95 sm:size-14 sm:rounded-full"
         data-chatbot-toggle
         aria-expanded="false"
         aria-controls="chatbot-widget"
     >
         <span class="sr-only">Sohbet başlat</span>
-        <svg class="size-6 transition-all duration-200" data-chatbot-icon-chat xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+        <svg class="size-5 transition-all duration-200 sm:size-6" data-chatbot-icon-chat xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="{{ $icons['chat'] }}"/>
         </svg>
-        <svg class="absolute size-6 rotate-45 scale-0 opacity-0 transition-all duration-200" data-chatbot-icon-close xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <svg class="absolute size-5 rotate-45 scale-0 opacity-0 transition-all duration-200 sm:size-6" data-chatbot-icon-close xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
         </svg>
         <span class="absolute -end-0.5 -top-0.5 hidden size-4 items-center justify-center rounded-full bg-brand-500 text-[9px] font-bold text-white ring-2 ring-white" data-chatbot-badge>1</span>

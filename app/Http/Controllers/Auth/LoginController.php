@@ -3,24 +3,25 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Services\SeoMetaService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
-use Illuminate\View\View;
 
 class LoginController extends Controller
 {
-    public function create(SeoMetaService $seo): View|RedirectResponse
+    /**
+     * Giriş artık ayrı bir sayfa değil, header'daki auth modal'ı üzerinden
+     * yapılıyor; bu route sadece eski linkler/doğrudan URL ziyaretleri için
+     * ana sayfaya yönlendirip modal'ı ilgili sekmede otomatik açtırıyor.
+     */
+    public function create(): RedirectResponse
     {
         if (Auth::check()) {
             return redirect()->route('account.dashboard');
         }
 
-        return view('auth.login', [
-            'meta' => $seo->forDefault(),
-        ]);
+        return redirect()->route('home', ['auth' => 'login']);
     }
 
     public function store(Request $request): RedirectResponse

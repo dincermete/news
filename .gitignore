@@ -10,6 +10,8 @@ error_log
 /.codex
 /.cursor/
 /.idea
+/.impeccable/hook.cache.json
+/.impeccable/live/
 /.nova
 /.phpunit.cache
 /.vscode

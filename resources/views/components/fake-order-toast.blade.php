@@ -1,6 +1,6 @@
 {{-- Social-proof toast; bottom-start so it does not block chatbot (bottom-end). --}}
 <div
-    class="pointer-events-none fixed bottom-4 start-4 z-40 w-[min(100%-2rem,22rem)]"
+    class="mobile-floating-widget pointer-events-none fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] start-4 z-40 w-[min(100%-2rem,22rem)] xl:bottom-4"
     x-data="fakeOrderToast(@js(url('/api/fake-notification')))"
     x-cloak
 >

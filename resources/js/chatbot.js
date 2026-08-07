@@ -6,6 +6,8 @@
 import { animate } from 'motion';
 
 const STORAGE_KEY = 'nt_chatbot_session';
+const SESSION_OPEN_KEY = 'nt_chatbot_open';
+const SESSION_SCREEN_KEY = 'nt_chatbot_screen';
 const SPRING = [0.22, 0.61, 0.36, 1];
 const MIN_TYPING_MS = 550;
 
@@ -255,7 +257,6 @@ function mountChatbot() {
     const tabbar = root.querySelector('[data-chatbot-tabbar]');
     const tabButtons = root.querySelectorAll('[data-chatbot-tab]');
     const tabTargetButtons = root.querySelectorAll('[data-chatbot-tab-target]');
-    const conversationTriggers = root.querySelectorAll('[data-chatbot-open-conversation], [data-chatbot-start-conversation]');
     const backBtn = root.querySelector('[data-chatbot-back]');
     const faqToggles = root.querySelectorAll('[data-chatbot-faq-toggle]');
 
@@ -271,7 +272,7 @@ function mountChatbot() {
     let sending = false;
     let historyLoaded = false;
     let historyRendered = false;
-    const token = sessionToken();
+    let token = sessionToken();
 
     // Kullanıcının dikkatini çekmek için bir kereye mahsus bildirim rozeti.
     window.setTimeout(() => {
@@ -300,6 +301,11 @@ function mountChatbot() {
         });
 
         currentScreen = name;
+        try {
+            sessionStorage.setItem(SESSION_SCREEN_KEY, name);
+        } catch {
+            // Gizlilik modu / depolama kapalı — sekmeler arası hatırlama devre dışı kalır.
+        }
         tabbar?.classList.toggle('hidden', name === 'conversation');
 
         tabButtons.forEach((btn) => {
@@ -326,14 +332,51 @@ function mountChatbot() {
         renderHistoryIntoConversation();
     };
 
+    /**
+     * "Yeni sohbet başlat": eskisinden ayrı, boş bir konuşma. Yeni bir session
+     * token üretir (sunucu tarafında da gerçekten yeni bir ChatbotConversation
+     * satırı açılır), önbellekteki eski geçmişi temizler ve konuşma ekranını
+     * hoş geldin balonuyla sıfırdan gösterir.
+     */
+    const startNewConversation = () => {
+        try {
+            localStorage.removeItem(STORAGE_KEY);
+        } catch {
+            // Gizlilik modu / depolama kapalı — yine de yeni bir token üretilir.
+        }
+        token = sessionToken();
+        cachedHistory = [];
+        historyLoaded = true;
+        historyRendered = true;
+
+        if (messages) {
+            messages.innerHTML = '';
+            if (welcomeRow) {
+                messages.appendChild(welcomeRow);
+            }
+        }
+        chipsRow?.classList.remove('hidden');
+        recentCard?.classList.add('hidden');
+        recentCard?.classList.remove('flex');
+        messagesCard?.classList.add('hidden');
+        messagesCard?.classList.remove('flex');
+        messagesEmpty?.classList.remove('hidden');
+        messagesEmpty?.classList.add('flex');
+
+        showScreen('conversation');
+    };
+
     tabButtons.forEach((btn) => {
         btn.addEventListener('click', () => showScreen(btn.dataset.chatbotTab));
     });
     tabTargetButtons.forEach((btn) => {
         btn.addEventListener('click', () => showScreen(btn.dataset.chatbotTabTarget));
     });
-    conversationTriggers.forEach((el) => {
+    root.querySelectorAll('[data-chatbot-open-conversation]').forEach((el) => {
         el.addEventListener('click', goToConversation);
+    });
+    root.querySelectorAll('[data-chatbot-start-conversation]').forEach((el) => {
+        el.addEventListener('click', startNewConversation);
     });
     backBtn?.addEventListener('click', () => showScreen('home'));
 
@@ -369,6 +412,16 @@ function mountChatbot() {
         open = next;
         toggle?.setAttribute('aria-expanded', open ? 'true' : 'false');
         morphIcon(open);
+
+        try {
+            if (open) {
+                sessionStorage.setItem(SESSION_OPEN_KEY, '1');
+            } else {
+                sessionStorage.removeItem(SESSION_OPEN_KEY);
+            }
+        } catch {
+            // Gizlilik modu / depolama kapalı — sekmeler arası hatırlama devre dışı kalır.
+        }
 
         if (open) {
             badge?.classList.add('hidden');
@@ -554,6 +607,36 @@ function mountChatbot() {
             send(chip.getAttribute('data-chip'));
         });
     });
+
+    /**
+     * Bu bir tam sayfa yenilemeli site (SPA değil): normal bir link tıklaması
+     * widget'ı sıfırdan yeniden mount eder. Kullanıcı sohbeti açık bırakıp
+     * başka bir sayfaya geçtiyse, burada aynı sekme oturumu boyunca
+     * (sessionStorage) açık/konuşma durumunu geri yükleyip devam ettiriyoruz.
+     */
+    (async () => {
+        let wasOpen = false;
+        let savedScreen = 'home';
+        try {
+            wasOpen = sessionStorage.getItem(SESSION_OPEN_KEY) === '1';
+            savedScreen = sessionStorage.getItem(SESSION_SCREEN_KEY) || 'home';
+        } catch {
+            return;
+        }
+
+        if (!wasOpen) {
+            return;
+        }
+
+        await loadHistory();
+        setOpen(true);
+
+        if (savedScreen === 'conversation') {
+            goToConversation();
+        } else if (savedScreen !== 'home') {
+            showScreen(savedScreen);
+        }
+    })();
 }
 
 function scheduleMount() {

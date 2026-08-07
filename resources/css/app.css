@@ -108,6 +108,32 @@
     display: none !important;
 }
 
+/*
+ | Mobil menü açıkken alt bar / fake bildirim / sohbet+WhatsApp widget'ları
+ | gizlenmez — header'ın z-index'i (bkz. <header>) onları backdrop'un
+ | arkasına düşürür, saydam+blur'lu backdrop üzerinden sönük görünürler.
+ | Burada yalnızca tıklanmalarını engelliyoruz.
+ */
+html.mobile-menu-open .mobile-floating-widget {
+    pointer-events: none;
+}
+
+a,
+button,
+[role="button"],
+input[type="submit"],
+input[type="button"],
+input[type="reset"] {
+    cursor: pointer;
+}
+
+a[aria-disabled="true"],
+button:disabled,
+button[aria-disabled="true"],
+input:disabled {
+    cursor: not-allowed;
+}
+
 /* Storefront: font + yoğunluk */
 .storefront {
     font-family: var(--font-sans);

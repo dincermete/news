@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-07T00:00:00.000Z",
+  "title": "Design System: Tanıtım Yazısı",
+  "extensions": {
+    "colorMeta": {
+      "signal-red": {
+        "role": "primary",
+        "displayName": "Sinyal Kırmızısı",
+        "canonical": "#ff3738",
+        "tonalRamp": ["#4a0708", "#881818", "#a51415", "#c81415", "#ed1f20", "#ff3738", "#ff6b6c", "#ffa0a0", "#ffc7c7", "#ffe0e0", "#fff1f1"]
+      },
+      "deep-navy": {
+        "role": "secondary",
+        "displayName": "Derin Lacivert",
+        "canonical": "#2248ab",
+        "tonalRamp": ["#121d3b", "#1b2d5f", "#1b3377", "#1c3c91", "#2248ab", "#3d5fbf", "#6a88d4", "#9ab0e4", "#c3d0f0", "#dde6f7", "#f0f4fc"]
+      },
+      "ink": { "role": "neutral", "displayName": "Ink (Birincil Metin)", "canonical": "#0a0b0b" },
+      "ink-2": { "role": "neutral", "displayName": "Ink İkincil", "canonical": "#545454" },
+      "ink-3": { "role": "neutral", "displayName": "Ink Üçüncül", "canonical": "#a4a4a4" },
+      "paper": { "role": "neutral", "displayName": "Paper (Zemin)", "canonical": "#f8f9fa" },
+      "paper-2": { "role": "neutral", "displayName": "Paper Koyu", "canonical": "#eef0f2" },
+      "card-dark": { "role": "neutral", "displayName": "Koyu Kart Zemini", "canonical": "#101114" },
+      "panel": { "role": "neutral", "displayName": "Panel Zemini (dekoratif)", "canonical": "#05070c" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Hero ve bölüm başlıkları; Stack Sans Headline, orta ağırlık, sıkı tracking." },
+      "body": { "displayName": "Body", "purpose": "Gövde metni ve nav linkleri; Inter Display." }
+    },
+    "shadows": [
+      { "name": "soft", "value": "0 1px 2px rgb(15 18 28 / 0.04), 0 4px 14px rgb(15 18 28 / 0.06)", "purpose": "Hafif kalkış: rozet, küçük yüzen pill." },
+      { "name": "pop", "value": "0 18px 40px rgb(15 18 28 / 0.08), 0 4px 12px rgb(15 18 28 / 0.04)", "purpose": "Dropdown, popover, mega-menü paneli — sistemin aktif yükselme gölgesi." },
+      { "name": "glow", "value": "0 20px 60px -18px rgb(34 72 171 / 0.45)", "purpose": "Lacivert dekoratif ışıma (panel arka planı)." },
+      { "name": "glow-brand", "value": "0 20px 60px -18px rgb(255 55 56 / 0.45)", "purpose": "Kırmızı dekoratif ışıma / güçlü CTA hover glow." }
+    ],
+    "motion": [
+      { "name": "ease-standard", "value": "cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "Dropdown açılış/kapanış, popover transition." },
+      { "name": "press-scale", "value": "scale(0.98)", "purpose": "Buton active/press geri bildirimi." },
+      { "name": "hover-lift-scale", "value": "scale(1.03)", "purpose": "Birincil CTA hover büyütme." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ana CTA — siyah gradyan zemin, tam yuvarlak, ikon+metin.",
+      "html": "<button class=\"ds-btn-primary\">Sepet<svg class=\"ds-btn-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M4.5 19.5 19.5 4.5m0 0H8.25m11.25 0v11.25\"/></svg></button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(to bottom, #000000, #363b3c); color: #fff; font-size: 13px; font-weight: 600; padding: 10px 20px; border: none; border-radius: 9999px; transition: transform 0.15s ease, background 0.15s ease; } .ds-btn-primary:hover { background: #000000; transform: scale(1.03); } .ds-btn-primary:active { transform: scale(0.98); } .ds-btn-icon { width: 14px; height: 14px; }"
+    },
+    {
+      "name": "Accent Button",
+      "kind": "button",
+      "refersTo": "button-accent",
+      "description": "İkincil CTA — derin lacivert zemin, tam yuvarlak.",
+      "html": "<button class=\"ds-btn-accent\">Bize Ulaşın</button>",
+      "css": ".ds-btn-accent { display: inline-flex; align-items: center; background: #2248ab; color: #fff; font-size: 13px; font-weight: 600; padding: 10px 20px; border: none; border-radius: 9999px; transition: background 0.15s ease; } .ds-btn-accent:hover { background: #1c3c91; }"
+    },
+    {
+      "name": "Nav Pill (default/active)",
+      "kind": "nav",
+      "refersTo": "nav-pill",
+      "description": "Üst menü linki — nötr rest hali, kırmızı sinyalli aktif hali.",
+      "html": "<div class=\"ds-nav-row\"><a class=\"ds-nav-pill\" href=\"#\">Paketler</a><a class=\"ds-nav-pill ds-nav-pill--active\" href=\"#\">Siteler</a></div>",
+      "css": ".ds-nav-row { display: flex; gap: 4px; } .ds-nav-pill { font-size: 13px; font-weight: 500; color: #545454; padding: 8px 14px; border-radius: 9999px; transition: background 0.15s ease, color 0.15s ease; } .ds-nav-pill:hover { background: rgb(10 11 11 / 0.05); color: #0a0b0b; } .ds-nav-pill--active { background: #fff1f1; color: #c81415; font-weight: 600; }"
+    },
+    {
+      "name": "Notification Chip",
+      "kind": "chip",
+      "refersTo": "chip-brand",
+      "description": "Sepet/bildirim sayaç rozeti — kırmızı sinyal, yalnızca aktif durumda görünür.",
+      "html": "<span class=\"ds-chip-brand\">3</span>",
+      "css": ".ds-chip-brand { display: inline-flex; align-items: center; justify-content: center; min-width: 16px; height: 16px; padding: 0 4px; background: #ff3738; color: #fff; font-size: 10px; font-weight: 700; border-radius: 9999px; box-shadow: 0 0 0 2px #fff; }"
+    },
+    {
+      "name": "Search Field",
+      "kind": "input",
+      "refersTo": "search-field",
+      "description": "Kapsül arama alanı — kenarlıklı dış kapsül, iç input sade.",
+      "html": "<form class=\"ds-search\"><svg class=\"ds-search-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z\"/></svg><input class=\"ds-search-input\" placeholder=\"Site ara…\"/></form>",
+      "css": ".ds-search { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid rgb(10 11 11 / 0.1); border-radius: 9999px; padding: 6px 14px; box-shadow: 0 1px 2px rgb(15 18 28 / 0.04), 0 4px 14px rgb(15 18 28 / 0.06); } .ds-search-icon { width: 16px; height: 16px; color: #a4a4a4; flex-shrink: 0; } .ds-search-input { border: none; background: transparent; outline: none; font-size: 14px; color: #0a0b0b; width: 100%; }"
+    },
+    {
+      "name": "Dropdown / Mega-Menu Panel",
+      "kind": "card",
+      "refersTo": "mega-menu-panel",
+      "description": "Hover ile açılan (tek panel paylaşılan durum), tetikleyicinin tam ortasına hizalanan, içerik boyutlu (header genişliğinde değil) açık flyout panel; icon çipli link satırları + altta 2 sütunlu sabit footer aksiyon çubuğu.",
+      "html": "<div class=\"ds-mega-panel\"><div class=\"ds-mega-body\"><a class=\"ds-mega-item\" href=\"#\"><span class=\"ds-mega-icon\">●</span><span><span class=\"ds-mega-title\">Tüm Siteler</span><span class=\"ds-mega-desc\">Kataloğun tamamını gözden geçirin</span></span></a></div><div class=\"ds-mega-footer\"><a href=\"#\">Tüm Siteleri Gör</a><a href=\"#\">Siteni Ücretsiz Ekle</a></div></div>",
+      "css": ".ds-mega-panel { background: #fff; border: 1px solid rgb(10 11 11 / 0.1); border-radius: 16px; box-shadow: 0 18px 40px rgb(15 18 28 / 0.08), 0 4px 12px rgb(15 18 28 / 0.04); overflow: hidden; width: 320px; } .ds-mega-body { padding: 12px; } .ds-mega-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px; border-radius: 8px; transition: background 0.15s ease; } .ds-mega-item:hover { background: #f8f9fa; } .ds-mega-icon { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; background: #f8f9fa; color: #0a0b0b; flex-shrink: 0; } .ds-mega-item:hover .ds-mega-icon { background: #0a0b0b; color: #fff; } .ds-mega-title { display: block; font-weight: 600; color: #0a0b0b; font-size: 14px; } .ds-mega-desc { display: block; margin-top: 2px; font-size: 12px; color: #a4a4a4; } .ds-mega-footer { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid rgb(10 11 11 / 0.1); background: #f8f9fa; } .ds-mega-footer a { display: flex; align-items: center; justify-content: center; padding: 12px; font-size: 13px; font-weight: 600; color: #0a0b0b; border-right: 1px solid rgb(10 11 11 / 0.1); } .ds-mega-footer a:last-child { border-right: none; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Newsroom Control Panel (Yayın Kontrol Odası)",
+    "overview": "Tanıtım Yazısı, yüzlerce haber ve blog sitesini tek bir pazaryerinde toplayan bir aracı platform. Görsel dili, bu işi yürüten kişinin masasındaki sakin ama kararlı kumanda paneli hissini taşır: nötr, güven veren bir zemin (paper/ink) üzerinde, sinyal kırmızısı yalnızca 'şimdi harekete geç' anlarında (CTA, bildirim rozeti, aktif durum) yanar — bir yayın stüdyosunun 'ON AIR' lambası gibi nadir ve vurucu. Derin lacivert ise arka planda süren güven/kurumsallık hissini taşır. Sistem, jenerik bir SaaS şablonu gibi görünmeyi reddeder: renk kısıtlı ve amaçlı kullanılır, yüzeyler varsayılan olarak düzdür, gölge yalnızca bir şey 'yükseldiğinde' devreye girer.",
+    "keyCharacteristics": [
+      "Nötr zemin (paper/beyaz), rengin nadiren ama kararlı biçimde kullanıldığı kompozisyon",
+      "Durumsal derinlik: düz yüzeyler, gölge yalnızca etkileşim/yükselme anında",
+      "Tam yuvarlak (rounded-full) pill butonlar; masaüstü buton/input'larda rounded-md; kartlarda büyük radius",
+      "panel-light/panel-dark: köşeleri yuvarlatılmış, kırmızı→lacivert radyal ışımalı vitrin panel düzeni",
+      "Mega-menü flyout paneli açık zeminde (bg-white), tetikleyicinin ortasına hizalı, tek panel prensibiyle (aynı anda en fazla bir grup açık)",
+      "Stack Sans Headline başlık + Inter Display gövde ikilisi"
+    ],
+    "rules": [
+      { "name": "The Rarity Rule", "body": "Sinyal kırmızısı herhangi bir ekranın ≤%10'unda kullanılır; azlığı onu güçlü kılar. Asla büyük zemin rengi olarak kullanılmaz.", "section": "colors" },
+      { "name": "The Newsroom Signal Rule", "body": "Kırmızı bir 'canlı/aksiyon gerekiyor' sinyalidir (sepet rozeti, bildirim noktası, aktif nav durumu, birincil CTA vurgusu). Dekoratif olarak kullanılmaz.", "section": "colors" },
+      { "name": "The Rest-Flat Rule", "body": "Etkileşimde olmayan hiçbir yüzey gölge taşımaz; gölge her zaman bir duruma (hover/açık/yüzen) tepkidir.", "section": "elevation" },
+      { "name": "The Breathing Room Rule", "body": "Masaüstü tam mega-menü yalnızca xl (1280px) ve üzerinde gösterilir; altında hamburger menüsüne (ve alt bar'a) düşer.", "section": "layout" },
+      { "name": "The Two-Action Footer Rule", "body": "Mega-menü panelinin gövdesinde rekabet eden çoklu CTA kartı yok; panelin altında sabit, 2 sütunlu bir footer'da yalnızca bir keşif linki ve bir dönüşüm linki bulunur.", "section": "components" }
+    ],
+    "dos": [
+      "Do rengi (kırmızı/lacivert) yalnızca aksiyon/durum sinyali için kullan — CTA, rozet, aktif nav durumu, hover glow.",
+      "Do yüzeyleri rest halinde düz tut; gölgeyi yalnızca dropdown/hover/yüzen öğede göster (shadow-pop).",
+      "Do geniş kenar boşluklu kompozisyon kullan — sıkışık, bitişik öğelerden kaçın.",
+      "Do masaüstü tam menüyü yalnızca yeterli genişlik (xl, 1280px+) olduğunda göster; altında hamburger'e düş.",
+      "Do mega-menü panelini tetikleyicinin ortasına hizala; aynı anda yalnızca bir panel açık tut (tab-benzeri anlık geçiş)."
+    ],
+    "donts": [
+      "Don't rengi geniş zemin/arka plan rengi olarak kullanma — yalnızca vurgu.",
+      "Don't koyu temayı (panel-dark, card-dark) genel gövde/header/dropdown zemini olarak kullanma; yalnızca dekoratif panel köşelerinde kalır.",
+      "Don't jenerik SaaS şablonu hissi veren nötr gri-mavi, kimliksiz kompozisyonlar üretme.",
+      "Don't bir dropdown/mega-menüye birden fazla rekabet eden CTA/feature kartı ekleme; yalnızca footer'daki iki link yeterli."
+    ]
+  }
+}

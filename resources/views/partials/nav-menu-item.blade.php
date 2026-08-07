@@ -10,16 +10,16 @@
     href="{{ $item['url'] }}"
     @click="{{ $onClick }}"
     @class([
-        'group flex items-start gap-3 rounded-xl px-3 py-2.5 text-sm transition',
-        $item['active'] ? 'bg-ink text-white' : 'text-ink-2 hover:bg-paper hover:text-ink',
+        'group flex items-start gap-x-3 rounded-lg p-3 text-sm transition',
+        $item['active'] ? 'bg-brand-50 text-brand-700' : 'text-ink-2 hover:bg-paper hover:text-ink',
     ])
 >
     @if ($iconPaths !== [])
         <span @class([
-            'mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-lg transition',
-            $item['active'] ? 'bg-white/15 text-white' : 'bg-ink/5 text-ink-2 group-hover:bg-ink group-hover:text-white',
+            'mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-lg transition',
+            $item['active'] ? 'bg-brand-500 text-white' : 'bg-paper text-ink group-hover:bg-ink group-hover:text-white',
         ])>
-            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <svg class="size-4.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                 @foreach ($iconPaths as $d)
                     <path stroke-linecap="round" stroke-linejoin="round" d="{{ $d }}"/>
                 @endforeach
@@ -28,9 +28,9 @@
     @endif
 
     <span class="min-w-0 flex-1">
-        <span class="block truncate font-medium">{{ $item['label'] }}</span>
+        <span class="block truncate font-semibold">{{ $item['label'] }}</span>
         @if (! empty($item['description']))
-            <span @class(['mt-0.5 block line-clamp-2 text-[11px] leading-snug', $item['active'] ? 'text-white/70' : 'text-ink-3'])>{{ $item['description'] }}</span>
+            <span @class(['mt-0.5 block truncate text-[12px] leading-snug', $item['active'] ? 'text-brand-700/70' : 'text-ink-3'])>{{ $item['description'] }}</span>
         @endif
     </span>
 </a>

@@ -6,26 +6,30 @@ use App\Enums\CustomerStatus;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Services\SeoMetaService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Password;
-use Illuminate\View\View;
 
 class RegisterController extends Controller
 {
-    public function create(Request $request, SeoMetaService $seo): View|RedirectResponse
+    /**
+     * Üye ol artık ayrı bir sayfa değil, header'daki auth modal'ı üzerinden
+     * yapılıyor; bu route sadece eski linkler/doğrudan URL ziyaretleri (ör.
+     * affiliate paylaşım linkleri) için ana sayfaya yönlendirip modal'ı
+     * ilgili sekmede, ?ref kodunu koruyarak otomatik açtırıyor.
+     */
+    public function create(Request $request): RedirectResponse
     {
         if (Auth::check()) {
             return redirect()->route('account.dashboard');
         }
 
-        return view('auth.register', [
-            'meta' => $seo->forDefault(),
+        return redirect()->route('home', array_filter([
+            'auth' => 'register',
             'ref' => $request->query('ref'),
-        ]);
+        ]));
     }
 
     public function store(Request $request): RedirectResponse

@@ -26,9 +26,8 @@ class HeaderRenderTest extends TestCase
         $response = $this->get('/');
 
         $response->assertStatus(200);
-        $response->assertSee('Popüler Kategoriler', false);
+        $response->assertSee('Tüm Siteleri Gör', false);
         $response->assertSee('Siteni Ücretsiz Ekle', false);
-        $response->assertSee('SEO ROI Hesaplayıcı', false);
     }
 
     /**

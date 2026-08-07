@@ -27,7 +27,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/public.js'])
 </head>
-<body class="storefront flex min-h-screen flex-col bg-white font-sans text-ink antialiased">
+<body class="storefront flex min-h-screen flex-col bg-white font-sans text-ink antialiased pb-24 xl:pb-0">
     @include('partials.header')
 
     <main id="main" class="@yield('mainClass', 'mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:px-8')">
@@ -36,9 +36,13 @@
 
     @include('partials.footer')
 
+    @include('partials.bottom-nav')
+
     @include('components.fake-order-toast')
     @include('components.chatbot-widget')
-    @include('components.login-required-modal')
+    @guest
+        @include('components.auth-modal')
+    @endguest
 
     {{-- chatbot.js is a separate Vite entry: type=module ⇒ deferred, idle-mounted --}}
     @vite(['resources/js/chatbot.js'])

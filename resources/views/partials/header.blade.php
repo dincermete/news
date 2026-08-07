@@ -1,8 +1,7 @@
 @php
     $cartCount = (int) ($cartCount ?? 0);
-    $navLink = 'rounded-full px-3.5 py-2 text-[13px] font-medium text-ink-2 transition hover:bg-ink/5 hover:text-ink';
-    $navLinkActive = 'rounded-full bg-ink/5 px-3.5 py-2 text-[13px] font-medium text-ink';
-    $drawerLink = 'flex items-center gap-3 rounded-2xl px-4 py-3 text-[15px] font-medium transition';
+    $navLink = 'rounded-md px-3.5 py-2 text-[13px] font-medium text-ink-2 transition hover:bg-ink/5 hover:text-ink';
+    $navLinkActive = 'rounded-md bg-accent-50 px-3.5 py-2 text-[13px] font-semibold text-accent-700';
     $phone = $siteSettings->support_phone ?: '08503052241';
     $phoneDisplay = $siteSettings->support_phone_display ?: '0850 305 22 41';
 
@@ -20,19 +19,6 @@
         'briefcase' => ['M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-4.5A3.375 3.375 0 0 0 12.75 11h-1.5A3.375 3.375 0 0 0 8 14.25V18.75m9-12.75v-1.5a3 3 0 0 0-3-3h-3a3 3 0 0 0-3 3v1.5'],
         'sparkle' => ['M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z'],
     ];
-
-    $currentKategori = request()->routeIs('sites.category')
-        ? request()->route('kategori')
-        : null;
-
-    $megaMenu = $megaMenu ?? ['topCategories' => [], 'activeSiteCount' => 0, 'categoryCount' => 0, 'latestPost' => null];
-
-    $topCategoryNav = collect($megaMenu['topCategories'])
-        ->map(fn (array $category): array => [
-            ...$category,
-            'active' => $currentKategori === $category['slug'],
-        ])
-        ->all();
 
     $sitesExploreNav = [
         ['label' => 'Tüm Siteler', 'url' => route('sites.index'), 'active' => request()->routeIs('sites.index'), 'icon' => $icons['eye'], 'description' => 'Kataloğun tamamını gözden geçirin'],
@@ -61,14 +47,7 @@
 
     $currentToolSlug = request()->routeIs('tools.show') ? request()->route('slug') : null;
 
-    $toolsSections = [
-        [
-            'label' => null,
-            'items' => [
-                ['label' => 'Tüm Araçlar', 'url' => route('tools.index'), 'active' => request()->routeIs('tools.index'), 'icon' => $icons['sparkle'], 'description' => 'Ücretsiz, üyeliksiz SEO ve içerik araçları'],
-            ],
-        ],
-    ];
+    $toolsSections = [];
 
     foreach (\App\Support\Tools::categories() as $categoryKey => $categoryLabel) {
         $toolsSections[] = [
@@ -79,6 +58,7 @@
                     'url' => route('tools.show', $tool['slug']),
                     'active' => $currentToolSlug === $tool['slug'],
                     'icon' => [$tool['icon']],
+                    'description' => $tool['excerpt'] ?? null,
                 ])
                 ->all(),
         ];
@@ -88,77 +68,53 @@
         [
             'key' => 'siteler',
             'label' => 'Siteler',
-            'layout' => 'split',
+            'url' => route('sites.index'),
+            'layout' => 'list',
             'sections' => [
-                ['label' => 'Keşfet', 'variant' => 'icons', 'items' => $sitesExploreNav],
-                [
-                    'label' => 'Popüler Kategoriler',
-                    'variant' => 'compact',
-                    'items' => $topCategoryNav,
-                    'footer' => ['label' => 'Tüm kategorileri gör', 'url' => route('sites.index')],
-                ],
+                ['label' => null, 'variant' => 'icons', 'items' => $sitesExploreNav],
             ],
-            'feature' => [
-                'type' => 'promo',
-                'eyebrow' => 'Neden '.$siteSettings->siteName(),
-                'title' => 'Gerçek, onaylı yayın ağı',
-                'body' => 'Binlerce aktif haber ve blog sitesi arasından bütçenize uygun olanı birkaç saniyede bulun.',
-                'stats' => [
-                    ['value' => number_format($megaMenu['activeSiteCount'], 0, ',', '.').'+', 'label' => 'Aktif site'],
-                    ['value' => (string) $megaMenu['categoryCount'], 'label' => 'Kategori'],
-                ],
-                'cta' => ['label' => 'Siteni Ücretsiz Ekle', 'url' => route('account.site-submissions')],
+            'footer' => [
+                ['label' => 'Tüm Siteleri Gör', 'url' => route('sites.index'), 'icon' => $icons['eye']],
+                ['label' => 'Siteni Ücretsiz Ekle', 'url' => route('account.site-submissions'), 'icon' => $icons['sparkle']],
             ],
         ],
         [
             'key' => 'paketler',
             'label' => 'Paketler',
+            'url' => route('bundles.index'),
             'layout' => 'grid2',
             'sections' => [
                 ['label' => null, 'variant' => 'icons', 'items' => $packagesNav],
             ],
-            'feature' => [
-                'type' => 'article',
-                'eyebrow' => 'Kaynak',
-                'post' => $megaMenu['latestPost'],
-                'fallback' => [
-                    'title' => 'Bütçenize uygun paketi bulalım',
-                    'body' => 'Hedefinizi anlatın, size özel bir plan çıkaralım.',
-                    'cta_label' => 'Bize ulaşın',
-                    'cta_url' => route('contact.show'),
-                ],
+            'footer' => [
+                ['label' => 'Tüm Paketleri Gör', 'url' => route('bundles.index'), 'icon' => $icons['document']],
+                ['label' => 'Bize Ulaşın', 'url' => route('contact.show'), 'icon' => $icons['envelope']],
             ],
         ],
         [
             'key' => 'hizmetler',
             'label' => 'Hizmetler',
+            'url' => route('agency-services.index'),
             'layout' => 'grid2',
             'sections' => [
                 ['label' => null, 'variant' => 'icons', 'items' => $servicesNav],
             ],
-            'feature' => [
-                'type' => 'promo',
-                'eyebrow' => 'Ücretsiz Danışmanlık',
-                'title' => 'Size en uygun hizmeti birlikte seçelim',
-                'body' => 'Hedefinizi anlatın, ekibimiz aynı gün dönüş yapsın.',
-                'stats' => [],
-                'cta' => ['label' => 'Bize Ulaşın', 'url' => route('contact.show')],
+            'footer' => [
+                ['label' => 'Tüm Hizmetleri Gör', 'url' => route('agency-services.index'), 'icon' => $icons['briefcase']],
+                ['label' => 'Bize Ulaşın', 'url' => route('contact.show'), 'icon' => $icons['envelope']],
             ],
         ],
         [
             'key' => 'araclar',
             'label' => 'Araçlar',
+            'url' => route('tools.index'),
             'layout' => 'columns',
             'sections' => collect($toolsSections)
                 ->map(fn (array $section): array => [...$section, 'variant' => 'icons'])
                 ->all(),
-            'feature' => [
-                'type' => 'tool',
-                'eyebrow' => 'Öne Çıkan Araç',
-                'name' => 'SEO ROI Hesaplayıcı',
-                'excerpt' => 'Trafik, dönüşüm oranı ve sipariş değerinden SEO yatırımınızın geri dönüşünü hesaplayın.',
-                'url' => route('tools.show', 'seo-roi-hesaplama'),
-                'icon' => $icons['trending'],
+            'footer' => [
+                ['label' => 'Tüm Araçları Gör', 'url' => route('tools.index'), 'icon' => $icons['sparkle']],
+                ['label' => 'Ücretsiz SEO Analizi', 'url' => route('free-analysis.show'), 'icon' => $icons['trending']],
             ],
         ],
     ];
@@ -171,9 +127,12 @@
 @endphp
 
 <header
-    class="sticky top-0 z-40"
+    class="sticky top-0 z-[55]"
     x-data="{ mobileOpen: false }"
-    x-init="$watch('mobileOpen', (open) => document.documentElement.classList.toggle('overflow-hidden', open))"
+    x-init="$watch('mobileOpen', (open) => {
+        document.documentElement.classList.toggle('overflow-hidden', open);
+        document.documentElement.classList.toggle('mobile-menu-open', open);
+    })"
     @keydown.escape.window="mobileOpen = false"
 >
     {{-- Utility bar --}}
@@ -196,8 +155,8 @@
                 <a href="{{ route('contact.show') }}" class="transition hover:text-white">İletişim</a>
                 @guest
                     <span class="h-3 w-px bg-white/15" aria-hidden="true"></span>
-                    <a href="{{ route('login') }}" class="transition hover:text-white">Giriş Yap</a>
-                    <a href="{{ route('register') }}" class="font-semibold text-white transition hover:text-white/80">Kayıt Ol</a>
+                    <button type="button" @click="window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: { tab: 'login' } }))" class="transition hover:text-white">Giriş Yap</button>
+                    <button type="button" @click="window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: { tab: 'register' } }))" class="font-semibold text-white transition hover:text-white/80">Kayıt Ol</button>
                 @endguest
             </div>
         </div>
@@ -221,7 +180,12 @@
                 @endif
             </a>
 
-            <div class="relative hidden min-w-0 flex-1 items-center justify-center gap-x-0.5 lg:flex xl:gap-x-1" role="navigation">
+            <div
+                class="relative hidden min-w-0 flex-1 items-center justify-center gap-x-0.5 xl:flex xl:gap-x-1"
+                role="navigation"
+                x-data="{ openGroup: null, closeTimer: null }"
+                @keydown.escape.window="openGroup = null"
+            >
                 <a href="{{ route('home') }}" @class([request()->routeIs('home') ? $navLinkActive : $navLink, 'shrink-0 whitespace-nowrap'])>Anasayfa</a>
 
                 @foreach ($navGroups as $group)
@@ -230,85 +194,85 @@
                             ->flatMap(fn (array $section): array => $section['items'])
                             ->contains(fn (array $item): bool => $item['active']);
                         $sectionsGridClass = match ($group['layout']) {
-                            'split' => 'grid gap-x-8 sm:grid-cols-2',
-                            'columns' => 'grid gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-4',
+                            'columns' => 'grid gap-x-8 gap-y-6 sm:grid-cols-'.min(count($group['sections']), 4),
                             default => '',
+                        };
+                        $panelWidthClass = match ($group['layout']) {
+                            'columns' => 'w-[min(92vw,46rem)]',
+                            'grid2' => 'w-[min(92vw,34rem)]',
+                            default => 'w-[min(92vw,24rem)]',
                         };
                     @endphp
                     <div
-                        class="shrink-0"
-                        x-data="{ open: false }"
-                        @keydown.escape.window="open = false"
+                        class="relative shrink-0"
+                        @mouseenter="clearTimeout(closeTimer); openGroup = '{{ $group['key'] }}'"
+                        @mouseleave="closeTimer = setTimeout(() => { if (openGroup === '{{ $group['key'] }}') openGroup = null }, 100)"
                     >
-                        <button
-                            type="button"
-                            @click="open = !open"
+                        <a
+                            href="{{ $group['url'] }}"
+                            @click="openGroup = null"
+                            @focus="clearTimeout(closeTimer); openGroup = '{{ $group['key'] }}'"
                             @class([
                                 $groupActive ? $navLinkActive : $navLink,
                                 'inline-flex shrink-0 items-center gap-x-1.5 whitespace-nowrap',
                             ])
-                            :aria-expanded="open.toString()"
+                            :aria-expanded="(openGroup === '{{ $group['key'] }}').toString()"
                             aria-haspopup="true"
                         >
                             {{ $group['label'] }}
-                            <svg class="size-3.5 shrink-0 opacity-60 transition" :class="open && 'rotate-180'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
-                        </button>
+                            <svg class="size-3.5 shrink-0 opacity-60 transition" :class="openGroup === '{{ $group['key'] }}' && 'rotate-180'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+                        </a>
 
                         <div
-                            x-show="open"
+                            x-show="openGroup === '{{ $group['key'] }}'"
                             x-cloak
-                            x-transition
-                            @click.outside="open = false"
-                            class="absolute inset-x-0 top-full z-50 mt-3 max-h-[80vh] overflow-y-auto rounded-2xl border border-ink/10 bg-white shadow-pop"
+                            x-transition:enter="transition ease-out duration-150"
+                            x-transition:enter-start="opacity-0 -translate-y-1"
+                            x-transition:enter-end="opacity-100 translate-y-0"
+                            x-transition:leave="transition ease-in duration-100"
+                            x-transition:leave-start="opacity-100 translate-y-0"
+                            x-transition:leave-end="opacity-0 -translate-y-1"
+                            @click.outside="if (openGroup === '{{ $group['key'] }}') openGroup = null"
+                            @class([
+                                'absolute start-1/2 top-full z-50 mt-3 -translate-x-1/2 overflow-hidden rounded-lg border border-ink/10 bg-white shadow-pop',
+                                $panelWidthClass,
+                            ])
                         >
-                            <div class="grid gap-8 p-6 lg:grid-cols-[minmax(0,1fr)_18rem] xl:grid-cols-[minmax(0,1fr)_20rem]">
-                                <div @class([$sectionsGridClass, 'space-y-6' => $sectionsGridClass === ''])>
-                                    @foreach ($group['sections'] as $section)
-                                        @continue(empty($section['items']))
-                                        <div>
-                                            @if ($section['label'])
-                                                <p class="px-1 pb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-3">{{ $section['label'] }}</p>
-                                            @endif
+                            <div @class([$sectionsGridClass, 'space-y-0.5' => $sectionsGridClass === '', 'max-h-[65vh] overflow-y-auto p-3'])>
+                                @foreach ($group['sections'] as $section)
+                                    @continue(empty($section['items']))
+                                    <div>
+                                        @if ($section['label'])
+                                            <p class="px-3 pb-2 pt-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-3">{{ $section['label'] }}</p>
+                                        @endif
 
-                                            @if (($section['variant'] ?? 'icons') === 'compact')
-                                                <div class="grid grid-cols-2 gap-x-3 gap-y-0.5">
-                                                    @foreach ($section['items'] as $item)
-                                                        <a
-                                                            href="{{ $item['url'] }}"
-                                                            @click="open = false"
-                                                            @class([
-                                                                'flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-[13px] transition',
-                                                                $item['active'] ? 'bg-ink text-white' : 'text-ink-2 hover:bg-paper hover:text-ink',
-                                                            ])
-                                                        >
-                                                            <span class="truncate">{{ $item['label'] }}</span>
-                                                            @if (isset($item['count']))
-                                                                <span @class(['shrink-0 text-[11px] tabular-nums', $item['active'] ? 'text-white/60' : 'text-ink-3'])>{{ $item['count'] }}</span>
-                                                            @endif
-                                                        </a>
-                                                    @endforeach
-                                                </div>
-                                                @if (! empty($section['footer']))
-                                                    <a href="{{ $section['footer']['url'] }}" @click="open = false" class="mt-2 inline-flex items-center gap-x-1 px-2 text-[12px] font-semibold text-accent-600 transition hover:text-accent-700">
-                                                        {{ $section['footer']['label'] }}
-                                                        <svg class="size-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0-4 4m4-4H3"/></svg>
-                                                    </a>
-                                                @endif
-                                            @else
-                                                <div @class(['space-y-0.5', 'grid grid-cols-1 gap-x-4 sm:grid-cols-2' => $group['layout'] === 'grid2'])>
-                                                    @foreach ($section['items'] as $item)
-                                                        @include('partials.nav-menu-item', ['item' => $item, 'onClick' => 'open = false'])
-                                                    @endforeach
-                                                </div>
-                                            @endif
+                                        <div @class(['space-y-0.5', 'grid grid-cols-1 gap-x-4 sm:grid-cols-2' => $group['layout'] === 'grid2'])>
+                                            @foreach ($section['items'] as $item)
+                                                @include('partials.nav-menu-item', ['item' => $item, 'onClick' => 'openGroup = null'])
+                                            @endforeach
                                         </div>
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            @if (! empty($group['footer']))
+                                <div class="grid grid-cols-2 divide-x divide-ink/10 border-t border-ink/10 bg-paper">
+                                    @foreach ($group['footer'] as $footerItem)
+                                        <a
+                                            href="{{ $footerItem['url'] }}"
+                                            @click="openGroup = null"
+                                            class="flex items-center justify-center gap-x-2 p-3 text-[13px] font-semibold text-ink transition hover:bg-ink/5"
+                                        >
+                                            <svg class="size-4 shrink-0 text-ink-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                                @foreach ((array) $footerItem['icon'] as $d)
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="{{ $d }}"/>
+                                                @endforeach
+                                            </svg>
+                                            {{ $footerItem['label'] }}
+                                        </a>
                                     @endforeach
                                 </div>
-
-                                @if (! empty($group['feature']))
-                                    @include('partials.nav-mega-feature', ['feature' => $group['feature'], 'onClick' => 'open = false'])
-                                @endif
-                            </div>
+                            @endif
                         </div>
                     </div>
                 @endforeach
@@ -323,7 +287,7 @@
                 >
                     <button
                         type="button"
-                        class="inline-flex size-9 items-center justify-center rounded-full text-ink-2 transition hover:bg-ink/5 hover:text-ink focus:outline-hidden"
+                        class="inline-flex size-9 items-center justify-center rounded-md text-ink-2 transition hover:bg-ink/5 hover:text-ink focus:outline-hidden"
                         aria-label="Ara"
                         @click="open = !open"
                         :aria-expanded="open.toString()"
@@ -335,7 +299,7 @@
                         x-show="open"
                         x-cloak
                         @click.outside="open = false"
-                        class="absolute end-0 z-50 mt-2 w-72 rounded-2xl border border-ink/10 bg-white p-2 shadow-pop sm:w-80"
+                        class="absolute end-0 z-50 mt-2 w-72 rounded-md border border-ink/10 bg-white p-2 shadow-pop sm:w-80"
                     >
                         <form method="get" action="{{ route('sites.index') }}" class="flex items-center gap-1.5" role="search">
                             <svg class="ms-2 size-4 shrink-0 text-ink-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
@@ -347,7 +311,7 @@
                                 class="w-full border-0 bg-transparent p-0 py-1.5 text-sm text-ink placeholder:text-ink-3 focus:ring-0"
                                 aria-label="Site ara"
                             >
-                            <button type="submit" class="inline-flex shrink-0 items-center justify-center rounded-full bg-ink px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-black">
+                            <button type="submit" class="inline-flex shrink-0 items-center justify-center rounded-md bg-ink px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-black">
                                 Ara
                             </button>
                         </form>
@@ -366,7 +330,7 @@
                 >
                     <button
                         type="button"
-                        class="relative inline-flex size-9 items-center justify-center rounded-full text-ink-2 transition hover:bg-ink/5 hover:text-ink focus:outline-hidden"
+                        class="relative inline-flex size-9 items-center justify-center rounded-md text-ink-2 transition hover:bg-ink/5 hover:text-ink focus:outline-hidden"
                         aria-label="Bildirimler"
                         @click="toggle()"
                         :aria-expanded="open.toString()"
@@ -390,7 +354,7 @@
                         x-transition:leave-start="opacity-100"
                         x-transition:leave-end="opacity-0"
                         @click.outside="close()"
-                        class="absolute end-0 z-50 mt-2 w-[min(100vw-2rem,22rem)] overflow-hidden rounded-2xl border border-ink/10 bg-white shadow-pop"
+                        class="absolute end-0 z-50 mt-2 w-[min(100vw-2rem,22rem)] overflow-hidden rounded-md border border-ink/10 bg-white shadow-pop"
                     >
                         <div class="flex items-center justify-between gap-3 border-b border-ink/5 px-4 py-3">
                             <div>
@@ -402,7 +366,7 @@
                             </div>
                             <button
                                 type="button"
-                                class="rounded-full px-2.5 py-1 text-[11px] font-semibold text-accent-600 transition hover:bg-accent-50 disabled:pointer-events-none disabled:opacity-40"
+                                class="rounded-md px-2.5 py-1 text-[11px] font-semibold text-accent-600 transition hover:bg-accent-50 disabled:pointer-events-none disabled:opacity-40"
                                 x-show="unread > 0"
                                 x-cloak
                                 @click="markAllRead()"
@@ -470,13 +434,24 @@
                     </div>
                 </div>
 
-                <a href="{{ auth()->check() ? route('account.dashboard') : route('login') }}" class="inline-flex size-9 items-center justify-center rounded-full text-ink-2 transition hover:bg-ink/5 hover:text-ink focus:outline-hidden" aria-label="Hesabım">
-                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>
-                </a>
+                @auth
+                    <a href="{{ route('account.dashboard') }}" class="hidden size-9 items-center justify-center rounded-md text-ink-2 transition hover:bg-ink/5 hover:text-ink focus:outline-hidden xl:inline-flex" aria-label="Hesabım">
+                        <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>
+                    </a>
+                @else
+                    <button
+                        type="button"
+                        @click="window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: { tab: 'login' } }))"
+                        class="hidden size-9 items-center justify-center rounded-md text-ink-2 transition hover:bg-ink/5 hover:text-ink focus:outline-hidden xl:inline-flex"
+                        aria-label="Hesabım"
+                    >
+                        <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>
+                    </button>
+                @endauth
 
                 <a
                     href="{{ route('cart.index') }}"
-                    class="group relative ms-1 inline-flex items-center gap-x-2 rounded-2xl bg-ink px-3 py-2.5 text-xs font-medium text-white transition hover:bg-black hover:scale-[1.03] active:scale-[0.98] focus:outline-hidden sm:px-5"
+                    class="group relative ms-1 hidden items-center gap-x-2 rounded-md bg-ink px-3 py-2.5 text-xs font-medium text-white transition hover:bg-black hover:scale-[1.03] active:scale-[0.98] focus:outline-hidden xl:inline-flex"
                 >
                     <span class="hidden sm:inline">Sepet</span>
                     <svg class="size-3.5 shrink-0 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5 19.5 4.5m0 0H8.25m11.25 0v11.25" /></svg>
@@ -487,7 +462,7 @@
 
                 <button
                     type="button"
-                    class="inline-flex size-9 items-center justify-center rounded-full border border-ink/10 text-ink transition hover:bg-ink/5 lg:hidden"
+                    class="inline-flex size-9 items-center justify-center rounded-md border border-ink/10 text-ink transition hover:bg-ink/5 xl:hidden"
                     @click="mobileOpen = true"
                     :aria-expanded="mobileOpen.toString()"
                     aria-controls="mobile-nav-drawer"
@@ -503,51 +478,60 @@
 
     {{-- Mobile side drawer --}}
     <div
-        class="lg:hidden"
-        x-cloak
-        x-show="mobileOpen"
-        x-transition.opacity.duration.200ms
+        class="xl:hidden"
         role="dialog"
         aria-modal="true"
         aria-label="Mobil menü"
     >
         <div
             class="fixed inset-0 z-[60] bg-ink/40 backdrop-blur-[2px]"
+            x-cloak
+            x-show="mobileOpen"
+            x-transition.opacity.duration.200ms
             @click="mobileOpen = false"
             aria-hidden="true"
         ></div>
 
         <div
             id="mobile-nav-drawer"
-            class="fixed inset-y-0 end-0 z-[70] flex w-[min(100vw-2.5rem,22rem)] flex-col bg-white shadow-pop"
+            class="fixed inset-x-4 top-4 z-[70] flex max-h-[calc(100vh-2rem)] flex-col overflow-hidden rounded-2xl bg-white shadow-pop sm:inset-x-auto sm:end-4 sm:w-[22rem]"
+            x-cloak
             x-show="mobileOpen"
-            x-transition:enter="transform transition ease-out duration-300"
-            x-transition:enter-start="translate-x-full"
-            x-transition:enter-end="translate-x-0"
-            x-transition:leave="transform transition ease-in duration-200"
-            x-transition:leave-start="translate-x-0"
-            x-transition:leave-end="translate-x-full"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
             @click.stop
         >
-            <div class="flex items-center justify-between gap-3 border-b border-ink/5 bg-ink px-4 py-3.5 text-white">
-                <div class="min-w-0">
-                    <p class="truncate font-display text-base font-semibold">{{ $siteSettings->siteName() }}</p>
-                    <p class="text-[11px] font-medium text-white/60">Menü</p>
-                </div>
+            <div class="flex shrink-0 items-center justify-between gap-3 border-b border-ink/5 px-4 py-3.5">
+                <a href="{{ route('home') }}" @click="mobileOpen = false" class="inline-flex min-w-0 items-center gap-x-2">
+                    @if ($siteSettings->logoUrl())
+                        <img src="{{ $siteSettings->logoUrl() }}" alt="{{ $siteSettings->siteName() }}" class="h-7 w-auto">
+                    @else
+                        <span class="inline-flex size-7 items-center justify-center rounded-md bg-gradient-to-br from-accent-500 to-accent-700 text-white">
+                            <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                            </svg>
+                        </span>
+                        <span class="truncate font-display text-base font-semibold text-ink">{{ $siteSettings->siteName() }}</span>
+                    @endif
+                </a>
                 <button
                     type="button"
-                    class="inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-white/15 text-white transition hover:bg-white/10"
+                    class="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-ink-3 transition hover:bg-paper hover:text-ink"
                     @click="mobileOpen = false"
                     aria-label="Menüyü kapat"
                 >
-                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                    <svg class="size-4.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
 
-            <div class="flex-1 overflow-y-auto overscroll-contain px-3 py-4">
-                <form method="get" action="{{ route('sites.index') }}" class="mb-5 flex items-center gap-2 rounded-2xl border border-ink/10 bg-paper px-3 py-2" role="search">
+            <div class="flex-1 overflow-y-auto overscroll-contain px-4 py-3">
+                <form method="get" action="{{ route('sites.index') }}" class="mb-3 flex items-center gap-2 rounded-md border border-ink/10 bg-paper px-3 py-2" role="search">
                     <svg class="size-4 shrink-0 text-ink-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
                     <input
                         type="search"
@@ -558,79 +542,83 @@
                     >
                 </form>
 
-                <div class="mb-5 space-y-0.5">
-                    <a
-                        href="{{ route('home') }}"
-                        @click="mobileOpen = false"
-                        @class([
-                            $drawerLink,
-                            request()->routeIs('home') ? 'bg-ink text-white' : 'text-ink hover:bg-paper',
-                        ])
-                    >
-                        <span>Anasayfa</span>
-                    </a>
-                    <a
-                        href="{{ route('account.site-submissions') }}"
-                        @click="mobileOpen = false"
-                        @class([
-                            $drawerLink,
-                            request()->routeIs('account.site-submissions') ? 'bg-ink text-white' : 'text-ink hover:bg-paper',
-                        ])
-                    >
-                        <span>Siteni Ekle</span>
-                    </a>
-                </div>
+                <a
+                    href="{{ route('home') }}"
+                    @click="mobileOpen = false"
+                    @class(['block px-1 py-3 text-[15px]', request()->routeIs('home') ? 'font-semibold text-ink' : 'font-medium text-ink-2 hover:text-ink'])
+                >
+                    Anasayfa
+                </a>
 
                 @foreach ($navGroups as $group)
-                    <p class="px-4 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-3">{{ $group['label'] }}</p>
-                    <div class="mb-5 space-y-3">
-                        @foreach ($group['sections'] as $section)
-                            @continue(empty($section['items']))
-                            <div class="space-y-0.5">
-                                @if ($section['label'])
-                                    <p class="px-4 pb-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-ink-3/70">{{ $section['label'] }}</p>
-                                @endif
-                                @foreach ($section['items'] as $item)
-                                    @include('partials.nav-menu-item', ['item' => $item, 'onClick' => 'mobileOpen = false'])
-                                @endforeach
-                            </div>
-                        @endforeach
+                    @php
+                        $groupActive = collect($group['sections'])
+                            ->flatMap(fn (array $section): array => $section['items'])
+                            ->contains(fn (array $item): bool => $item['active']);
+                    @endphp
+                    <div x-data="{ open: false }">
+                        <button
+                            type="button"
+                            @click="open = !open"
+                            @class(['flex w-full items-center justify-between gap-2 px-1 py-3 text-[15px]', $groupActive ? 'font-semibold text-ink' : 'font-medium text-ink-2'])
+                            :aria-expanded="open.toString()"
+                        >
+                            {{ $group['label'] }}
+                            <svg class="size-4 shrink-0 text-ink-3 transition" :class="open && 'rotate-180'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+                        </button>
+                        <div x-show="open" x-cloak x-transition class="space-y-2 pb-3 ps-3">
+                            @foreach ($group['sections'] as $section)
+                                @continue(empty($section['items']))
+                                <div>
+                                    @if ($section['label'])
+                                        <p class="pb-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-ink-3/70">{{ $section['label'] }}</p>
+                                    @endif
+                                    @foreach ($section['items'] as $item)
+                                        <a
+                                            href="{{ $item['url'] }}"
+                                            @click="mobileOpen = false"
+                                            @class(['block py-1.5 text-[14px]', $item['active'] ? 'font-semibold text-brand-600' : 'text-ink-2'])
+                                        >
+                                            {{ $item['label'] }}
+                                        </a>
+                                    @endforeach
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
                 @endforeach
 
-                <p class="px-4 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-3">Kurumsal</p>
-                <div class="space-y-0.5">
+                <div class="my-3 border-t border-ink/5"></div>
+
+                <div class="grid grid-cols-2 gap-x-4 gap-y-2.5 pb-2">
                     @foreach ($companyNav as $item)
-                        @include('partials.nav-menu-item', ['item' => $item, 'onClick' => 'mobileOpen = false'])
+                        <a href="{{ $item['url'] }}" @click="mobileOpen = false" class="text-[13px] font-medium text-ink-2 hover:text-ink">{{ $item['label'] }}</a>
                     @endforeach
+                    <a href="{{ route('account.site-submissions') }}" @click="mobileOpen = false" class="text-[13px] font-medium text-ink-2 hover:text-ink">Siteni Ekle</a>
                     @guest
-                        <a href="{{ route('login') }}" @click="mobileOpen = false" class="{{ $drawerLink }} text-ink hover:bg-paper">
-                            <span>Giriş Yap</span>
-                        </a>
-                        <a href="{{ route('register') }}" @click="mobileOpen = false" class="{{ $drawerLink }} text-ink hover:bg-paper">
-                            <span>Kayıt Ol</span>
-                        </a>
+                        <button type="button" @click="mobileOpen = false; window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: { tab: 'login' } }))" class="text-start text-[13px] font-medium text-ink-2 hover:text-ink">Giriş Yap</button>
+                        <button type="button" @click="mobileOpen = false; window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: { tab: 'register' } }))" class="text-start text-[13px] font-medium text-ink-2 hover:text-ink">Kayıt Ol</button>
                     @endguest
                 </div>
             </div>
 
-            <div class="border-t border-ink/5 bg-paper p-4">
-                <a
-                    href="tel:{{ $phone }}"
-                    class="mb-2 flex items-center justify-center gap-2 rounded-2xl border border-ink/10 bg-white px-4 py-3 text-sm font-semibold text-ink"
-                >
-                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"/></svg>
-                    {{ $phoneDisplay }}
-                </a>
+            <div class="shrink-0 space-y-2 border-t border-ink/5 p-4">
                 <a
                     href="{{ route('cart.index') }}"
                     @click="mobileOpen = false"
-                    class="flex items-center justify-center gap-2 rounded-2xl bg-ink px-4 py-3 text-sm font-semibold text-white"
+                    class="flex items-center justify-center gap-2 rounded-md bg-ink px-4 py-3 text-sm font-semibold text-white"
                 >
                     Sepete git
                     @if ($cartCount > 0)
                         <span class="inline-flex min-w-5 items-center justify-center rounded-full bg-brand-500 px-1.5 text-[11px]">{{ $cartCount }}</span>
                     @endif
+                </a>
+                <a
+                    href="tel:{{ $phone }}"
+                    class="flex items-center justify-center gap-2 rounded-md border border-ink/10 bg-white px-4 py-3 text-sm font-semibold text-ink"
+                >
+                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"/></svg>
+                    {{ $phoneDisplay }}
                 </a>
             </div>
         </div>

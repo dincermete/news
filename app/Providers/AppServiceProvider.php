@@ -39,7 +39,7 @@ class AppServiceProvider extends ServiceProvider
             $this->applySiteSettingOverrides();
         });
 
-        View::composer(['layouts.app', 'partials.footer', 'partials.header', 'layouts.account', 'components.chatbot-widget', 'about.index', 'contact.index', 'home', 'geo.index', 'backlink-packages.index', 'seo-packages.index', 'agency-services.index', 'agency-services.show', 'tools.index', 'tools.show', 'auth.login', 'auth.register'], function ($view): void {
+        View::composer(['layouts.app', 'partials.footer', 'partials.header', 'layouts.account', 'components.chatbot-widget', 'about.index', 'contact.index', 'home', 'geo.index', 'backlink-packages.index', 'seo-packages.index', 'agency-services.index', 'agency-services.show', 'tools.index', 'tools.show'], function ($view): void {
             $view->with('siteSettings', SiteSetting::current());
         });
 
