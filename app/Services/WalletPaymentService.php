@@ -7,7 +7,6 @@ use App\Enums\PaymentStatus;
 use App\Enums\WalletBalanceType;
 use App\Enums\WalletTransactionType;
 use App\Exceptions\InsufficientWalletBalanceException;
-use App\Jobs\ProcessSuccessfulPayment;
 use App\Models\Payment;
 use App\Models\User;
 use App\Models\Wallet;
@@ -16,9 +15,13 @@ use RuntimeException;
 
 class WalletPaymentService
 {
+    public function __construct(public PaymentCompletionService $completion) {}
+
     public function payWithWallet(Payment $payment): void
     {
         if ($payment->status === PaymentStatus::Paid) {
+            $this->completion->complete($payment);
+
             return;
         }
 
@@ -30,17 +33,23 @@ class WalletPaymentService
             : Currency::Try;
 
         DB::transaction(function () use ($payment, $user, $currency): void {
+            $lockedPayment = Payment::query()->whereKey($payment->id)->lockForUpdate()->firstOrFail();
+
+            if ($lockedPayment->status === PaymentStatus::Paid) {
+                return;
+            }
+
             $wallet = Wallet::forUser($user, $currency);
             $wallet = Wallet::query()->whereKey($wallet->id)->lockForUpdate()->firstOrFail();
 
-            $amountDue = round((float) $payment->amount, 2);
+            $amountDue = round((float) $lockedPayment->amount, 2);
 
             if ($wallet->totalAvailableBalance() + 0.00001 < $amountDue) {
                 throw InsufficientWalletBalanceException::make();
             }
 
             $remaining = $amountDue;
-            $relatedOrderId = $payment->order_id;
+            $relatedOrderId = $lockedPayment->order_id;
 
             foreach (WalletBalanceType::debitPriority() as $bucket) {
                 if ($remaining <= 0) {
@@ -68,7 +77,7 @@ class WalletPaymentService
                     'reason' => 'payment',
                     'balance_type' => $bucket,
                     'related_order_id' => $relatedOrderId,
-                    'related_payment_id' => $payment->id,
+                    'related_payment_id' => $lockedPayment->id,
                 ]);
 
                 $remaining = round($remaining - $take, 2);
@@ -77,17 +86,9 @@ class WalletPaymentService
             if ($remaining > 0.00001) {
                 throw InsufficientWalletBalanceException::make();
             }
-
-            $payment->forceFill([
-                'status' => PaymentStatus::Paid,
-                'paid_at' => now(),
-            ])->save();
-
-            $payment->loadMissing(['order', 'orderGroup.orders']);
-            $payment->markRelatedOrdersContentPending();
         });
 
-        ProcessSuccessfulPayment::dispatch($payment->fresh());
+        $this->completion->complete($payment->fresh());
     }
 
     protected function resolveUser(Payment $payment): User

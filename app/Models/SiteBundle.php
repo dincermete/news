@@ -110,4 +110,14 @@ class SiteBundle extends Model
     {
         return $this->hasMany(Order::class);
     }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(SiteReview::class);
+    }
+
+    public function questions(): HasMany
+    {
+        return $this->hasMany(SiteQuestion::class);
+    }
 }

@@ -55,7 +55,7 @@ class PaymentForm
                                         ->options(PaymentStatus::class)
                                         ->required()
                                         ->default(PaymentStatus::Pending)
-                                        ->helperText('Havale onayları için tablo aksiyonunu kullanın.'),
+                                        ->helperText('Havale için tercihen listeden «Havale Onayla» kullanın. Status Paid yapılırsa fulfillment otomatik tetiklenir.'),
                                     DateTimePicker::make('paid_at')
                                         ->label('Ödeme zamanı')
                                         ->seconds(false),

@@ -4,24 +4,38 @@ namespace Tests\Feature;
 
 use App\Enums\CartStatus;
 use App\Enums\Currency;
+use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
-use App\Enums\PaymentStatus;
 use App\Enums\ProductType;
-use App\Jobs\ProcessSuccessfulPayment;
 use App\Models\BillingProfile;
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\Order;
 use App\Models\Payment;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Models\WalletTopupPackage;
 use App\Services\CartCheckoutService;
+use App\Services\PaymentCompletionService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class WalletTopupTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Storage::fake('local');
+        Pdf::shouldReceive('loadView')->andReturnSelf();
+        Pdf::shouldReceive('output')->andReturn('%PDF-fake');
+        Queue::fake();
+    }
 
     public function test_user_can_add_a_wallet_topup_package_to_cart(): void
     {
@@ -125,13 +139,15 @@ class WalletTopupTest extends TestCase
         $group = app(CartCheckoutService::class)->checkout($cart, $billing, method: PaymentMethod::BankTransfer);
         $payment = Payment::query()->where('order_group_id', $group->id)->firstOrFail();
 
-        $payment->forceFill(['status' => PaymentStatus::Paid])->save();
-
-        (new ProcessSuccessfulPayment($payment->fresh()))->handle();
+        app(PaymentCompletionService::class)->complete($payment->fresh());
 
         $wallet = Wallet::forUser($user, Currency::Try);
         $this->assertSame(200.0, $wallet->totalAvailableBalance());
         $this->assertSame(6, $user->fresh()->spinCreditBalance());
+        $this->assertSame(
+            OrderStatus::Completed,
+            Order::query()->where('order_group_id', $group->id)->firstOrFail()->status,
+        );
     }
 
     public function test_paid_bank_transfer_payment_credits_wallet_and_awards_spin_credits_for_a_custom_amount(): void
@@ -152,13 +168,15 @@ class WalletTopupTest extends TestCase
         $group = app(CartCheckoutService::class)->checkout($cart, $billing, method: PaymentMethod::BankTransfer);
         $payment = Payment::query()->where('order_group_id', $group->id)->firstOrFail();
 
-        $payment->forceFill(['status' => PaymentStatus::Paid])->save();
-
-        (new ProcessSuccessfulPayment($payment->fresh()))->handle();
+        app(PaymentCompletionService::class)->complete($payment->fresh());
 
         $wallet = Wallet::forUser($user, Currency::Try);
         $this->assertSame(350.0, $wallet->totalAvailableBalance());
         $this->assertSame(9, $user->fresh()->spinCreditBalance());
+        $this->assertSame(
+            OrderStatus::Completed,
+            Order::query()->where('order_group_id', $group->id)->firstOrFail()->status,
+        );
     }
 
     public function test_bank_transfer_payment_gets_a_reference_code_but_card_payment_does_not(): void

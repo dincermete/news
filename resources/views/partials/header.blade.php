@@ -2,45 +2,127 @@
     $cartCount = (int) ($cartCount ?? 0);
     $navLink = 'rounded-full px-3.5 py-2 text-[13px] font-medium text-ink-2 transition hover:bg-ink/5 hover:text-ink';
     $navLinkActive = 'rounded-full bg-ink/5 px-3.5 py-2 text-[13px] font-medium text-ink';
-    $drawerLink = 'flex items-center justify-between gap-3 rounded-2xl px-4 py-3.5 text-[15px] font-medium transition';
+    $drawerLink = 'flex items-center gap-3 rounded-2xl px-4 py-3 text-[15px] font-medium transition';
     $phone = $siteSettings->support_phone ?: '08503052241';
     $phoneDisplay = $siteSettings->support_phone_display ?: '0850 305 22 41';
 
-    $currentKategori = request()->routeIs('sites.index') ? request()->query('kategori') : null;
+    // Icon paths reused verbatim from elsewhere in this app (already verified to render correctly).
+    $icons = [
+        'phone' => ['M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z'],
+        'home' => ['M2.25 21h19.5M3 21V9.75L12 3l9 6.75V21M9.75 21v-6a1.5 1.5 0 0 1 1.5-1.5h1.5a1.5 1.5 0 0 1 1.5 1.5v6'],
+        'document' => ['M9 12h3.75M9 15h3.75M9 18h3.75m3-15H9.75A2.25 2.25 0 0 0 7.5 5.25v13.5A2.25 2.25 0 0 0 9.75 21h4.5a2.25 2.25 0 0 0 2.25-2.25V6.108c0-.318-.126-.622-.351-.847L14.643 3.75a1.5 1.5 0 0 0-1.06-.44H12'],
+        'envelope' => ['M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75'],
+        'eye' => ['M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z', 'M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z'],
+        'bell' => ['M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0'],
+        'link' => ['M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z'],
+        'trending' => ['M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941'],
+        'globe' => ['M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0 0c1.657 0 3-4.03 3-9s-1.343-9-3-9-3 4.03-3 9 1.343 9 3 9Zm-8.716-6.747h17.432M3.284 9.747h17.432'],
+        'briefcase' => ['M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-4.5A3.375 3.375 0 0 0 12.75 11h-1.5A3.375 3.375 0 0 0 8 14.25V18.75m9-12.75v-1.5a3 3 0 0 0-3-3h-3a3 3 0 0 0-3 3v1.5'],
+        'sparkle' => ['M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z'],
+    ];
+
+    $currentKategori = request()->routeIs('sites.category')
+        ? request()->route('kategori')
+        : null;
 
     $categoryNav = \App\Models\SiteCategory::query()
         ->orderBy('name')
         ->get(['name', 'slug'])
         ->map(fn (\App\Models\SiteCategory $category): array => [
             'label' => $category->name,
-            'url' => route('sites.index', ['kategori' => $category->slug]),
+            'url' => route('sites.category', ['kategori' => $category->slug]),
             'active' => $currentKategori === $category->slug,
         ])
         ->all();
 
-    $allSitesNav = [
-        ['label' => 'Tüm Siteler', 'url' => route('sites.index'), 'active' => request()->routeIs('sites.index') && $currentKategori === null],
-        ['label' => 'Basın Bülteni', 'url' => route('press-release.index'), 'active' => request()->routeIs('press-release.*')],
-        ['label' => 'Footer Link', 'url' => route('footer-links.index'), 'active' => request()->routeIs('footer-links.*')],
+    $sitesExploreNav = [
+        ['label' => 'Tüm Siteler', 'url' => route('sites.index'), 'active' => request()->routeIs('sites.index'), 'icon' => $icons['eye'], 'description' => 'Kataloğun tamamını gözden geçirin'],
+        ['label' => 'Basın Bülteni', 'url' => route('press-release.index'), 'active' => request()->routeIs('press-release.*'), 'icon' => $icons['bell'], 'description' => 'Geniş dağıtımlı basın bülteni hizmeti'],
+        ['label' => 'Footer Link', 'url' => route('footer-links.index'), 'active' => request()->routeIs('footer-links.*'), 'icon' => $icons['link'], 'description' => 'Site altbilgisinde kalıcı backlink'],
     ];
 
     $packagesNav = [
-        ['label' => 'Tanıtım Paketleri', 'url' => route('bundles.index'), 'active' => request()->routeIs('bundles.*')],
-        ['label' => 'SEO Paketleri', 'url' => route('seo-packages.index'), 'active' => request()->routeIs('seo-packages.*')],
-        ['label' => 'Backlink Paketleri', 'url' => route('backlink-packages.index'), 'active' => request()->routeIs('backlink-packages.*')],
-        ['label' => 'GEO', 'url' => route('geo.index'), 'active' => request()->routeIs('geo.*')],
+        ['label' => 'Tanıtım Paketleri', 'url' => route('bundles.index'), 'active' => request()->routeIs('bundles.*'), 'icon' => $icons['document'], 'description' => 'Çoklu site tanıtım yazısı paketleri'],
+        ['label' => 'SEO Paketleri', 'url' => route('seo-packages.index'), 'active' => request()->routeIs('seo-packages.*'), 'icon' => $icons['trending'], 'description' => 'Aylık, anahtar kelime bazlı SEO çalışması'],
+        ['label' => 'Backlink Paketleri', 'url' => route('backlink-packages.index'), 'active' => request()->routeIs('backlink-packages.*'), 'icon' => $icons['link'], 'description' => 'Rekabet seviyesine göre backlink paketleri'],
+        ['label' => 'GEO', 'url' => route('geo.index'), 'active' => request()->routeIs('geo.*'), 'icon' => $icons['globe'], 'description' => 'Yapay zekâ aramalarında görünürlük'],
     ];
 
+    $currentServiceSlug = request()->routeIs('agency-services.show') ? request()->route('slug') : null;
+
+    $servicesNav = collect(\App\Support\AgencyServicePages::all())
+        ->map(fn (array $service): array => [
+            'label' => $service['name'],
+            'url' => route('agency-services.show', $service['slug']),
+            'active' => $currentServiceSlug === $service['slug'],
+            'icon' => [$service['icon']],
+            'description' => $service['excerpt'],
+        ])
+        ->all();
+
+    $currentToolSlug = request()->routeIs('tools.show') ? request()->route('slug') : null;
+
+    $toolsSections = [
+        [
+            'label' => null,
+            'items' => [
+                ['label' => 'Tüm Araçlar', 'url' => route('tools.index'), 'active' => request()->routeIs('tools.index'), 'icon' => $icons['sparkle'], 'description' => 'Ücretsiz, üyeliksiz SEO ve içerik araçları'],
+            ],
+        ],
+    ];
+
+    foreach (\App\Support\Tools::categories() as $categoryKey => $categoryLabel) {
+        $toolsSections[] = [
+            'label' => $categoryLabel,
+            'items' => collect(\App\Support\Tools::grouped()[$categoryKey] ?? [])
+                ->map(fn (array $tool): array => [
+                    'label' => $tool['name'],
+                    'url' => route('tools.show', $tool['slug']),
+                    'active' => $currentToolSlug === $tool['slug'],
+                    'icon' => [$tool['icon']],
+                ])
+                ->all(),
+        ];
+    }
+
     $navGroups = [
-        ['key' => 'kategoriler', 'label' => 'Kategoriler', 'items' => $categoryNav],
-        ['key' => 'tum-siteler', 'label' => 'Tüm Siteler', 'items' => $allSitesNav],
-        ['key' => 'paketler', 'label' => 'Paketler', 'items' => $packagesNav],
+        [
+            'key' => 'siteler',
+            'label' => 'Siteler',
+            'width' => 'w-72 sm:w-80',
+            'sections' => [
+                ['label' => null, 'items' => $sitesExploreNav],
+                ['label' => 'Kategoriler', 'items' => $categoryNav],
+            ],
+        ],
+        [
+            'key' => 'paketler',
+            'label' => 'Paketler',
+            'width' => 'w-72 sm:w-80',
+            'sections' => [
+                ['label' => null, 'items' => $packagesNav],
+            ],
+        ],
+        [
+            'key' => 'hizmetler',
+            'label' => 'Hizmetler',
+            'width' => 'w-72 sm:w-80',
+            'sections' => [
+                ['label' => null, 'items' => $servicesNav],
+            ],
+        ],
+        [
+            'key' => 'araclar',
+            'label' => 'Araçlar',
+            'width' => 'w-72 sm:w-80',
+            'sections' => $toolsSections,
+        ],
     ];
 
     $companyNav = [
-        ['label' => 'Hakkımızda', 'url' => route('about.show'), 'active' => request()->routeIs('about.*')],
-        ['label' => 'Blog', 'url' => route('blog.index'), 'active' => request()->routeIs('blog.*')],
-        ['label' => 'İletişim', 'url' => route('contact.show'), 'active' => request()->routeIs('contact.*')],
+        ['label' => 'Hakkımızda', 'url' => route('about.show'), 'active' => request()->routeIs('about.*'), 'icon' => $icons['home']],
+        ['label' => 'Blog', 'url' => route('blog.index'), 'active' => request()->routeIs('blog.*'), 'icon' => $icons['document']],
+        ['label' => 'İletişim', 'url' => route('contact.show'), 'active' => request()->routeIs('contact.*'), 'icon' => $icons['envelope']],
     ];
 @endphp
 
@@ -50,6 +132,34 @@
     x-init="$watch('mobileOpen', (open) => document.documentElement.classList.toggle('overflow-hidden', open))"
     @keydown.escape.window="mobileOpen = false"
 >
+    {{-- Utility bar --}}
+    <div class="hidden bg-ink text-white/70 sm:block">
+        <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2 text-xs sm:px-6 lg:px-8">
+            <div class="flex items-center gap-x-5">
+                <a href="tel:{{ $phone }}" class="inline-flex items-center gap-x-1.5 transition hover:text-white">
+                    <svg class="size-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $icons['phone'][0] }}"/></svg>
+                    {{ $phoneDisplay }}
+                </a>
+                <a href="{{ route('account.site-submissions') }}" class="hidden items-center gap-x-1.5 transition hover:text-white md:inline-flex">
+                    <svg class="size-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $icons['home'][0] }}"/></svg>
+                    Siteni Ekle
+                </a>
+            </div>
+
+            <div class="flex items-center gap-x-5">
+                <a href="{{ route('about.show') }}" class="hidden transition hover:text-white md:inline">Hakkımızda</a>
+                <a href="{{ route('blog.index') }}" class="hidden transition hover:text-white md:inline">Blog</a>
+                <a href="{{ route('contact.show') }}" class="transition hover:text-white">İletişim</a>
+                @guest
+                    <span class="h-3 w-px bg-white/15" aria-hidden="true"></span>
+                    <a href="{{ route('login') }}" class="transition hover:text-white">Giriş Yap</a>
+                    <a href="{{ route('register') }}" class="font-semibold text-white transition hover:text-white/80">Kayıt Ol</a>
+                @endguest
+            </div>
+        </div>
+    </div>
+
+    {{-- Main nav --}}
     <div class="border-b border-ink/5 bg-white/90 backdrop-blur-md">
         <nav class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8" aria-label="Ana menü">
             <a href="{{ route('home') }}" class="inline-flex shrink-0 items-center gap-x-2 focus:outline-hidden">
@@ -71,7 +181,11 @@
                 <a href="{{ route('home') }}" @class([request()->routeIs('home') ? $navLinkActive : $navLink, 'shrink-0 whitespace-nowrap'])>Anasayfa</a>
 
                 @foreach ($navGroups as $group)
-                    @php $groupActive = collect($group['items'])->contains(fn (array $item): bool => $item['active']); @endphp
+                    @php
+                        $groupActive = collect($group['sections'])
+                            ->flatMap(fn (array $section): array => $section['items'])
+                            ->contains(fn (array $item): bool => $item['active']);
+                    @endphp
                     <div
                         class="relative shrink-0"
                         x-data="{ open: false }"
@@ -96,23 +210,27 @@
                             x-cloak
                             x-transition
                             @click.outside="open = false"
-                            class="absolute start-1/2 z-50 mt-3 max-h-[80vh] w-64 -translate-x-1/2 overflow-y-auto rounded-2xl border border-ink/10 bg-white p-2 shadow-pop"
+                            @class([
+                                'absolute start-1/2 z-50 mt-3 max-h-[80vh] -translate-x-1/2 space-y-4 overflow-y-auto rounded-2xl border border-ink/10 bg-white p-3 shadow-pop',
+                                $group['width'],
+                            ])
                         >
-                            @foreach ($group['items'] as $item)
-                                <a
-                                    href="{{ $item['url'] }}"
-                                    @click="open = false"
-                                    @class([
-                                        'block rounded-xl px-4 py-2.5 text-sm font-medium whitespace-nowrap transition',
-                                        $item['active'] ? 'bg-ink/5 text-ink' : 'text-ink-2 hover:bg-ink/5 hover:text-ink',
-                                    ])
-                                >{{ $item['label'] }}</a>
+                            @foreach ($group['sections'] as $section)
+                                @continue(empty($section['items']))
+                                <div>
+                                    @if ($section['label'])
+                                        <p class="px-2 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-3">{{ $section['label'] }}</p>
+                                    @endif
+                                    <div class="space-y-0.5">
+                                        @foreach ($section['items'] as $item)
+                                            @include('partials.nav-menu-item', ['item' => $item, 'onClick' => 'open = false'])
+                                        @endforeach
+                                    </div>
+                                </div>
                             @endforeach
                         </div>
                     </div>
                 @endforeach
-
-                <a href="{{ route('account.site-submissions') }}" @class([request()->routeIs('account.site-submissions') ? $navLinkActive : $navLink, 'shrink-0 whitespace-nowrap'])>Siteni Ekle</a>
             </div>
 
             <div class="flex shrink-0 items-center gap-x-1 sm:gap-x-1.5">
@@ -234,7 +352,7 @@
                                         aria-hidden="true"
                                     >
                                         <template x-if="item.kind === 'announcement'">
-                                            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 1 1 0-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.172.10.0.1.2.172.16.0.2.10.0.1.2.0.1.05.418-.024.1-.017.17-.038.254-.064a49.003 49.003 0 0 0 4.928-2.405c.25-.137.4-.4.4-.684V8.288c0-.284-.15-.547-.4-.684a49.003 49.003 0 0 0-4.928-2.405c-.084-.026-.17-.047-.254-.064-.148-.021-.292-.007-.418.024a.75.75 0 0 0-.47.386c-.4.891-.732 1.821-.985 2.783m0 9.18v-9.18" /></svg>
+                                            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" /></svg>
                                         </template>
                                         <template x-if="item.kind !== 'announcement'">
                                             <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" /></svg>
@@ -330,14 +448,14 @@
             x-transition:leave-end="translate-x-full"
             @click.stop
         >
-            <div class="flex items-center justify-between gap-3 border-b border-ink/5 px-4 py-3.5">
+            <div class="flex items-center justify-between gap-3 border-b border-ink/5 bg-ink px-4 py-3.5 text-white">
                 <div class="min-w-0">
-                    <p class="truncate font-display text-base font-semibold text-ink">{{ $siteSettings->siteName() }}</p>
-                    <p class="text-[11px] font-medium text-ink-3">Menü</p>
+                    <p class="truncate font-display text-base font-semibold">{{ $siteSettings->siteName() }}</p>
+                    <p class="text-[11px] font-medium text-white/60">Menü</p>
                 </div>
                 <button
                     type="button"
-                    class="inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-ink/10 text-ink transition hover:bg-ink/5"
+                    class="inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-white/15 text-white transition hover:bg-white/10"
                     @click="mobileOpen = false"
                     aria-label="Menüyü kapat"
                 >
@@ -365,28 +483,36 @@
                         @click="mobileOpen = false"
                         @class([
                             $drawerLink,
-                            request()->routeIs('home') ? 'bg-ink text-white' : 'text-ink hover:bg-ink/5',
+                            request()->routeIs('home') ? 'bg-ink text-white' : 'text-ink hover:bg-paper',
                         ])
                     >
                         <span>Anasayfa</span>
+                    </a>
+                    <a
+                        href="{{ route('account.site-submissions') }}"
+                        @click="mobileOpen = false"
+                        @class([
+                            $drawerLink,
+                            request()->routeIs('account.site-submissions') ? 'bg-ink text-white' : 'text-ink hover:bg-paper',
+                        ])
+                    >
+                        <span>Siteni Ekle</span>
                     </a>
                 </div>
 
                 @foreach ($navGroups as $group)
                     <p class="px-4 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-3">{{ $group['label'] }}</p>
-                    <div class="mb-5 space-y-0.5">
-                        @foreach ($group['items'] as $item)
-                            <a
-                                href="{{ $item['url'] }}"
-                                @click="mobileOpen = false"
-                                @class([
-                                    $drawerLink,
-                                    $item['active'] ? 'bg-ink text-white' : 'text-ink hover:bg-ink/5',
-                                ])
-                            >
-                                <span>{{ $item['label'] }}</span>
-                                <svg class="size-3.5 opacity-40" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
-                            </a>
+                    <div class="mb-5 space-y-3">
+                        @foreach ($group['sections'] as $section)
+                            @continue(empty($section['items']))
+                            <div class="space-y-0.5">
+                                @if ($section['label'])
+                                    <p class="px-4 pb-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-ink-3/70">{{ $section['label'] }}</p>
+                                @endif
+                                @foreach ($section['items'] as $item)
+                                    @include('partials.nav-menu-item', ['item' => $item, 'onClick' => 'mobileOpen = false'])
+                                @endforeach
+                            </div>
                         @endforeach
                     </div>
                 @endforeach
@@ -394,18 +520,16 @@
                 <p class="px-4 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-3">Kurumsal</p>
                 <div class="space-y-0.5">
                     @foreach ($companyNav as $item)
-                        <a
-                            href="{{ $item['url'] }}"
-                            @click="mobileOpen = false"
-                            @class([
-                                $drawerLink,
-                                $item['active'] ? 'bg-ink text-white' : 'text-ink hover:bg-ink/5',
-                            ])
-                        >
-                            <span>{{ $item['label'] }}</span>
-                            <svg class="size-3.5 opacity-40" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
-                        </a>
+                        @include('partials.nav-menu-item', ['item' => $item, 'onClick' => 'mobileOpen = false'])
                     @endforeach
+                    @guest
+                        <a href="{{ route('login') }}" @click="mobileOpen = false" class="{{ $drawerLink }} text-ink hover:bg-paper">
+                            <span>Giriş Yap</span>
+                        </a>
+                        <a href="{{ route('register') }}" @click="mobileOpen = false" class="{{ $drawerLink }} text-ink hover:bg-paper">
+                            <span>Kayıt Ol</span>
+                        </a>
+                    @endguest
                 </div>
             </div>
 

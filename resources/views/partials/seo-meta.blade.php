@@ -1,9 +1,12 @@
 @php
-    /** @var array{title: string, description: string, keywords?: string|null, og_image: string|null, og_url?: string|null, og_type?: string, published_time?: string|null, modified_time?: string|null, author?: string|null} $meta */
+    /** @var array{title: string, description: string, keywords?: string|null, og_image: string|null, og_url?: string|null, og_type?: string, robots?: string|null, published_time?: string|null, modified_time?: string|null, author?: string|null} $meta */
     $ogType = $meta['og_type'] ?? 'website';
 @endphp
 <title>{{ $meta['title'] }}</title>
 <meta name="description" content="{{ $meta['description'] }}">
+@if (! empty($meta['robots']))
+    <meta name="robots" content="{{ $meta['robots'] }}">
+@endif
 @if (! empty($meta['keywords']))
     <meta name="keywords" content="{{ $meta['keywords'] }}">
 @endif

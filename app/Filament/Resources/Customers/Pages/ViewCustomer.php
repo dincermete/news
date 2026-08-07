@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Customers\Pages;
 
 use App\Filament\Resources\Customers\Actions\CustomerActions;
 use App\Filament\Resources\Customers\CustomerResource;
+use App\Filament\Resources\Customers\Schemas\CustomerForm;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 
@@ -16,7 +17,9 @@ class ViewCustomer extends ViewRecord
         return [
             CustomerActions::adjustBalanceAction(),
             CustomerActions::toggleStatusAction(),
-            EditAction::make(),
+            EditAction::make()
+                ->modalWidth(CustomerForm::modalWidth())
+                ->slideOver(),
         ];
     }
 }

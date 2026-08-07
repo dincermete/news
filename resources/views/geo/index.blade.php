@@ -40,12 +40,12 @@
     ];
 
     $engineCards = [
-        ['name' => 'ChatGPT', 'desc' => 'OpenAI · 200M+ haftalık kullanıcı'],
-        ['name' => 'Gemini', 'desc' => 'Google · AI Overview kaynağı'],
-        ['name' => 'Perplexity', 'desc' => 'Citation tabanlı yanıt motoru'],
-        ['name' => 'Claude', 'desc' => 'Anthropic · uzun bağlam analizi'],
-        ['name' => 'Copilot', 'desc' => 'Microsoft · Bing AI yanıtları'],
-        ['name' => 'Google AI Overview', 'desc' => 'Google arama içi AI özetleri'],
+        ['name' => 'ChatGPT', 'desc' => 'OpenAI · 200M+ haftalık kullanıcı', 'dot' => '#10A37F'],
+        ['name' => 'Gemini', 'desc' => 'Google · AI Overview kaynağı', 'dot' => '#4285F4'],
+        ['name' => 'Perplexity', 'desc' => 'Citation tabanlı yanıt motoru', 'dot' => '#20808D'],
+        ['name' => 'Claude', 'desc' => 'Anthropic · uzun bağlam analizi', 'dot' => '#D97757'],
+        ['name' => 'Copilot', 'desc' => 'Microsoft · Bing AI yanıtları', 'dot' => '#0078D4'],
+        ['name' => 'Google AI Overview', 'desc' => 'Google arama içi AI özetleri', 'dot' => '#4285F4'],
     ];
 
     $services = [
@@ -83,10 +83,10 @@
     ];
 
     $stats = [
-        ['value' => '%12,3', 'title' => 'Ortalama dönüşüm', 'text' => 'AI sohbet kullanıcılarının ortalama dönüşüm oranı.', 'chip' => 'from-[#674cd0] to-[#a8a8ff]'],
-        ['value' => '4×', 'title' => 'Satın alma sıklığı', 'text' => 'Klasik kullanıcıya göre satın alma sıklığı.', 'chip' => 'from-[#f045aa] to-[#eeaad2]'],
-        ['value' => '5+', 'title' => 'Büyük dil modeli', 'text' => 'Takip edilen büyük dil modeli sayısı.', 'chip' => 'from-[#67a429] to-[#aee576]'],
-        ['value' => '99', 'title' => 'Kontrol noktası', 'text' => 'GEO + SEO + AEO kontrol noktası.', 'chip' => 'from-[#fa8837] to-[#faac75]'],
+        ['value' => '%12,3', 'title' => 'Ortalama dönüşüm', 'text' => 'AI sohbet kullanıcılarının ortalama dönüşüm oranı.', 'chip' => 'from-accent-500 to-accent-700'],
+        ['value' => '4×', 'title' => 'Satın alma sıklığı', 'text' => 'Klasik kullanıcıya göre satın alma sıklığı.', 'chip' => 'from-brand-500 to-brand-700'],
+        ['value' => '5+', 'title' => 'Büyük dil modeli', 'text' => 'Takip edilen büyük dil modeli sayısı.', 'chip' => 'from-black to-[#363b3c]'],
+        ['value' => '99', 'title' => 'Kontrol noktası', 'text' => 'GEO + SEO + AEO kontrol noktası.', 'chip' => 'from-accent-600 to-brand-600'],
     ];
 
     $tools = ['Google Analytics', 'Search Console', 'Tag Manager', 'Google Trends', 'Google İşletme Profili', 'Bing Webmaster', 'Yandex Webmaster', 'Semrush', 'Ahrefs', 'Screaming Frog', 'SEOmonitor', 'Majestic', 'Moz', 'Ubersuggest', 'KWFinder', 'Microsoft Clarity', 'Hotjar', 'GTmetrix', 'PageSpeed Insights', 'SimilarWeb', 'Looker Studio', 'Keyword Tool'];
@@ -140,6 +140,26 @@
                         SEO + GEO Paketleri
                     </a>
                 </div>
+
+                {{-- AI yanıt kartı: temsili örnek, gerçek bir alıntı değildir --}}
+                <div class="relative mt-10 w-full max-w-sm text-start" data-reveal>
+                    <span class="absolute -end-3 -top-3 z-10 rounded-full bg-brand-500 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-pop">Temsili örnek</span>
+                    <div class="rounded-[20px] border border-ink/10 bg-white p-4 shadow-pop">
+                        <div class="flex items-center gap-2 border-b border-ink/10 pb-3">
+                            <span class="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-ink text-white">
+                                <svg class="size-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/></svg>
+                            </span>
+                            <span class="text-xs font-semibold text-ink">AI asistanı · örnek yanıt</span>
+                        </div>
+                        <p class="mt-3 text-xs font-medium italic text-ink-3">"En iyi tanıtım yazısı ve backlink platformu hangisi?"</p>
+                        <div class="mt-2 rounded-xl bg-paper p-3">
+                            <p class="text-[13px] leading-relaxed text-ink">
+                                <strong>{{ site_setting('site_name') }}</strong>, şeffaf fiyatlandırması, DA/PA doğrulanmış site ağı ve hızlı yayın süreciyle öne çıkan platformlardan biri.
+                            </p>
+                            <p class="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-accent-700">Kaynak: {{ site_setting('site_domain') }}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -191,7 +211,8 @@
             <div class="grid gap-3 sm:grid-cols-2" data-reveal>
                 @foreach ($engineCards as $engine)
                     <div class="rounded-2xl bg-paper p-5">
-                        <h3 class="font-display text-base font-semibold text-ink">{{ $engine['name'] }}</h3>
+                        <span class="inline-flex size-2.5 rounded-full" style="background-color: {{ $engine['dot'] }}"></span>
+                        <h3 class="mt-2.5 font-display text-base font-semibold text-ink">{{ $engine['name'] }}</h3>
                         <p class="mt-1 text-xs font-medium text-ink-2">{{ $engine['desc'] }}</p>
                     </div>
                 @endforeach
@@ -301,6 +322,31 @@
                 <span class="pointer-events-none absolute inset-y-0 start-0 w-[80px] bg-gradient-to-r from-ink to-transparent" aria-hidden="true"></span>
                 <span class="pointer-events-none absolute inset-y-0 end-0 w-[80px] bg-gradient-to-l from-ink to-transparent" aria-hidden="true"></span>
             </div>
+        </div>
+    </section>
+
+    {{-- ================= KENDİ ARAÇLARIMIZ ================= --}}
+    <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
+        <div class="mx-auto max-w-2xl text-center">
+            <p data-reveal><span class="{{ $chip }}">Ücretsiz</span></p>
+            <h2 class="mt-5 {{ $h2 }}" data-reveal>Kendi GEO araçlarımızı hemen deneyin</h2>
+            <p class="mt-4 {{ $sub }}" data-reveal>Konuşmadan önce görün: domaininizin AI botlarına açık olup olmadığını kontrol edin, llms.txt dosyanızı oluşturun.</p>
+        </div>
+
+        <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            @foreach (collect(\App\Support\Tools::grouped()['ai'] ?? []) as $tool)
+                <a href="{{ route('tools.show', $tool['slug']) }}" class="group flex flex-col rounded-[20px] bg-paper p-6 transition hover:-translate-y-0.5 hover:shadow-pop" data-reveal>
+                    <span class="inline-flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-ink text-white">
+                        <svg class="size-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $tool['icon'] }}"/></svg>
+                    </span>
+                    <h3 class="mt-4 font-display text-lg font-semibold text-ink">{{ $tool['name'] }}</h3>
+                    <p class="mt-1.5 text-sm font-medium leading-relaxed text-ink-2">{{ $tool['excerpt'] }}</p>
+                    <span class="mt-auto flex items-center gap-x-1.5 pt-4 text-xs font-semibold text-ink-2 transition group-hover:text-ink">
+                        Aracı kullan
+                        <svg class="size-3 transition group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
+                    </span>
+                </a>
+            @endforeach
         </div>
     </section>
 

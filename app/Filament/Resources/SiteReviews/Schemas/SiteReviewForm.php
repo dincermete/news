@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\SiteReviews\Schemas;
 
+use App\Models\SiteReview;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -24,9 +25,36 @@ class SiteReviewForm
                                 ->relationship('site', 'domain')
                                 ->searchable()
                                 ->preload()
-                                ->required()
                                 ->disabled()
                                 ->dehydrated()
+                                ->visible(fn (?SiteReview $record): bool => filled($record?->site_id))
+                                ->columnSpan(1),
+                            Select::make('site_bundle_id')
+                                ->label('Tanıtım paketi')
+                                ->relationship('bundle', 'name')
+                                ->searchable()
+                                ->preload()
+                                ->disabled()
+                                ->dehydrated()
+                                ->visible(fn (?SiteReview $record): bool => filled($record?->site_bundle_id))
+                                ->columnSpan(1),
+                            Select::make('seo_package_id')
+                                ->label('SEO paketi')
+                                ->relationship('seoPackage', 'name')
+                                ->searchable()
+                                ->preload()
+                                ->disabled()
+                                ->dehydrated()
+                                ->visible(fn (?SiteReview $record): bool => filled($record?->seo_package_id))
+                                ->columnSpan(1),
+                            Select::make('backlink_package_id')
+                                ->label('Backlink paketi')
+                                ->relationship('backlinkPackage', 'name')
+                                ->searchable()
+                                ->preload()
+                                ->disabled()
+                                ->dehydrated()
+                                ->visible(fn (?SiteReview $record): bool => filled($record?->backlink_package_id))
                                 ->columnSpan(1),
                             Toggle::make('is_approved')
                                 ->label('Onaylı')

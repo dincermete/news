@@ -6,6 +6,7 @@ use App\Console\Commands\GenerateSitemap;
 use App\Enums\SiteStatus;
 use App\Models\Page;
 use App\Models\Site;
+use App\Models\SiteCategory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
 use Tests\TestCase;
@@ -38,12 +39,16 @@ class SitemapTest extends TestCase
             'title' => 'Pasif',
         ]);
 
+        $category = SiteCategory::factory()->create(['slug' => 'haber']);
+
         $activeSites = Site::factory()->count(3)->create([
             'status' => SiteStatus::Active,
+            'site_category_id' => $category->id,
         ]);
 
         Site::factory()->create([
             'status' => SiteStatus::Inactive,
+            'site_category_id' => $category->id,
         ]);
 
         $this->artisan(GenerateSitemap::class)
@@ -58,6 +63,8 @@ class SitemapTest extends TestCase
         $this->assertStringContainsString('<urlset', $xml);
         $this->assertStringContainsString(url('/'), $xml);
         $this->assertStringContainsString(url('/siteler'), $xml);
+        $this->assertStringContainsString(route('sites.category', ['kategori' => $category->slug]), $xml);
+        $this->assertStringNotContainsString(url('/iller'), $xml);
         $this->assertStringContainsString(url('/blog'), $xml);
         $this->assertStringContainsString(route('pages.show', 'geo'), $xml);
         $this->assertStringNotContainsString(route('pages.show', 'pasif-sayfa'), $xml);
@@ -67,8 +74,8 @@ class SitemapTest extends TestCase
         }
 
         $urlCount = substr_count($xml, '<url>');
-        // home + siteler + blog + 1 active page + 3 active sites
-        $this->assertSame(7, $urlCount);
+        // home + siteler + blog + 1 category + 1 active page + 3 active sites
+        $this->assertSame(8, $urlCount);
     }
 
     public function test_sitemap_route_serves_generated_file(): void

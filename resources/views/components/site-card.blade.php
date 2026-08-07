@@ -9,20 +9,12 @@
 @endphp
 <div class="flex h-full flex-col rounded-[20px] border border-ink/10 bg-white transition hover:-translate-y-0.5 hover:shadow-pop">
     <div class="flex flex-auto flex-col p-5">
-        <div class="flex items-start gap-3">
-            <x-site-logo :site="$site" :height="32" class="mt-0.5 shrink-0 rounded-lg" />
-            <div class="min-w-0 flex-1">
-                <a
-                    href="{{ storefront_site_url($site) }}"
-                    class="block truncate text-sm font-semibold text-ink transition hover:text-accent-700 focus:outline-hidden"
-                >
-                    {{ $site->domain }}
-                </a>
-                <p class="mt-0.5 truncate text-xs text-ink-3">
-                    {{ $site->category?->name ?? 'Kategorisiz' }}
-                </p>
-            </div>
-        </div>
+        <x-site-identity
+            :site="$site"
+            :height="32"
+            logo-class="mt-0.5 shrink-0 rounded-lg"
+            domain-class="block truncate text-sm font-semibold text-ink transition hover:text-accent-700 focus:outline-hidden"
+        />
 
         <div class="mt-3 flex flex-wrap gap-1.5">
             @if ($site->da_value !== null)

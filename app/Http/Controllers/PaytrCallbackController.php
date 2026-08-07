@@ -3,16 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Enums\PaymentStatus;
-use App\Jobs\ProcessSuccessfulPayment;
 use App\Models\Payment;
+use App\Services\PaymentCompletionService;
 use App\Services\PaytrService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
 
 class PaytrCallbackController extends Controller
 {
-    public function __invoke(Request $request, PaytrService $paytr): Response
+    public function __invoke(Request $request, PaytrService $paytr, PaymentCompletionService $completion): Response
     {
         $payload = $request->all();
 
@@ -32,22 +31,13 @@ class PaytrCallbackController extends Controller
             return response('OK');
         }
 
-        if ($payment->status === PaymentStatus::Paid) {
+        if ($status === 'success') {
+            $completion->complete($payment);
+
             return response('OK');
         }
 
-        if ($status === 'success') {
-            DB::transaction(function () use ($payment): void {
-                $payment->forceFill([
-                    'status' => PaymentStatus::Paid,
-                    'paid_at' => now(),
-                ])->save();
-
-                $payment->markRelatedOrdersContentPending();
-            });
-
-            ProcessSuccessfulPayment::dispatch($payment->fresh());
-        } else {
+        if ($payment->status !== PaymentStatus::Paid) {
             $payment->forceFill([
                 'status' => PaymentStatus::Failed,
             ])->save();

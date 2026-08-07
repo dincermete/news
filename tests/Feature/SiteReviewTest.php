@@ -63,7 +63,7 @@ class SiteReviewTest extends TestCase
         $response->assertSee('Onaylı Yorumcu', false);
         $response->assertSee('Bu onaylı yorum detayda görünmeli.', false);
         $response->assertDontSee('Gizli Yorumcu', false);
-        $response->assertSee('Siteye Git', false);
+        $response->assertDontSee('Siteye Git', false);
         $response->assertSee('Hemen Satın Al', false);
         $response->assertSee('Sepete Ekle', false);
         $this->assertTrue($approved->is_approved);

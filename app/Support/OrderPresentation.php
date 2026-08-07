@@ -34,8 +34,17 @@ class OrderPresentation
      */
     public static function payloadRows(Order $order): array
     {
-        $payload = is_array($order->content_payload) ? $order->content_payload : [];
+        return self::payloadRowsFromArray(
+            is_array($order->content_payload) ? $order->content_payload : []
+        );
+    }
 
+    /**
+     * @param  array<string, mixed>  $payload
+     * @return list<array{label: string, value: string, href: ?string, full: bool}>
+     */
+    public static function payloadRowsFromArray(array $payload): array
+    {
         if ($payload === []) {
             return [];
         }

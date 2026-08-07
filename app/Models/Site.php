@@ -7,6 +7,7 @@ use App\Enums\MetricSource;
 use App\Enums\PromotionalListingType;
 use App\Enums\SiteStatus;
 use App\Observers\SiteObserver;
+use App\Support\PublicImagePaths;
 use App\Support\SiteSeoMetrics;
 use Database\Factories\SiteFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -30,10 +31,12 @@ class Site extends Model
     protected $fillable = [
         'domain',
         'logo_path',
+        'analytics_image_paths',
         'site_category_id',
         'description',
         'short_description',
         'age',
+        'opened_at',
         'is_dofollow',
         'is_news_approved',
         'is_google_indexed',
@@ -97,6 +100,7 @@ class Site extends Model
     {
         $casts = [
             'age' => 'integer',
+            'opened_at' => 'date',
             'is_dofollow' => 'boolean',
             'is_news_approved' => 'boolean',
             'is_google_indexed' => 'boolean',
@@ -104,6 +108,7 @@ class Site extends Model
             'daily_capacity' => 'integer',
             'weekly_capacity' => 'integer',
             'max_link_count' => 'integer',
+            'analytics_image_paths' => 'array',
         ];
 
         foreach (SiteSeoMetrics::keys() as $metric) {
@@ -132,6 +137,11 @@ class Site extends Model
     public function labels(): BelongsToMany
     {
         return $this->belongsToMany(Label::class, 'site_label');
+    }
+
+    public function provinces(): BelongsToMany
+    {
+        return $this->belongsToMany(Province::class);
     }
 
     public function bundles(): BelongsToMany
@@ -191,6 +201,10 @@ class Site extends Model
         }
 
         $this->setAttribute('delivery_details', $listing->delivery_details);
+        $this->setAttribute('estimated_delivery', $listing->estimated_delivery);
+        $this->setAttribute('listing_name', $listing->name);
+        $this->setAttribute('reference_content_url', $listing->reference_content_url);
+        $this->setAttribute('reference_content_label', $listing->reference_content_label);
         $this->setAttribute('cta_cart_color', $listing->cta_cart_color);
         $this->setAttribute('cta_buy_color', $listing->cta_buy_color);
         $this->setAttribute('cta_whatsapp_color', $listing->cta_whatsapp_color);
@@ -198,6 +212,14 @@ class Site extends Model
         $this->setRelation('activeListing', $listing);
 
         return $this;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function analyticsImageUrls(): array
+    {
+        return PublicImagePaths::urls($this->analytics_image_paths);
     }
 
     public function normalizeJoinedPricingAttributes(): static
@@ -209,6 +231,14 @@ class Site extends Model
                 'currency',
                 Currency::tryFrom((string) $attrs['currency']) ?? Currency::Try,
             );
+        }
+
+        // Cached rows are rehydrated from attributesToArray(), so JSON columns
+        // arrive already decoded and must be re-encoded for their casts.
+        foreach ($attrs as $key => $value) {
+            if (is_array($value) && $this->hasCast($key, ['array', 'json', 'object', 'collection'])) {
+                $this->setAttribute($key, $value);
+            }
         }
 
         return $this;

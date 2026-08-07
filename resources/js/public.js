@@ -356,6 +356,246 @@ document.addEventListener('alpine:init', () => {
             this.schedule(this.intervalSeconds * 1000);
         },
     }));
+
+    Alpine.data('turkeyMap', (config = {}) => ({
+        provinces: config.provinces || [],
+        svgUrl: config.svgUrl || '',
+        lazy: config.lazy !== false,
+        loaded: false,
+        loading: false,
+        query: '',
+        sort: 'name',
+        tooltip: { show: false, text: '', x: 0, y: 0 },
+        visited: [],
+        observer: null,
+
+        get bySlug() {
+            return Object.fromEntries(this.provinces.map((p) => [p.slug, p]));
+        },
+
+        get filteredProvinces() {
+            const q = this.query.trim().toLocaleLowerCase('tr-TR');
+            let list = [...this.provinces];
+
+            if (q !== '') {
+                list = list.filter((p) =>
+                    p.name.toLocaleLowerCase('tr-TR').includes(q)
+                    || p.plate_code.includes(q)
+                    || p.slug.includes(q),
+                );
+            }
+
+            if (this.sort === 'sites') {
+                list.sort((a, b) => b.sites_count - a.sites_count || a.name.localeCompare(b.name, 'tr'));
+            } else {
+                list.sort((a, b) => a.name.localeCompare(b.name, 'tr'));
+            }
+
+            return list;
+        },
+
+        init() {
+            try {
+                this.visited = JSON.parse(localStorage.getItem('visited-provinces') || '[]');
+            } catch {
+                this.visited = [];
+            }
+
+            this.$nextTick(() => {
+                if (! this.lazy) {
+                    this.load();
+
+                    return;
+                }
+
+                this.observer = new IntersectionObserver((entries) => {
+                    if (entries.some((entry) => entry.isIntersecting)) {
+                        this.load();
+                        this.observer?.disconnect();
+                    }
+                }, { rootMargin: '200px' });
+
+                this.observer.observe(this.$el);
+            });
+        },
+
+        destroy() {
+            this.observer?.disconnect();
+        },
+
+        async load() {
+            const canvas = this.$refs.mapCanvas;
+            if (this.loaded || this.loading || ! this.svgUrl || ! canvas) {
+                return;
+            }
+
+            this.loading = true;
+
+            try {
+                const response = await fetch(this.svgUrl, {
+                    headers: { Accept: 'image/svg+xml,text/plain,*/*' },
+                    credentials: 'same-origin',
+                });
+
+                if (! response.ok) {
+                    canvas.innerHTML = '<p class="py-16 text-center text-sm text-ink-3">Harita yüklenemedi.</p>';
+
+                    return;
+                }
+
+                canvas.innerHTML = await response.text();
+                this.enhance(canvas);
+                this.loaded = true;
+            } catch {
+                canvas.innerHTML = '<p class="py-16 text-center text-sm text-ink-3">Harita yüklenemedi.</p>';
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        enhance(root) {
+            const svg = root.querySelector('svg');
+            if (! svg) {
+                return;
+            }
+
+            svg.setAttribute('role', 'img');
+            svg.setAttribute('aria-label', 'Türkiye illeri haritası');
+            svg.classList.add('turkey-map-svg');
+            svg.removeAttribute('width');
+            svg.removeAttribute('height');
+            svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+            svg.style.width = '100%';
+            svg.style.height = 'auto';
+            svg.style.maxWidth = '100%';
+            svg.style.display = 'block';
+
+            root.querySelectorAll('g[data-slug][data-plakakodu]').forEach((group) => {
+                const slug = group.getAttribute('data-slug');
+                const province = this.bySlug[slug];
+                if (! province) {
+                    group.style.display = 'none';
+
+                    return;
+                }
+
+                const bucket = province.bucket ?? 0;
+
+                group.classList.add('turkey-province', `bucket-${bucket}`);
+                if (this.visited.includes(slug)) {
+                    group.classList.add('is-visited');
+                }
+
+                group.style.cursor = 'pointer';
+                group.style.pointerEvents = 'auto';
+                group.setAttribute('role', 'link');
+                group.setAttribute('tabindex', '0');
+                group.setAttribute(
+                    'aria-label',
+                    province.sites_count > 0
+                        ? `${province.name} — ${province.sites_count} site`
+                        : `${province.name} — yakında`,
+                );
+                group.dataset.url = province.url;
+
+                // Clear inline fills so CSS :hover / .is-hover can win
+                group.querySelectorAll('path, polygon, polyline').forEach((shape) => {
+                    shape.removeAttribute('fill');
+                    shape.style.removeProperty('fill');
+                    shape.style.pointerEvents = 'auto';
+                    shape.style.cursor = 'pointer';
+                });
+
+                const showTip = () => {
+                    root.querySelectorAll('.turkey-province.is-hover').forEach((el) => {
+                        el.classList.remove('is-hover');
+                    });
+                    group.classList.add('is-hover');
+                    // Hover edilen ili üstte çiz (scale komşuların altında kalmasın)
+                    group.parentNode?.appendChild(group);
+                    this.showTooltip(group, province);
+                };
+                const hideTip = () => {
+                    group.classList.remove('is-hover');
+                    this.tooltip.show = false;
+                };
+                const onFocus = () => {
+                    root.querySelectorAll('.turkey-province.is-hover, .turkey-province.is-focus').forEach((el) => {
+                        el.classList.remove('is-hover', 'is-focus');
+                    });
+                    group.classList.add('is-focus', 'is-hover');
+                    this.showTooltip(group, province);
+                };
+                const onBlur = () => {
+                    group.classList.remove('is-focus', 'is-hover');
+                    this.tooltip.show = false;
+                };
+                const go = (event) => {
+                    event?.preventDefault?.();
+                    this.navigate(slug, province.url);
+                };
+
+                group.addEventListener('mouseenter', showTip);
+                group.addEventListener('mouseleave', hideTip);
+                group.addEventListener('focus', onFocus);
+                group.addEventListener('blur', onBlur);
+                group.addEventListener('click', go);
+                group.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        go(event);
+                    }
+                });
+            });
+        },
+
+        showTooltip(group, province) {
+            const svg = group.ownerSVGElement;
+            const host = this.$refs.mapHost;
+            if (! svg || ! host) {
+                return;
+            }
+
+            let bbox;
+            try {
+                bbox = group.getBBox();
+            } catch {
+                return;
+            }
+
+            const ctm = group.getScreenCTM();
+            const hostRect = host.getBoundingClientRect();
+            if (! ctm) {
+                return;
+            }
+
+            const pt = svg.createSVGPoint();
+            pt.x = bbox.x + bbox.width / 2;
+            pt.y = bbox.y + bbox.height / 2;
+            const screen = pt.matrixTransform(ctm);
+
+            this.tooltip = {
+                show: true,
+                text: province.sites_count > 0
+                    ? `${province.name} · ${province.sites_count} site →`
+                    : `${province.name} · yakında →`,
+                x: screen.x - hostRect.left,
+                y: screen.y - hostRect.top,
+            };
+        },
+
+        navigate(slug, url) {
+            try {
+                const next = Array.from(new Set([...this.visited, slug]));
+                this.visited = next;
+                localStorage.setItem('visited-provinces', JSON.stringify(next));
+            } catch {
+                // ignore
+            }
+
+            window.location.href = url;
+        },
+    }));
 });
 
 Alpine.start();

@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Collection;
 
 #[ObservedBy([PaymentObserver::class])]
 #[Fillable([
@@ -80,7 +81,12 @@ class Payment extends Model
     public function isPendingBankTransfer(): bool
     {
         return $this->method === PaymentMethod::BankTransfer
-            && $this->status === PaymentStatus::Notified;
+            && in_array($this->status, [PaymentStatus::Pending, PaymentStatus::Notified], true);
+    }
+
+    public function isAwaitingBankTransferApproval(): bool
+    {
+        return $this->isPendingBankTransfer();
     }
 
     /**
@@ -88,9 +94,9 @@ class Payment extends Model
      * bought like any other product, via order_group_id — not the legacy
      * direct order_id + wallet_topup_package_id shape below).
      *
-     * @return \Illuminate\Support\Collection<int, Order>
+     * @return Collection<int, Order>
      */
-    public function walletTopupOrders(): \Illuminate\Support\Collection
+    public function walletTopupOrders(): Collection
     {
         $this->loadMissing(['order', 'orderGroup.orders']);
 

@@ -100,12 +100,7 @@
                         <div class="divide-y divide-ink/5">
                             @foreach ($cart->items as $item)
                                 @php
-                                    $title = $item->site?->domain
-                                        ?? $item->siteBundle?->name
-                                        ?? $item->seoPackage?->name
-                                        ?? $item->backlinkPackage?->name
-                                        ?? $item->product_type?->getLabel()
-                                        ?? 'Ürün #'.$item->id;
+                                    $title = $item->displayTitle();
                                     $configured = $item->isConfigured();
                                 @endphp
                                 <div class="px-5 py-4" x-data="{ open: false }">

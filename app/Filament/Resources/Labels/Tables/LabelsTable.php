@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Labels\Tables;
 
 use App\Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\ColorColumn;
@@ -38,6 +39,7 @@ class LabelsTable
             ])
             ->recordActions([
                 EditAction::make(),
+                DeleteAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

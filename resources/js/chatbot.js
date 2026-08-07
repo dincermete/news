@@ -1,6 +1,7 @@
 /**
  * Chatbot widget — deferred module, idle-mounted (not on critical path).
- * Intercom-style launcher/panel with Motion-powered open/close and a typing indicator.
+ * Intercom-style Messenger: Home / Messages / Help / News tabs, a separate
+ * conversation screen, and Motion-powered open/close + typing indicator.
  */
 import { animate } from 'motion';
 
@@ -60,8 +61,8 @@ function appendBubble(container, text, role) {
     const bubble = document.createElement('div');
     bubble.className =
         role === 'user'
-            ? 'max-w-[85%] rounded-2xl rounded-br-sm bg-gradient-to-br from-accent-600 to-brand-600 px-3.5 py-2.5 text-[13px] leading-relaxed text-white'
-            : 'max-w-[85%] rounded-2xl rounded-bl-sm bg-white px-3.5 py-2.5 text-[13px] leading-relaxed text-ink shadow-soft';
+            ? 'max-w-[85%] rounded-2xl rounded-br-sm bg-white px-3.5 py-2.5 text-[13px] leading-relaxed text-ink'
+            : 'max-w-[85%] rounded-2xl rounded-bl-sm bg-white/10 px-3.5 py-2.5 text-[13px] leading-relaxed text-white';
     bubble.textContent = text;
     row.appendChild(bubble);
 
@@ -79,11 +80,11 @@ function appendTyping(container) {
     row.appendChild(botAvatar());
 
     const bubble = document.createElement('div');
-    bubble.className = 'flex items-center gap-1 rounded-2xl rounded-bl-sm bg-white px-4 py-3 shadow-soft';
+    bubble.className = 'flex items-center gap-1 rounded-2xl rounded-bl-sm bg-white/10 px-4 py-3';
     bubble.innerHTML = [0, 1, 2]
         .map(
             (i) =>
-                `<span class="chatbot-dot inline-block size-1.5 rounded-full bg-ink-3" style="animation-delay:${i * 0.15}s"></span>`,
+                `<span class="chatbot-dot inline-block size-1.5 rounded-full bg-white/50" style="animation-delay:${i * 0.15}s"></span>`,
         )
         .join('');
     row.appendChild(bubble);
@@ -101,10 +102,10 @@ function appendEscalation(container, escalation) {
     row.appendChild(botAvatar());
 
     const card = document.createElement('div');
-    card.className = 'max-w-[90%] rounded-2xl rounded-bl-sm border border-brand-200 bg-brand-50 p-3.5 text-[13px] text-brand-950';
+    card.className = 'max-w-[90%] rounded-2xl rounded-bl-sm border border-brand-400/30 bg-brand-950/40 p-3.5 text-[13px] text-white';
     card.innerHTML = `
         <p class="font-semibold">Destek ekibine yönlendirildiniz</p>
-        <p class="mt-1 text-brand-900">Destek talebiniz oluşturuldu (#${escapeHtml(String(escalation.support_ticket_id))}).</p>
+        <p class="mt-1 text-white/70">Destek talebiniz oluşturuldu (#${escapeHtml(String(escalation.support_ticket_id))}).</p>
         ${
             escalation.whatsapp_link
                 ? `<a href="${escapeHtml(escalation.whatsapp_link)}" target="_blank" rel="noopener noreferrer" class="mt-2 inline-flex items-center gap-x-1.5 rounded-full bg-gradient-to-br from-accent-600 to-brand-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:scale-105">WhatsApp ile devam et</a>`
@@ -138,21 +139,41 @@ function mountChatbot() {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     const endpoint = root.dataset.chatbotEndpoint;
+    const conversationEndpoint = root.dataset.chatbotConversationEndpoint;
     const csrf = root.dataset.chatbotCsrf;
     const panel = root.querySelector('[data-chatbot-panel]');
     const toggle = root.querySelector('[data-chatbot-toggle]');
-    const closeBtn = root.querySelector('[data-chatbot-close]');
+    const closeBtns = root.querySelectorAll('[data-chatbot-close]');
     const form = root.querySelector('[data-chatbot-form]');
     const input = root.querySelector('[data-chatbot-input]');
     const sendBtn = root.querySelector('[data-chatbot-send]');
     const messages = root.querySelector('[data-chatbot-messages]');
+    const welcomeRow = root.querySelector('[data-chatbot-welcome]');
     const chips = root.querySelectorAll('[data-chip]');
     const badge = root.querySelector('[data-chatbot-badge]');
     const iconChat = root.querySelector('[data-chatbot-icon-chat]');
     const iconClose = root.querySelector('[data-chatbot-icon-close]');
 
+    const screens = root.querySelectorAll('[data-chatbot-screen]');
+    const tabbar = root.querySelector('[data-chatbot-tabbar]');
+    const tabButtons = root.querySelectorAll('[data-chatbot-tab]');
+    const tabTargetButtons = root.querySelectorAll('[data-chatbot-tab-target]');
+    const conversationTriggers = root.querySelectorAll('[data-chatbot-open-conversation], [data-chatbot-start-conversation]');
+    const backBtn = root.querySelector('[data-chatbot-back]');
+    const faqToggles = root.querySelectorAll('[data-chatbot-faq-toggle]');
+
+    const recentCard = root.querySelector('[data-chatbot-recent-card]');
+    const recentText = root.querySelector('[data-chatbot-recent-text]');
+    const recentTime = root.querySelector('[data-chatbot-recent-time]');
+    const messagesCard = root.querySelector('[data-chatbot-messages-card]');
+    const messagesText = root.querySelector('[data-chatbot-messages-text]');
+    const messagesTime = root.querySelector('[data-chatbot-messages-time]');
+    const messagesEmpty = root.querySelector('[data-chatbot-messages-empty]');
+
     let open = false;
     let sending = false;
+    let historyLoaded = false;
+    let historyRendered = false;
     const token = sessionToken();
 
     // Kullanıcının dikkatini çekmek için bir kereye mahsus bildirim rozeti.
@@ -163,14 +184,87 @@ function mountChatbot() {
         }
     }, 3000);
 
+    let currentScreen = 'home';
+
+    const showScreen = (name) => {
+        if (name === currentScreen) {
+            return;
+        }
+
+        let enteringEl = null;
+
+        screens.forEach((screen) => {
+            const isTarget = screen.dataset.chatbotScreen === name;
+            screen.classList.toggle('hidden', !isTarget);
+            screen.classList.toggle('flex', isTarget);
+            if (isTarget) {
+                enteringEl = screen;
+            }
+        });
+
+        currentScreen = name;
+        tabbar?.classList.toggle('hidden', name === 'conversation');
+
+        tabButtons.forEach((btn) => {
+            const active = btn.dataset.chatbotTab === name;
+            btn.classList.toggle('text-white', active);
+            btn.classList.toggle('text-white/45', !active);
+        });
+
+        if (enteringEl && !prefersReducedMotion) {
+            animate(
+                enteringEl,
+                { opacity: [0, 1], transform: ['translateY(6px)', 'translateY(0)'] },
+                { duration: 0.22, easing: SPRING },
+            );
+        }
+
+        if (name === 'conversation') {
+            window.setTimeout(() => input?.focus(), 200);
+        }
+    };
+
+    const goToConversation = () => {
+        showScreen('conversation');
+        renderHistoryIntoConversation();
+    };
+
+    tabButtons.forEach((btn) => {
+        btn.addEventListener('click', () => showScreen(btn.dataset.chatbotTab));
+    });
+    tabTargetButtons.forEach((btn) => {
+        btn.addEventListener('click', () => showScreen(btn.dataset.chatbotTabTarget));
+    });
+    conversationTriggers.forEach((el) => {
+        el.addEventListener('click', goToConversation);
+    });
+    backBtn?.addEventListener('click', () => showScreen('home'));
+
+    faqToggles.forEach((btn) => {
+        const panelEl = btn.nextElementSibling;
+        const chevron = btn.querySelector('[data-chatbot-faq-chevron]');
+
+        btn.addEventListener('click', () => {
+            const isOpen = btn.getAttribute('aria-expanded') === 'true';
+            btn.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+            panelEl?.classList.toggle('hidden', isOpen);
+            chevron?.classList.toggle('rotate-90', !isOpen);
+        });
+    });
+
     const morphIcon = (isOpen) => {
         if (!iconChat || !iconClose) {
             return;
         }
 
-        iconChat.style.transform = isOpen ? 'scale(0) rotate(-45deg)' : 'scale(1) rotate(0deg)';
+        // Tailwind's rotate-45/scale-0 utilities set the independent CSS `rotate`/`scale`
+        // properties (not the legacy `transform` shorthand), so these must be set the same
+        // way here — setting `transform` inline would only *compose* with, not override, them.
+        iconChat.style.scale = isOpen ? '0' : '1';
+        iconChat.style.rotate = isOpen ? '-45deg' : '0deg';
         iconChat.style.opacity = isOpen ? '0' : '1';
-        iconClose.style.transform = isOpen ? 'scale(1) rotate(0deg)' : 'scale(0) rotate(45deg)';
+        iconClose.style.scale = isOpen ? '1' : '0';
+        iconClose.style.rotate = isOpen ? '0deg' : '45deg';
         iconClose.style.opacity = isOpen ? '1' : '0';
     };
 
@@ -195,7 +289,7 @@ function mountChatbot() {
                 );
             }
 
-            window.setTimeout(() => input?.focus(), 320);
+            loadHistory();
         } else if (panel) {
             const finish = () => {
                 panel.classList.add('hidden');
@@ -216,7 +310,70 @@ function mountChatbot() {
     };
 
     toggle?.addEventListener('click', () => setOpen(!open));
-    closeBtn?.addEventListener('click', () => setOpen(false));
+    closeBtns.forEach((btn) => btn.addEventListener('click', () => setOpen(false)));
+
+    let cachedHistory = [];
+
+    async function loadHistory() {
+        if (historyLoaded || !conversationEndpoint) {
+            return;
+        }
+        historyLoaded = true;
+
+        try {
+            const url = new URL(conversationEndpoint, window.location.origin);
+            url.searchParams.set('session_token', token);
+            const response = await fetch(url.toString(), {
+                headers: { Accept: 'application/json' },
+            });
+
+            if (!response.ok) {
+                return;
+            }
+
+            const data = await response.json();
+            cachedHistory = Array.isArray(data.messages) ? data.messages : [];
+
+            if (cachedHistory.length === 0) {
+                messagesEmpty?.classList.remove('hidden');
+                messagesEmpty?.classList.add('flex');
+                return;
+            }
+
+            const last = cachedHistory[cachedHistory.length - 1];
+            const preview = last.content.length > 60 ? `${last.content.slice(0, 60)}…` : last.content;
+
+            if (recentCard) {
+                recentCard.classList.remove('hidden');
+                recentCard.classList.add('flex');
+            }
+            if (recentText) recentText.textContent = preview;
+            if (recentTime) recentTime.textContent = last.created_at_display || '';
+
+            if (messagesCard) {
+                messagesCard.classList.remove('hidden');
+                messagesCard.classList.add('flex');
+            }
+            if (messagesText) messagesText.textContent = preview;
+            if (messagesTime) messagesTime.textContent = last.created_at_display || '';
+            messagesEmpty?.classList.add('hidden');
+        } catch {
+            // Sessizce yok say — geçmiş olmadan da sohbet açılabilir.
+        }
+    }
+
+    function renderHistoryIntoConversation() {
+        if (historyRendered || cachedHistory.length === 0 || !messages) {
+            return;
+        }
+        historyRendered = true;
+
+        welcomeRow?.remove();
+
+        cachedHistory.forEach((entry) => {
+            appendBubble(messages, entry.content, entry.role === 'user' ? 'user' : 'bot');
+        });
+    }
 
     const send = async (text) => {
         const message = String(text || '').trim();
@@ -271,6 +428,8 @@ function mountChatbot() {
                     appendEscalation(messages, data.escalation);
                 }
             }
+
+            historyRendered = true;
         } catch {
             typingRow.remove();
             appendBubble(messages, 'Bağlantı hatası. Lütfen tekrar deneyin.', 'bot');
@@ -289,7 +448,7 @@ function mountChatbot() {
 
     chips.forEach((chip) => {
         chip.addEventListener('click', () => {
-            setOpen(true);
+            goToConversation();
             send(chip.getAttribute('data-chip'));
         });
     });

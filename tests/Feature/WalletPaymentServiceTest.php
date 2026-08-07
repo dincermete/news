@@ -9,7 +9,7 @@ use App\Enums\PaymentStatus;
 use App\Enums\WalletBalanceType;
 use App\Enums\WalletTransactionType;
 use App\Exceptions\InsufficientWalletBalanceException;
-use App\Jobs\ProcessSuccessfulPayment;
+use App\Jobs\InvoiceGenerationJob;
 use App\Models\Order;
 use App\Models\OrderGroup;
 use App\Models\Payment;
@@ -92,7 +92,7 @@ class WalletPaymentServiceTest extends TestCase
         $this->assertSame(WalletBalanceType::Main, $debits[3]->balance_type);
         $this->assertSame('10.00', $debits[3]->amount);
 
-        Queue::assertPushed(ProcessSuccessfulPayment::class);
+        Queue::assertPushed(InvoiceGenerationJob::class);
     }
 
     public function test_pay_with_wallet_throws_when_balance_is_insufficient(): void

@@ -2,9 +2,7 @@
 
 namespace App\Filament\Resources\WalletTopupPackages;
 
-use App\Filament\Resources\WalletTopupPackages\Pages\CreateWalletTopupPackage;
-use App\Filament\Resources\WalletTopupPackages\Pages\EditWalletTopupPackage;
-use App\Filament\Resources\WalletTopupPackages\Pages\ListWalletTopupPackages;
+use App\Filament\Resources\WalletTopupPackages\Pages\ManageWalletTopupPackages;
 use App\Filament\Resources\WalletTopupPackages\Schemas\WalletTopupPackageForm;
 use App\Filament\Resources\WalletTopupPackages\Tables\WalletTopupPackagesTable;
 use App\Models\WalletTopupPackage;
@@ -51,9 +49,7 @@ class WalletTopupPackageResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListWalletTopupPackages::route('/'),
-            'create' => CreateWalletTopupPackage::route('/create'),
-            'edit' => EditWalletTopupPackage::route('/{record}/edit'),
+            'index' => ManageWalletTopupPackages::route('/'),
         ];
     }
 }

@@ -24,12 +24,14 @@ class PromotionalListingFactory extends Factory
         return [
             'site_id' => Site::factory()->withoutListings(),
             'type' => PromotionalListingType::SiteArticle,
+            'name' => fake()->unique()->words(3, true).' Tanıtım Yazısı',
             'price' => $price,
             'discount_price' => fake()->optional(0.3)->randomFloat(2, 5, max(5, $price - 1)),
             'currency' => Currency::Try,
             'status' => SiteStatus::Active,
             'short_description' => fake()->optional()->sentence(),
             'description' => fake()->optional()->paragraph(),
+            'estimated_delivery' => fake()->optional(0.5)->randomElement(['3 İş Günü', '7 İş Günü']),
         ];
     }
 

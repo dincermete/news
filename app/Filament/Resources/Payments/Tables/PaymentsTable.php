@@ -5,8 +5,8 @@ namespace App\Filament\Resources\Payments\Tables;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Filament\Actions\BulkActionGroup;
-use App\Jobs\ProcessSuccessfulPayment;
 use App\Models\Payment;
+use App\Services\PaymentCompletionService;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -17,14 +17,13 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
 
 class PaymentsTable
 {
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['order.user', 'orderGroup.user']))
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['order.user', 'orderGroup.user', 'orderGroup.orders']))
             ->columns([
                 TextColumn::make('id')
                     ->label('#')
@@ -84,7 +83,7 @@ class PaymentsTable
                     ->label('Havale Onayı Bekleyenler')
                     ->query(fn (Builder $query): Builder => $query
                         ->where('method', PaymentMethod::BankTransfer)
-                        ->where('status', PaymentStatus::Notified))
+                        ->whereIn('status', [PaymentStatus::Pending, PaymentStatus::Notified]))
                     ->toggle(),
                 SelectFilter::make('method')
                     ->label('Yöntem')
@@ -99,23 +98,20 @@ class PaymentsTable
                     ->icon(Heroicon::CheckCircle)
                     ->color('success')
                     ->requiresConfirmation()
+                    ->modalHeading('Havale onayla')
+                    ->modalDescription('Ödeme Paid yapılacak; siparişler ilerletilecek. Bakiye paketlerinde cüzdan anında yüklenecek. Müşteri bildirim vermemişse (Pending) yine de onaylayabilirsiniz.')
                     ->visible(fn (Payment $record): bool => $record->isPendingBankTransfer())
                     ->action(function (Payment $record): void {
-                        DB::transaction(function () use ($record): void {
-                            $record->forceFill([
-                                'status' => PaymentStatus::Paid,
-                                'paid_at' => now(),
-                            ])->save();
+                        app(PaymentCompletionService::class)->complete($record);
 
-                            $record->loadMissing(['order', 'orderGroup.orders']);
-                            $record->markRelatedOrdersContentPending();
-                        });
-
-                        ProcessSuccessfulPayment::dispatch($record->fresh());
+                        $fresh = $record->fresh(['orderGroup.orders', 'order']);
+                        $topupTotal = $fresh?->walletTopupOrders()->sum(fn ($order) => (float) $order->price) ?? 0;
 
                         Notification::make()
                             ->title('Havale onaylandı')
-                            ->body('Ödeme ve sipariş güncellendi, fatura kuyruğa alındı.')
+                            ->body($topupTotal > 0
+                                ? 'Ödeme tamamlandı. Cüzdana '.number_format($topupTotal, 2, ',', '.').' ₺ yüklendi.'
+                                : 'Ödeme ve sipariş güncellendi.')
                             ->success()
                             ->send();
                     }),

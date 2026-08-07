@@ -43,6 +43,21 @@ class AdminPanelProvider extends PanelProvider
                     return 'Tanıtım Yazısı';
                 }
             })
+            ->brandLogo(function (): ?string {
+                try {
+                    return site_setting()->logoUrl();
+                } catch (\Throwable) {
+                    return null;
+                }
+            })
+            ->darkModeBrandLogo(function (): ?string {
+                try {
+                    return site_setting()->logoUrl(dark: true) ?: site_setting()->logoUrl();
+                } catch (\Throwable) {
+                    return null;
+                }
+            })
+            ->brandLogoHeight('2rem')
             ->databaseNotifications()
             ->userMenu(position: UserMenuPosition::Sidebar)
             ->plugin(FilamentShadcnThemePlugin::make())

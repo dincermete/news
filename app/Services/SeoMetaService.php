@@ -9,9 +9,11 @@ use App\Models\BlogPost;
 use App\Models\BlogTag;
 use App\Models\Page;
 use App\Models\PromotionalListing;
+use App\Models\Province;
 use App\Models\SeoPackage;
 use App\Models\Site;
 use App\Models\SiteBundle;
+use App\Models\SiteCategory;
 use App\Models\SiteSetting;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -63,7 +65,7 @@ class SeoMetaService
 
         $title = filled($listing->meta_title)
             ? $listing->meta_title
-            : $domain.' | '.$brand;
+            : (filled($listing->name) ? $listing->name.' | '.$brand : $domain.' | '.$brand);
 
         $description = filled($listing->meta_description)
             ? $listing->meta_description
@@ -210,6 +212,25 @@ class SeoMetaService
     /**
      * @return array{title: string, description: string, keywords: string|null, og_image: string|null, og_url: string|null}
      */
+    public function forSiteCategory(SiteCategory $category): array
+    {
+        $brand = site_setting('site_name');
+        $settings = SiteSetting::current();
+
+        return [
+            'title' => $category->name.' Siteleri | '.$brand,
+            'description' => filled($category->description)
+                ? Str::limit(strip_tags($category->description), 160)
+                : $category->name.' kategorisindeki tanıtım yazısı siteleri — DA/PA, fiyat ve dofollow bilgileriyle karşılaştırın.',
+            'keywords' => $category->name.' siteleri, '.$category->name.' tanıtım yazısı',
+            'og_image' => $settings->ogImageUrl(),
+            'og_url' => route('sites.category', ['kategori' => $category->slug]),
+        ];
+    }
+
+    /**
+     * @return array{title: string, description: string, keywords: string|null, og_image: string|null, og_url: string|null}
+     */
     public function forBlogTag(BlogTag $tag): array
     {
         $brand = site_setting('site_name');
@@ -221,6 +242,53 @@ class SeoMetaService
             'keywords' => $tag->name,
             'og_image' => $settings->ogImageUrl(),
             'og_url' => route('blog.tag', $tag),
+        ];
+    }
+
+    /**
+     * @param  array{
+     *     sites_count?: int,
+     *     top_categories?: list<array{name: string, slug: string, count: int}>,
+     *     da_min?: float|null,
+     *     da_max?: float|null,
+     *     summary?: string
+     * }  $stats
+     * @return array{title: string, description: string, keywords: string|null, og_image: string|null, og_url: string|null, robots?: string}
+     */
+    public function forProvince(Province $province, array $stats = []): array
+    {
+        $brand = site_setting('site_name');
+        $count = (int) ($stats['sites_count'] ?? 0);
+        $top = collect($stats['top_categories'] ?? [])->pluck('name')->filter()->values();
+
+        $title = match (true) {
+            $count >= Province::INDEX_MIN_SITES => "{$province->name} Tanıtım Yazısı Siteleri — {$count} Site Listelendi | {$brand}",
+            $count >= 1 => "{$province->name} Yayın Siteleri ve Backlink Fırsatları | {$brand}",
+            default => "{$province->name} Tanıtım Yazısı Siteleri Yakında | {$brand}",
+        };
+
+        if (filled($stats['summary'] ?? null)) {
+            $description = Str::limit((string) $stats['summary'], 160);
+        } elseif ($count > 0 && $top->isNotEmpty()) {
+            $description = "{$province->name} için tanıtım yazısı siteleri; öne çıkan kategoriler: ".$top->implode(', ').'. 14 SEO metriği ve fiyatlarla karşılaştırın.';
+        } else {
+            $description = "{$province->name_locative} tanıtım yazısı ve backlink verilebilen yayın siteleri. Benzer illerdeki siteleri inceleyin veya kataloğa göz atın.";
+        }
+
+        $keywords = collect([
+            $province->name.' tanıtım yazısı',
+            $province->name.' backlink',
+            $province->name.' yayın siteleri',
+            ...$top->all(),
+        ])->filter()->implode(', ');
+
+        return [
+            'title' => $title,
+            'description' => $description,
+            'keywords' => $keywords,
+            'og_image' => SiteSetting::current()->ogImageUrl(),
+            'og_url' => $province->url(),
+            'robots' => $province->robotsDirective($count),
         ];
     }
 

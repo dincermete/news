@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             BankAccountSeeder::class,
             ArticleWordPackageSeeder::class,
             PageSeeder::class,
+            ProvinceSeeder::class,
             DemoCatalogSeeder::class,
         ]);
 

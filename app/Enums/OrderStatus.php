@@ -13,6 +13,7 @@ enum OrderStatus: string implements HasColor, HasLabel
     case InQueue = 'in_queue';
     case Published = 'published';
     case ReportSent = 'report_sent';
+    case Completed = 'completed';
     case Refunded = 'refunded';
     case Cancelled = 'cancelled';
 
@@ -25,12 +26,13 @@ enum OrderStatus: string implements HasColor, HasLabel
             self::InQueue => 'Yayın kuyruğunda',
             self::Published => 'Yayınlandı',
             self::ReportSent => 'Rapor gönderildi',
+            self::Completed => 'Tamamlandı',
             self::Refunded => 'İade edildi',
             self::Cancelled => 'İptal edildi',
         };
     }
 
-    public function getColor(): string | array | null
+    public function getColor(): string|array|null
     {
         return match ($this) {
             self::PaymentPending => 'warning',
@@ -39,17 +41,15 @@ enum OrderStatus: string implements HasColor, HasLabel
             self::InQueue => 'gray',
             self::Published => 'success',
             self::ReportSent => 'success',
+            self::Completed => 'success',
             self::Refunded => 'danger',
             self::Cancelled => 'danger',
         };
     }
 
-    public function canTransitionTo(self $status): bool
-    {
-        return in_array($status, $this->allowedTransitions(), true);
-    }
-
     /**
+     * Default content-product transition graph (Order::allowedTransitions may override by track).
+     *
      * @return list<self>
      */
     public function allowedTransitions(): array
@@ -60,7 +60,13 @@ enum OrderStatus: string implements HasColor, HasLabel
             self::Review => [self::InQueue, self::Cancelled, self::Refunded],
             self::InQueue => [self::Published, self::Cancelled, self::Refunded],
             self::Published => [self::ReportSent, self::Refunded],
+            self::Completed => [self::Refunded],
             self::ReportSent, self::Refunded, self::Cancelled => [],
         };
+    }
+
+    public function canTransitionTo(self $status): bool
+    {
+        return in_array($status, $this->allowedTransitions(), true);
     }
 }

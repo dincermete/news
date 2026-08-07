@@ -7,6 +7,7 @@ use App\Enums\PromotionalListingType;
 use App\Enums\SiteStatus;
 use App\Models\Concerns\HasStorefrontSeo;
 use App\Observers\PromotionalListingObserver;
+use App\Support\PublicImagePaths;
 use Database\Factories\PromotionalListingFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -20,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 #[Fillable([
     'site_id',
     'type',
+    'name',
     'price',
     'discount_price',
     'currency',
@@ -27,6 +29,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
     'short_description',
     'description',
     'delivery_details',
+    'estimated_delivery',
+    'reference_content_url',
+    'reference_content_label',
+    'reference_content_image_paths',
     'cta_cart_color',
     'cta_buy_color',
     'cta_whatsapp_color',
@@ -62,7 +68,18 @@ class PromotionalListing extends Model
             'discount_price' => 'decimal:2',
             'currency' => Currency::class,
             'status' => SiteStatus::class,
+            'reference_content_image_paths' => 'array',
         ];
+    }
+
+    /**
+     * Public URLs for the reference content screenshots shown in the lightbox.
+     *
+     * @return list<string>
+     */
+    public function referenceContentImageUrls(): array
+    {
+        return PublicImagePaths::urls($this->reference_content_image_paths);
     }
 
     public function site(): BelongsTo
@@ -92,6 +109,10 @@ class PromotionalListing extends Model
 
     public function getOptionLabelAttribute(): string
     {
+        if (filled($this->name)) {
+            return (string) $this->name;
+        }
+
         $domain = $this->site?->domain ?? ('#'.$this->site_id);
         $type = $this->type?->getLabel() ?? $this->type?->value;
 

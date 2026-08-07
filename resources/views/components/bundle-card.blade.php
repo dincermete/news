@@ -36,14 +36,13 @@
             <div class="relative mt-4 flex-1">
                 <ul class="space-y-1.5">
                     @foreach ($visibleSites as $site)
-                        <li class="flex min-w-0 items-center gap-x-3 rounded-lg border border-[#e3e3e0] bg-white px-3 py-2">
-                            <x-site-logo :site="$site" :height="28" class="shrink-0 rounded-lg" />
-                            <span class="min-w-0">
-                                <span class="block truncate text-sm font-semibold text-ink">{{ $site->domain }}</span>
-                                @if ($site->category?->name)
-                                    <span class="block truncate text-xs text-ink-3">{{ $site->category->name }}</span>
-                                @endif
-                            </span>
+                        <li class="rounded-lg border border-[#e3e3e0] bg-white px-3 py-2">
+                            <x-site-identity
+                                :site="$site"
+                                :height="28"
+                                :linked="false"
+                                domain-class="block truncate text-sm font-semibold text-ink"
+                            />
                         </li>
                     @endforeach
                 </ul>

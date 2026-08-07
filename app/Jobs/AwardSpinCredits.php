@@ -55,7 +55,19 @@ class AwardSpinCredits implements ShouldQueue
         ]);
     }
 
-    protected function resolveOrderCredits(Order $order): int
+    public function expectedCredits(): int
+    {
+        $payment = $this->payment;
+        $orders = $payment->walletTopupOrders();
+
+        $credits = $orders->isNotEmpty()
+            ? $orders->sum(fn (Order $order): int => $this->resolveOrderCredits($order))
+            : $this->resolveLegacyCredits($payment);
+
+        return (int) $credits;
+    }
+
+    public function resolveOrderCredits(Order $order): int
     {
         if ($order->wallet_topup_package_id && $order->walletTopupPackage) {
             return (int) $order->walletTopupPackage->spin_credits;
@@ -64,7 +76,7 @@ class AwardSpinCredits implements ShouldQueue
         return (int) floor(((float) $order->price) / 100) * 3;
     }
 
-    protected function resolveLegacyCredits(Payment $payment): int
+    public function resolveLegacyCredits(Payment $payment): int
     {
         $payment->loadMissing('walletTopupPackage');
 

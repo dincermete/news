@@ -2,9 +2,7 @@
 
 namespace App\Filament\Resources\DiscountTiers;
 
-use App\Filament\Resources\DiscountTiers\Pages\CreateDiscountTier;
-use App\Filament\Resources\DiscountTiers\Pages\EditDiscountTier;
-use App\Filament\Resources\DiscountTiers\Pages\ListDiscountTiers;
+use App\Filament\Resources\DiscountTiers\Pages\ManageDiscountTiers;
 use App\Filament\Resources\DiscountTiers\Schemas\DiscountTierForm;
 use App\Filament\Resources\DiscountTiers\Tables\DiscountTiersTable;
 use App\Models\DiscountTier;
@@ -44,9 +42,7 @@ class DiscountTierResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListDiscountTiers::route('/'),
-            'create' => CreateDiscountTier::route('/create'),
-            'edit' => EditDiscountTier::route('/{record}/edit'),
+            'index' => ManageDiscountTiers::route('/'),
         ];
     }
 }

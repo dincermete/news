@@ -8,6 +8,7 @@ use App\Services\CartService;
 use App\Services\CatalogCache;
 use App\Services\NetgsmService;
 use App\View\Composers\AccountLayoutComposer;
+use App\View\Composers\ChatbotWidgetComposer;
 use App\View\Composers\StorefrontHeaderComposer;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
@@ -38,7 +39,7 @@ class AppServiceProvider extends ServiceProvider
             $this->applySiteSettingOverrides();
         });
 
-        View::composer(['layouts.app', 'partials.footer', 'partials.header', 'layouts.account', 'components.chatbot-widget', 'about.index', 'contact.index', 'home', 'geo.index', 'backlink-packages.index', 'seo-packages.index', 'agency-services.index', 'agency-services.show', 'auth.login', 'auth.register'], function ($view): void {
+        View::composer(['layouts.app', 'partials.footer', 'partials.header', 'layouts.account', 'components.chatbot-widget', 'about.index', 'contact.index', 'home', 'geo.index', 'backlink-packages.index', 'seo-packages.index', 'agency-services.index', 'agency-services.show', 'tools.index', 'tools.show', 'auth.login', 'auth.register'], function ($view): void {
             $view->with('siteSettings', SiteSetting::current());
         });
 
@@ -53,6 +54,8 @@ class AppServiceProvider extends ServiceProvider
         View::composer('partials.header', StorefrontHeaderComposer::class);
 
         View::composer('layouts.account', AccountLayoutComposer::class);
+
+        View::composer('components.chatbot-widget', ChatbotWidgetComposer::class);
 
         RateLimiter::for('live-heartbeat', function (Request $request): Limit {
             $key = (string) ($request->input('session_token') ?: $request->ip());

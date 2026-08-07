@@ -1,4 +1,6 @@
 *.log
+error_log
+*.csv
 .DS_Store
 .env
 .env.backup

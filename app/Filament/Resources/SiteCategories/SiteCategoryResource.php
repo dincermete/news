@@ -2,9 +2,7 @@
 
 namespace App\Filament\Resources\SiteCategories;
 
-use App\Filament\Resources\SiteCategories\Pages\CreateSiteCategory;
-use App\Filament\Resources\SiteCategories\Pages\EditSiteCategory;
-use App\Filament\Resources\SiteCategories\Pages\ListSiteCategories;
+use App\Filament\Resources\SiteCategories\Pages\ManageSiteCategories;
 use App\Filament\Resources\SiteCategories\Schemas\SiteCategoryForm;
 use App\Filament\Resources\SiteCategories\Tables\SiteCategoriesTable;
 use App\Models\SiteCategory;
@@ -51,9 +49,7 @@ class SiteCategoryResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListSiteCategories::route('/'),
-            'create' => CreateSiteCategory::route('/create'),
-            'edit' => EditSiteCategory::route('/{record}/edit'),
+            'index' => ManageSiteCategories::route('/'),
         ];
     }
 }

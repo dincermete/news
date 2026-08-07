@@ -47,6 +47,7 @@ class PromotionalListingResourceTest extends TestCase
             ->fillForm([
                 'site_id' => $site->id,
                 'type' => PromotionalListingType::SiteArticle->value,
+                'name' => 'Tanıtım Yazısı Ürünü',
                 'price' => 250,
                 'discount_price' => 200,
                 'currency' => Currency::Try->value,
@@ -61,6 +62,7 @@ class PromotionalListingResourceTest extends TestCase
         $this->assertDatabaseHas(PromotionalListing::class, [
             'site_id' => $site->id,
             'type' => PromotionalListingType::SiteArticle->value,
+            'name' => 'Tanıtım Yazısı Ürünü',
             'price' => 250,
             'discount_price' => 200,
             'status' => SiteStatus::Active->value,

@@ -47,41 +47,43 @@ class SitesTable
                 TextColumn::make('da_value')
                     ->label('DA')
                     ->sortable()
-                    ->numeric(decimalPlaces: 0),
+                    ->numeric(decimalPlaces: 0)
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('pa_value')
                     ->label('PA')
                     ->sortable()
-                    ->numeric(decimalPlaces: 0),
+                    ->numeric(decimalPlaces: 0)
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('spam_score_value')
                     ->label('Spam Score')
                     ->sortable()
                     ->numeric(decimalPlaces: 0)
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('semrush_authority_score_value')
                     ->label('Semrush AS')
                     ->sortable()
                     ->numeric(decimalPlaces: 0)
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('ahrefs_dr_value')
                     ->label('Ahrefs DR')
                     ->sortable()
                     ->numeric(decimalPlaces: 0)
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('ahrefs_keywords_value')
                     ->label('Ahrefs Kelime')
                     ->sortable()
                     ->numeric(decimalPlaces: 0)
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('monthly_traffic_value')
                     ->label('Aylık Trafik')
                     ->sortable()
                     ->numeric(decimalPlaces: 0)
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('backlinks_value')
                     ->label('Backlinks')
                     ->sortable()
                     ->numeric(decimalPlaces: 0)
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('status')
                     ->label('Durum')
                     ->badge()

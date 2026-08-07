@@ -9,6 +9,7 @@ use App\Filament\Actions\AiSuggestFieldAction;
 use App\Filament\Schemas\StorefrontSeoForm;
 use App\Models\PromotionalListing;
 use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -45,6 +46,11 @@ class PromotionalListingForm
                                         ->where('site_id', $get('site_id')),
                                 )
                                 ->columnSpan(1),
+                            TextInput::make('name')
+                                ->label('Ürün adı')
+                                ->required()
+                                ->maxLength(255)
+                                ->columnSpanFull(),
                             Select::make('status')
                                 ->label('Satış durumu')
                                 ->options(SiteStatus::class)
@@ -81,6 +87,32 @@ class PromotionalListingForm
                                 ->columnSpanFull(),
                             RichEditor::make('delivery_details')
                                 ->label('Teslimat detayları')
+                                ->columnSpanFull(),
+                            TextInput::make('estimated_delivery')
+                                ->label('Tahmini teslimat')
+                                ->maxLength(100)
+                                ->placeholder('3 İş Günü')
+                                ->columnSpan(1),
+                            TextInput::make('reference_content_url')
+                                ->label('Referans içerik URL')
+                                ->url()
+                                ->maxLength(255)
+                                ->columnSpan(1),
+                            TextInput::make('reference_content_label')
+                                ->label('Referans içerik etiketi')
+                                ->maxLength(255)
+                                ->placeholder('Tıklayın')
+                                ->columnSpan(1),
+                            FileUpload::make('reference_content_image_paths')
+                                ->label('Referans içerik görselleri')
+                                ->image()
+                                ->multiple()
+                                ->reorderable()
+                                ->openable()
+                                ->disk('public')
+                                ->directory('reference-content')
+                                ->visibility('public')
+                                ->helperText('Yüklenen görseller ürün detayında lightbox olarak açılır. Görsel yoksa referans URL bağlantı olarak gösterilir.')
                                 ->columnSpanFull(),
                             ColorPicker::make('cta_cart_color')
                                 ->label('Sepete Ekle rengi')

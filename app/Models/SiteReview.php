@@ -11,6 +11,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
     'site_id',
+    'site_bundle_id',
+    'seo_package_id',
+    'backlink_package_id',
     'user_id',
     'name',
     'email',
@@ -46,6 +49,21 @@ class SiteReview extends Model
     public function site(): BelongsTo
     {
         return $this->belongsTo(Site::class);
+    }
+
+    public function bundle(): BelongsTo
+    {
+        return $this->belongsTo(SiteBundle::class, 'site_bundle_id');
+    }
+
+    public function seoPackage(): BelongsTo
+    {
+        return $this->belongsTo(SeoPackage::class);
+    }
+
+    public function backlinkPackage(): BelongsTo
+    {
+        return $this->belongsTo(BacklinkPackage::class);
     }
 
     public function user(): BelongsTo

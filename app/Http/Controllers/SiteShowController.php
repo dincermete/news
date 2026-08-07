@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\PromotionalListingType;
 use App\Enums\SiteStatus;
+use App\Models\BlogPost;
 use App\Models\Favorite;
 use App\Models\PromotionalListing;
 use App\Models\Site;
@@ -15,7 +15,6 @@ use App\Services\ProductPublicUrl;
 use App\Services\SeoMetaService;
 use App\Services\SiteViewService;
 use App\Services\WhatsAppRedirectService;
-use App\Support\CatalogQuery;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -69,7 +68,7 @@ class SiteShowController extends Controller
             $site->applyListingPricing($listing);
         }
 
-        $site->loadCount('favorites');
+        $site->loadCount(['favorites', 'orders']);
         $siteViews->record($site, $request->input('session_token'));
 
         $isFavorited = false;
@@ -103,14 +102,12 @@ class SiteShowController extends Controller
             $whatsappUrl = null;
         }
 
-        $bestSellers = CatalogQuery::activeSitesWithListing(PromotionalListingType::SiteArticle)
-            ->where('sites.id', '!=', $site->id)
-            ->withCount('orders')
-            ->orderByDesc('orders_count')
-            ->orderBy('sites.id')
-            ->limit(6)
-            ->get()
-            ->each(fn ($bestSeller) => $bestSeller->normalizeJoinedPricingAttributes());
+        $latestBlogPosts = BlogPost::query()
+            ->published()
+            ->with('category')
+            ->latest('published_at')
+            ->limit(5)
+            ->get(['id', 'title', 'slug', 'featured_image', 'published_at', 'blog_category_id']);
 
         $relatedSites = $crossSell->relatedSitesFor($listing, $site);
         $recommendedSites = $crossSell->recommendedSitesFor(
@@ -132,7 +129,7 @@ class SiteShowController extends Controller
             'questions' => $questions,
             'reviews' => $reviews,
             'whatsappUrl' => $whatsappUrl,
-            'bestSellers' => $bestSellers,
+            'latestBlogPosts' => $latestBlogPosts,
             'favoritedSiteIds' => auth()->user()?->favorites()->pluck('site_id')->all() ?? [],
         ]);
     }

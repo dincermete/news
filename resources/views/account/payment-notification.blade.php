@@ -11,7 +11,7 @@
         $input = 'block w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm text-ink focus:border-ink/30 focus:ring-0';
         $tone = fn (?string $color) => match ($color) {
             'success' => 'bg-emerald-100 text-emerald-700',
-            'warning' => 'bg-amber-100 text-amber-700',
+            'warning' => 'bg-yellow-100 text-yellow-700',
             'danger' => 'bg-brand-100 text-brand-700',
             'info', 'primary' => 'bg-accent-100 text-accent-700',
             default => 'bg-ink/5 text-ink-3',

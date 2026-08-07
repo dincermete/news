@@ -22,7 +22,21 @@ class SiteReviewsTable
         return $table
             ->columns([
                 TextColumn::make('id')->label('#')->sortable(),
-                TextColumn::make('site.domain')->label('Site')->searchable()->sortable(),
+                TextColumn::make('product')
+                    ->label('Ürün')
+                    ->state(fn (SiteReview $record): string => $record->site?->domain
+                        ?? $record->bundle?->name
+                        ?? $record->seoPackage?->name
+                        ?? $record->backlinkPackage?->name
+                        ?? '—')
+                    ->searchable(query: function ($query, string $search): void {
+                        $query->where(function ($query) use ($search): void {
+                            $query->whereHas('site', fn ($site) => $site->where('domain', 'like', "%{$search}%"))
+                                ->orWhereHas('bundle', fn ($bundle) => $bundle->where('name', 'like', "%{$search}%"))
+                                ->orWhereHas('seoPackage', fn ($package) => $package->where('name', 'like', "%{$search}%"))
+                                ->orWhereHas('backlinkPackage', fn ($package) => $package->where('name', 'like', "%{$search}%"));
+                        });
+                    }),
                 TextColumn::make('name')->label('Ad soyad')->searchable(),
                 TextColumn::make('email')->label('E-posta')->toggleable(),
                 TextColumn::make('phone')->label('Telefon')->toggleable(),

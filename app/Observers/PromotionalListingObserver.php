@@ -35,6 +35,5 @@ class PromotionalListingObserver
 
         $this->publicStats->forgetActiveSites();
         cache()->forget('home.sections.v2');
-        cache()->forget('home.products.v2');
     }
 }

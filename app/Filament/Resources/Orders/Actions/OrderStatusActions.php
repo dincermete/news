@@ -3,10 +3,12 @@
 namespace App\Filament\Resources\Orders\Actions;
 
 use App\Enums\ContentMode;
+use App\Enums\OrderFulfillmentTrack;
 use App\Enums\OrderStatus;
 use App\Events\WalletRefundRequested;
 use App\Jobs\GenerateArticleJob;
 use App\Models\Order;
+use App\Services\InstantOrderRefundService;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
@@ -26,7 +28,8 @@ class OrderStatusActions
                 ->requiresConfirmation()
                 ->modalHeading('AI makale üret')
                 ->modalDescription('Bu sipariş için arka planda makale üretimi başlatılacak.')
-                ->visible(fn (Order $record): bool => $record->content_mode === ContentMode::AiArticle)
+                ->visible(fn (Order $record): bool => $record->fulfillmentTrack() === OrderFulfillmentTrack::Content
+                    && $record->content_mode === ContentMode::AiArticle)
                 ->action(function (Order $record): void {
                     GenerateArticleJob::dispatch($record);
 
@@ -41,6 +44,8 @@ class OrderStatusActions
                 target: OrderStatus::Review,
                 icon: Heroicon::DocumentCheck,
                 color: 'primary',
+                visible: fn (Order $record): bool => $record->fulfillmentTrack() === OrderFulfillmentTrack::Content
+                    && $record->canTransitionTo(OrderStatus::Review),
             ),
             self::makeTransition(
                 name: 'queueForPublish',
@@ -48,6 +53,10 @@ class OrderStatusActions
                 target: OrderStatus::InQueue,
                 icon: Heroicon::QueueList,
                 color: 'info',
+                visible: fn (Order $record): bool => in_array($record->fulfillmentTrack(), [
+                    OrderFulfillmentTrack::Content,
+                    OrderFulfillmentTrack::Service,
+                ], true) && $record->canTransitionTo(OrderStatus::InQueue),
             ),
             self::makeTransition(
                 name: 'markPublished',
@@ -55,6 +64,10 @@ class OrderStatusActions
                 target: OrderStatus::Published,
                 icon: Heroicon::CheckBadge,
                 color: 'success',
+                visible: fn (Order $record): bool => in_array($record->fulfillmentTrack(), [
+                    OrderFulfillmentTrack::Content,
+                    OrderFulfillmentTrack::Service,
+                ], true) && $record->canTransitionTo(OrderStatus::Published),
             ),
             self::makeTransition(
                 name: 'markReportSent',
@@ -62,16 +75,63 @@ class OrderStatusActions
                 target: OrderStatus::ReportSent,
                 icon: Heroicon::PaperAirplane,
                 color: 'success',
+                visible: fn (Order $record): bool => in_array($record->fulfillmentTrack(), [
+                    OrderFulfillmentTrack::Content,
+                    OrderFulfillmentTrack::Service,
+                ], true) && $record->canTransitionTo(OrderStatus::ReportSent),
             ),
+            Action::make('cancel')
+                ->label('İptal Et')
+                ->icon(Heroicon::XCircle)
+                ->color('danger')
+                ->requiresConfirmation()
+                ->modalHeading('Siparişi iptal et')
+                ->visible(fn (Order $record): bool => $record->canTransitionTo(OrderStatus::Cancelled))
+                ->action(function (Order $record): void {
+                    $record->transitionTo(OrderStatus::Cancelled);
+
+                    Notification::make()
+                        ->title('Sipariş iptal edildi')
+                        ->success()
+                        ->send();
+                }),
             Action::make('refund')
                 ->label('İade Et')
                 ->icon(Heroicon::Banknotes)
                 ->color('danger')
                 ->requiresConfirmation()
                 ->modalHeading('Siparişi iade et')
-                ->modalDescription('Bu sipariş iade edildi olarak işaretlenecek ve cüzdan iadesi talebi oluşturulacak.')
-                ->visible(fn (Order $record): bool => $record->canTransitionTo(OrderStatus::Refunded))
+                ->modalDescription(fn (Order $record): string => $record->fulfillmentTrack() === OrderFulfillmentTrack::Instant
+                    ? 'Önce cüzdan/spin clawback yapılacak; başarılıysa sipariş iade edilecek.'
+                    : 'Bu sipariş iade edildi olarak işaretlenecek ve cüzdan iadesi talebi oluşturulacak.')
+                ->visible(fn (Order $record): bool => $record->canTransitionTo(OrderStatus::Refunded)
+                    && (
+                        $record->fulfillmentTrack() !== OrderFulfillmentTrack::Instant
+                        || $record->status === OrderStatus::Completed
+                    ))
                 ->action(function (Order $record): void {
+                    if ($record->fulfillmentTrack() === OrderFulfillmentTrack::Instant) {
+                        try {
+                            app(InstantOrderRefundService::class)->refund($record);
+                        } catch (\Throwable $e) {
+                            Notification::make()
+                                ->title('İade başarısız')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+
+                            return;
+                        }
+
+                        Notification::make()
+                            ->title('Bakiye siparişi iade edildi')
+                            ->body('Cüzdan clawback uygulandı.')
+                            ->success()
+                            ->send();
+
+                        return;
+                    }
+
                     $record->transitionTo(OrderStatus::Refunded);
 
                     WalletRefundRequested::dispatch($record);
@@ -85,19 +145,23 @@ class OrderStatusActions
         ];
     }
 
+    /**
+     * @param  (\Closure(Order): bool)|null  $visible
+     */
     protected static function makeTransition(
         string $name,
         string $label,
         OrderStatus $target,
         Heroicon $icon,
         string $color,
+        ?\Closure $visible = null,
     ): Action {
         return Action::make($name)
             ->label($label)
             ->icon($icon)
             ->color($color)
             ->requiresConfirmation()
-            ->visible(fn (Order $record): bool => $record->canTransitionTo($target))
+            ->visible($visible ?? fn (Order $record): bool => $record->canTransitionTo($target))
             ->action(function (Order $record) use ($target, $label): void {
                 $record->transitionTo($target);
 

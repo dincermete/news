@@ -21,10 +21,15 @@ use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BacklinkPackageCatalogController;
+use App\Http\Controllers\BacklinkPackageQuestionController;
+use App\Http\Controllers\BacklinkPackageReviewController;
 use App\Http\Controllers\BacklinkPackageShowController;
 use App\Http\Controllers\BankTransferNotificationController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\BundleQuestionController;
+use App\Http\Controllers\BundleReviewController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\ChatbotConversationController;
 use App\Http\Controllers\ChatbotMessageController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ContactController;
@@ -37,7 +42,10 @@ use App\Http\Controllers\MarkNotificationReadController;
 use App\Http\Controllers\PaytrCallbackController;
 use App\Http\Controllers\PressReleaseCatalogController;
 use App\Http\Controllers\ProductPublicPathController;
+use App\Http\Controllers\ProvinceSitesController;
 use App\Http\Controllers\SeoPackageCatalogController;
+use App\Http\Controllers\SeoPackageQuestionController;
+use App\Http\Controllers\SeoPackageReviewController;
 use App\Http\Controllers\SeoPackageShowController;
 use App\Http\Controllers\SiteBundleCatalogController;
 use App\Http\Controllers\SiteCatalogController;
@@ -47,6 +55,8 @@ use App\Http\Controllers\SiteQuestionController;
 use App\Http\Controllers\SiteReviewController;
 use App\Http\Controllers\SiteShowController;
 use App\Http\Controllers\SiteViewController;
+use App\Http\Controllers\ToolAiCrawlerCheckController;
+use App\Http\Controllers\ToolsController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -58,18 +68,40 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', HomeController::class)->name('home');
 
 Route::get('/siteler', SiteCatalogController::class)->name('sites.index');
+Route::get('/siteler/kategori/{kategori}', SiteCatalogController::class)
+    ->where('kategori', '^[a-z0-9]+(?:-[a-z0-9]+)*$')
+    ->name('sites.category');
 Route::get('/siteler/disa-aktar', SiteExportController::class)->name('sites.export');
+Route::get('/{slug}-tanitim-yazisi-siteleri', ProvinceSitesController::class)
+    ->where('slug', '^[a-z0-9]+(?:-[a-z0-9]+)*$')
+    ->name('provinces.sites');
 Route::get('/basin-bulteni', PressReleaseCatalogController::class)->name('press-release.index');
 Route::get('/tanitim-paketleri', [SiteBundleCatalogController::class, 'index'])->name('bundles.index');
 Route::get('/tanitim-paketleri/{slug}', [SiteBundleCatalogController::class, 'show'])->name('bundles.show');
+Route::post('/tanitim-paketleri/{bundle}/yorum', BundleReviewController::class)->name('bundles.review');
+Route::post('/tanitim-paketleri/{bundle}/soru', BundleQuestionController::class)->name('bundles.question');
 Route::get('/footer-linkler', FooterLinkCatalogController::class)->name('footer-links.index');
 Route::get('/geo', GeoPageController::class)->name('geo.index');
 Route::get('/seo-paketleri', SeoPackageCatalogController::class)->name('seo-packages.index');
 Route::get('/seo-paketleri/{slug}', SeoPackageShowController::class)->name('seo-packages.show');
+Route::post('/seo-paketleri/{package}/yorum', SeoPackageReviewController::class)->name('seo-packages.review');
+Route::post('/seo-paketleri/{package}/soru', SeoPackageQuestionController::class)->name('seo-packages.question');
 Route::get('/backlink-paketleri', BacklinkPackageCatalogController::class)->name('backlink-packages.index');
 Route::get('/backlink-paketleri/{slug}', BacklinkPackageShowController::class)->name('backlink-packages.show');
+Route::post('/backlink-paketleri/{package}/yorum', BacklinkPackageReviewController::class)->name('backlink-packages.review');
+Route::post('/backlink-paketleri/{package}/soru', BacklinkPackageQuestionController::class)->name('backlink-packages.question');
 Route::get('/hizmetler', [AgencyServiceController::class, 'index'])->name('agency-services.index');
 Route::get('/hizmetler/{slug}', [AgencyServiceController::class, 'show'])->name('agency-services.show');
+
+Route::prefix('araclar')->name('tools.')->group(function (): void {
+    Route::get('/', [ToolsController::class, 'index'])->name('index');
+    Route::post('/ai-bot-erisim-denetimi/kontrol', ToolAiCrawlerCheckController::class)
+        ->middleware('throttle:20,1')
+        ->name('ai-crawler-check');
+    Route::get('/{slug}', [ToolsController::class, 'show'])
+        ->where('slug', '^[a-z0-9]+(?:-[a-z0-9]+)*$')
+        ->name('show');
+});
 Route::get('/ucretsiz-analiz', [FreeAnalysisController::class, 'show'])->name('free-analysis.show');
 Route::get('/hakkimizda', AboutController::class)->name('about.show');
 Route::get('/iletisim', ContactController::class)->name('contact.show');
@@ -199,3 +231,6 @@ Route::post('/site/{site}/view', SiteViewController::class)
 
 Route::post('/chatbot/message', ChatbotMessageController::class)
     ->name('chatbot.message');
+
+Route::get('/chatbot/conversation', ChatbotConversationController::class)
+    ->name('chatbot.conversation');

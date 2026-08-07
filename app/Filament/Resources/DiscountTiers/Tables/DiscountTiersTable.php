@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\DiscountTiers\Tables;
 
 use App\Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
@@ -21,7 +22,10 @@ class DiscountTiersTable
                 IconColumn::make('is_active')->label('Aktif')->boolean()->sortable(),
             ])
             ->defaultSort('min_cart_amount')
-            ->recordActions([EditAction::make()])
+            ->recordActions([
+                EditAction::make(),
+                DeleteAction::make(),
+            ])
             ->toolbarActions([
                 BulkActionGroup::make([DeleteBulkAction::make()]),
             ]);

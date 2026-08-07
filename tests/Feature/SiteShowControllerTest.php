@@ -11,6 +11,7 @@ use App\Models\SiteQuestion;
 use App\Models\SiteView;
 use App\Models\User;
 use App\Services\ProductCrossSellService;
+use Carbon\CarbonImmutable;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -35,6 +36,115 @@ class SiteShowControllerTest extends TestCase
         $response->assertSee('detail-show.test');
         $response->assertSee('Detay açıklaması');
         $response->assertSee('Sepete Ekle');
+    }
+
+    public function test_site_data_section_only_shows_requested_metrics(): void
+    {
+        CarbonImmutable::setTestNow('2026-08-05');
+
+        $site = Site::factory()->create([
+            'domain' => 'metrics-show.test',
+            'status' => SiteStatus::Active,
+            'is_news_approved' => true,
+            'monthly_traffic_value' => 5_000_000,
+            'is_dofollow' => false,
+            'da_value' => 88,
+            'pa_value' => 62,
+            'max_link_count' => 2,
+            'opened_at' => '1996-11-01',
+        ]);
+
+        $response = $this->get(route('sites.show', $site->domain));
+
+        $response->assertOk();
+        $response->assertSeeTextInOrder([
+            '88',
+            'DA Değeri',
+            '5.000.000',
+            'Günlük Hit',
+            '29 Yıl 9 Ay',
+            'Site Yaşı',
+            'Site Verileri',
+            'Google News',
+            'Kayıtlı',
+            'Google Index',
+            'Link Türü',
+            'Nofollow',
+            'PA Değeri',
+            '62',
+            'Link Çıkışı',
+            '2',
+        ]);
+        $response->assertDontSee('Ahrefs DR');
+        $response->assertDontSee('Semrush AS');
+        $response->assertDontSee('Aylık Trafik');
+
+        CarbonImmutable::setTestNow();
+    }
+
+    public function test_product_info_card_renders_above_site_data(): void
+    {
+        $category = SiteCategory::factory()->create(['name' => 'Haber']);
+        $site = Site::factory()->create([
+            'domain' => 'product-info.test',
+            'status' => SiteStatus::Active,
+            'site_category_id' => $category->id,
+        ]);
+
+        $site->articleListing?->update([
+            'estimated_delivery' => '3 Gün',
+            'reference_content_url' => 'https://example.com/ornek-icerik',
+        ]);
+
+        $response = $this->get(route('sites.show', $site->domain));
+
+        $response->assertOk();
+        $response->assertSeeTextInOrder([
+            'Site Verileri',
+            'Kategori',
+            'Haber',
+            'Devamı için tıklayın',
+            'Google Analytics',
+            'Görsel Yok',
+            'Tahmini Teslimat',
+            '3 Gün',
+            'Toplam Satış',
+            'Satış Yok',
+            'Yorumlar',
+            'Yorum Yok',
+            'Referans İçerik',
+            'Tıklayın',
+        ]);
+        $response->assertDontSee('Ürün Bilgileri');
+        $response->assertDontSee('0 Görsel');
+        $response->assertDontSee('0 Adet');
+        $response->assertDontSee('0 Yorum');
+        $response->assertSee('https://example.com/ornek-icerik', false);
+    }
+
+    public function test_uploaded_images_are_exposed_to_the_lightbox(): void
+    {
+        $site = Site::factory()->create([
+            'domain' => 'lightbox.test',
+            'status' => SiteStatus::Active,
+            'analytics_image_paths' => ['site-analytics/ga-1.png', 'site-analytics/ga-2.png'],
+        ]);
+
+        $site->articleListing?->update([
+            'reference_content_image_paths' => ['reference-content/ref-1.png'],
+        ]);
+
+        $response = $this->get(route('sites.show', $site->domain));
+
+        $response->assertOk();
+        $response->assertSee('2 Görsel');
+        $response->assertSee('1 Görsel');
+        // Lightbox URLs are embedded as JSON in the Alpine component, so slashes are escaped.
+        $response->assertSee('site-analytics', false);
+        $response->assertSee('ga-1.png', false);
+        $response->assertSee('ga-2.png', false);
+        $response->assertSee('reference-content', false);
+        $response->assertSee('ref-1.png', false);
     }
 
     public function test_show_records_a_site_view(): void

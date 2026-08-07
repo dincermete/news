@@ -83,6 +83,25 @@ class CartItem extends Model
         return $this->configured_at !== null;
     }
 
+    public function displayTitle(): string
+    {
+        return $this->site?->domain
+            ?? $this->siteBundle?->name
+            ?? $this->seoPackage?->name
+            ?? $this->backlinkPackage?->name
+            ?? ($this->walletTopupPackage
+                ? 'Bakiye · '.number_format((float) $this->walletTopupPackage->amount, 2, ',', '.').' '.($this->currency?->value ?? 'TRY')
+                : null)
+            ?? $this->product_type?->getLabel()
+            ?? 'Ürün #'.$this->id;
+    }
+
+    public function durationLabel(): ?string
+    {
+        return $this->footerLinkDurationOption?->name
+            ?? $this->seoPackageDurationOption?->name;
+    }
+
     public function cart(): BelongsTo
     {
         return $this->belongsTo(Cart::class);

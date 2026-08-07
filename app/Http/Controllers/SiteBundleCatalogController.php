@@ -3,10 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Enums\SiteStatus;
+use App\Models\BlogPost;
 use App\Models\FaqEntry;
 use App\Models\SiteBundle;
+use App\Models\SiteQuestion;
+use App\Models\SiteReview;
 use App\Services\ProductPublicUrl;
 use App\Services\SeoMetaService;
+use App\Services\WhatsAppRedirectService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -56,8 +60,13 @@ class SiteBundleCatalogController extends Controller
         return $this->showBundle($bundle, $seo);
     }
 
-    public function showBundle(SiteBundle $bundle, SeoMetaService $seo): View
-    {
+    public function showBundle(
+        SiteBundle $bundle,
+        SeoMetaService $seo,
+        ?WhatsAppRedirectService $whatsApp = null,
+    ): View {
+        $whatsApp ??= app(WhatsAppRedirectService::class);
+
         $bundle->loadCount('sites');
         $bundle->load(['sites' => fn ($sites) => $sites->orderBy('domain')->with('category')]);
 
@@ -76,10 +85,44 @@ class SiteBundleCatalogController extends Controller
             ->limit(4)
             ->get();
 
+        $latestBlogPosts = BlogPost::query()
+            ->published()
+            ->with('category')
+            ->latest('published_at')
+            ->limit(5)
+            ->get(['id', 'title', 'slug', 'featured_image', 'published_at', 'blog_category_id']);
+
+        $questions = SiteQuestion::query()
+            ->publicAnswered()
+            ->where('site_bundle_id', $bundle->id)
+            ->latest('answered_at')
+            ->limit(20)
+            ->get(['id', 'question', 'answer', 'answered_at', 'guest_email', 'user_id']);
+
+        $reviews = SiteReview::query()
+            ->approved()
+            ->where('site_bundle_id', $bundle->id)
+            ->latest('approved_at')
+            ->limit(50)
+            ->get(['id', 'name', 'message', 'approved_at', 'created_at']);
+
+        $whatsappUrl = null;
+        try {
+            $whatsappUrl = $whatsApp->buildLink(
+                "Merhaba, {$bundle->name} paketi hakkında sipariş vermek istiyorum."
+            );
+        } catch (\RuntimeException) {
+            $whatsappUrl = null;
+        }
+
         return view('bundles.show', [
             'bundle' => $bundle,
             'faqs' => $faqs,
             'relatedBundles' => $relatedBundles,
+            'latestBlogPosts' => $latestBlogPosts,
+            'questions' => $questions,
+            'reviews' => $reviews,
+            'whatsappUrl' => $whatsappUrl,
             'meta' => $seo->forBundle($bundle),
         ]);
     }

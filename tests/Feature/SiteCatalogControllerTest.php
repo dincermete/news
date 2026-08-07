@@ -61,11 +61,29 @@ class SiteCatalogControllerTest extends TestCase
             'status' => SiteStatus::Active,
         ]);
 
-        $response = $this->get(route('sites.index', ['kategori' => 'haber']));
+        $response = $this->get(route('sites.category', ['kategori' => 'haber']));
 
         $response->assertOk();
         $response->assertSee('haber-site.test');
         $response->assertDontSee('blog-site.test');
+        $response->assertSee('Haber siteleri', false);
+    }
+
+    public function test_legacy_category_query_redirects_to_seo_path(): void
+    {
+        SiteCategory::factory()->create(['name' => 'Almanca', 'slug' => 'almanca']);
+
+        $this->get('/siteler?kategori=almanca&sort=price_asc')
+            ->assertRedirect('/siteler/kategori/almanca?sort=price_asc');
+
+        $this->get('/siteler?kategori=almanca&sort=price_asc')
+            ->assertStatus(301);
+    }
+
+    public function test_unknown_category_slug_returns_not_found(): void
+    {
+        $this->get(route('sites.category', ['kategori' => 'olmayan-kategori']))
+            ->assertNotFound();
     }
 
     public function test_filters_by_domain_search_query(): void

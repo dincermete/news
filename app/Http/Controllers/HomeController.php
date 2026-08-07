@@ -6,11 +6,10 @@ use App\Enums\PromotionalListingType;
 use App\Enums\SiteStatus;
 use App\Models\BacklinkPackage;
 use App\Models\FaqEntry;
-use App\Models\PromotionalListing;
-use App\Models\SeoPackage;
 use App\Models\Site;
 use App\Models\SiteBundle;
 use App\Models\SiteCategory;
+use App\Services\ProvinceStatsService;
 use App\Services\PublicStatsService;
 use App\Services\SeoMetaService;
 use App\Support\CatalogQuery;
@@ -22,11 +21,9 @@ class HomeController extends Controller
 {
     public const CACHE_KEY = 'home.sections.v2';
 
-    public const PRODUCTS_CACHE_KEY = 'home.products.v2';
-
     public const CACHE_TTL_SECONDS = 300;
 
-    public function __invoke(SeoMetaService $seo, PublicStatsService $stats): View
+    public function __invoke(SeoMetaService $seo, PublicStatsService $stats, ProvinceStatsService $provinceStats): View
     {
         /** @var array{newest: list<array<string, mixed>>, discounted: list<array<string, mixed>>, best_sellers: list<array<string, mixed>>} $sections */
         $sections = Cache::remember(
@@ -123,49 +120,15 @@ class HomeController extends Controller
             'sections' => $sections,
             'categories' => $categories,
             'faqs' => $faqs,
-            'productPrices' => $this->productPrices(),
             'popularSites' => $popularSites,
             'newestSites' => $newestSites,
             'pressReleaseSites' => $pressReleaseSites,
             'bestSellerSites' => $bestSellerSites,
             'featuredBundles' => $featuredBundles,
             'featuredBacklinkPackages' => $featuredBacklinkPackages,
+            'provinces' => $provinceStats->provincesWithCounts(),
             'favoritedSiteIds' => auth()->user()?->favorites()->pluck('site_id')->all() ?? [],
         ]);
-    }
-
-    /**
-     * Real minimum prices per product line, for the homepage product grid.
-     * Keeps the homepage honest about what's actually purchasable and at what price.
-     *
-     * @return array{site_article: ?float, press_release: ?float, bundle: ?float, seo_package: ?float, backlink_package: ?float}
-     */
-    protected function productPrices(): array
-    {
-        return Cache::remember(
-            self::PRODUCTS_CACHE_KEY,
-            self::CACHE_TTL_SECONDS,
-            fn (): array => [
-                'site_article' => (float) (PromotionalListing::query()
-                    ->activeForSale()
-                    ->ofType(PromotionalListingType::SiteArticle)
-                    ->selectRaw('MIN(COALESCE(discount_price, price)) as min_price')
-                    ->value('min_price') ?? 0) ?: null,
-                'press_release' => (float) (PromotionalListing::query()
-                    ->activeForSale()
-                    ->ofType(PromotionalListingType::PressRelease)
-                    ->min('price') ?? 0) ?: null,
-                'bundle' => (float) (SiteBundle::query()
-                    ->where('status', SiteStatus::Active)
-                    ->min('price') ?? 0) ?: null,
-                'seo_package' => (float) (SeoPackage::query()
-                    ->where('status', SiteStatus::Active)
-                    ->min('monthly_price') ?? 0) ?: null,
-                'backlink_package' => (float) (BacklinkPackage::query()
-                    ->where('status', SiteStatus::Active)
-                    ->min('price') ?? 0) ?: null,
-            ],
-        );
     }
 
     /**

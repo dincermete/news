@@ -9,7 +9,7 @@
         $chip = 'inline-flex items-center rounded-[10px] border border-ink/5 bg-white px-3.5 py-2 text-sm font-medium text-ink shadow-soft';
         $tone = fn (?string $color) => match ($color) {
             'success' => 'bg-emerald-100 text-emerald-700',
-            'warning' => 'bg-amber-100 text-amber-700',
+            'warning' => 'bg-yellow-100 text-yellow-700',
             'danger' => 'bg-brand-100 text-brand-700',
             'info', 'primary' => 'bg-accent-100 text-accent-700',
             default => 'bg-ink/5 text-ink-3',
@@ -24,7 +24,7 @@
         </div>
 
         @if ($commissionRate === null)
-            <div class="rounded-[20px] border border-amber-200 bg-amber-50 px-5 py-3.5 text-sm text-amber-900">
+            <div class="rounded-[20px] border border-yellow-200 bg-yellow-50 px-5 py-3.5 text-sm text-yellow-900">
                 Komisyon oranınız henüz tanımlanmamış. Oran atandıktan sonra referans siparişlerinden kazanç elde edebilirsiniz.
             </div>
         @else

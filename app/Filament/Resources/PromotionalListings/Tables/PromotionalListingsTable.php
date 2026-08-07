@@ -17,6 +17,11 @@ class PromotionalListingsTable
     {
         return $table
             ->columns([
+                TextColumn::make('name')
+                    ->label('Ürün adı')
+                    ->searchable()
+                    ->sortable()
+                    ->limit(40),
                 TextColumn::make('site.domain')
                     ->label('Site')
                     ->searchable()
@@ -25,6 +30,10 @@ class PromotionalListingsTable
                     ->label('Tip')
                     ->badge()
                     ->sortable(),
+                TextColumn::make('estimated_delivery')
+                    ->label('Teslimat')
+                    ->placeholder('—')
+                    ->toggleable(),
                 TextColumn::make('price')
                     ->label('Fiyat')
                     ->money(fn ($record) => $record->currency?->value ?? 'TRY')

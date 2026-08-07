@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Enums\NotificationAudience;
+use App\Models\Announcement;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -39,5 +41,26 @@ class ChatbotWidgetTest extends TestCase
             $chatbotPos,
             'chatbot.js should load after </head> (not in the critical head bundle).',
         );
+    }
+
+    public function test_guest_does_not_see_logged_in_only_announcement_in_widget(): void
+    {
+        Announcement::factory()->create([
+            'title' => 'Sadece üyeler duyurusu',
+            'audience' => NotificationAudience::LoggedInOnly,
+            'is_active' => true,
+        ]);
+
+        Announcement::factory()->create([
+            'title' => 'Herkese açık duyuru',
+            'audience' => NotificationAudience::All,
+            'is_active' => true,
+        ]);
+
+        $response = $this->get(route('home'));
+
+        $response->assertOk();
+        $response->assertDontSee('Sadece üyeler duyurusu');
+        $response->assertSee('Herkese açık duyuru');
     }
 }

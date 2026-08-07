@@ -36,15 +36,13 @@
                 @foreach ($favorites as $favorite)
                     @if ($favorite->site)
                         <div class="flex items-start justify-between gap-3 rounded-[20px] border border-ink/10 bg-paper p-5">
-                            <div class="flex min-w-0 items-start gap-x-3">
-                                <x-site-logo :site="$favorite->site" :height="32" class="mt-0.5 shrink-0 rounded-lg" />
-                                <div class="min-w-0">
-                                    <a href="{{ storefront_site_url($favorite->site) }}" class="block truncate text-sm font-semibold text-ink transition hover:text-accent-700">
-                                        {{ $favorite->site->domain }}
-                                    </a>
-                                    <p class="mt-0.5 truncate text-xs text-ink-3">{{ $favorite->site->category?->name }}</p>
-                                </div>
-                            </div>
+                            <x-site-identity
+                                :site="$favorite->site"
+                                :height="32"
+                                class="min-w-0 items-start"
+                                logo-class="mt-0.5 shrink-0 rounded-lg"
+                                domain-class="block truncate text-sm font-semibold text-ink transition hover:text-accent-700"
+                            />
                             <form method="post" action="{{ route('account.favorites.destroy', $favorite) }}">
                                 @csrf
                                 @method('DELETE')

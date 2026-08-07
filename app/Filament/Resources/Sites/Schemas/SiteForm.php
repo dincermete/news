@@ -45,6 +45,14 @@ class SiteForm
                                         ->preload()
                                         ->required()
                                         ->columnSpan(1),
+                                    Select::make('provinces')
+                                        ->label('İller')
+                                        ->relationship('provinces', 'name')
+                                        ->multiple()
+                                        ->searchable()
+                                        ->preload()
+                                        ->helperText('Bu sitenin görüneceği il SEO sayfaları.')
+                                        ->columnSpanFull(),
                                     Textarea::make('short_description')
                                         ->label('Kısa açıklama')
                                         ->rows(2)
@@ -88,6 +96,17 @@ class SiteForm
                                         ->imageEditor()
                                         ->imageEditorAspectRatios(['40:9'])
                                         ->helperText('Yatay marka logosu, 40:9 en-boy oranında (ör. 800×180px). Yüklenmezse site favicon\'u otomatik gösterilir.')
+                                        ->columnSpanFull(),
+                                    FileUpload::make('analytics_image_paths')
+                                        ->label('Google Analytics görselleri')
+                                        ->image()
+                                        ->multiple()
+                                        ->reorderable()
+                                        ->openable()
+                                        ->disk('public')
+                                        ->directory('site-analytics')
+                                        ->visibility('public')
+                                        ->helperText('Ürün detayında “Google Analytics / N Görsel” olarak gösterilir; ziyaretçi tıklayınca lightbox açılır.')
                                         ->columnSpanFull(),
                                 ]),
                             ]),

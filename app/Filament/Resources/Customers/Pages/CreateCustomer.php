@@ -14,25 +14,28 @@ class CreateCustomer extends CreateRecord
 {
     protected static string $resource = CustomerResource::class;
 
+    protected string $plainPassword = '';
+
     /**
      * @param  array<string, mixed>  $data
      * @return array<string, mixed>
      */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $plainPassword = Str::password(12);
+        if (filled($data['password'] ?? null)) {
+            $this->plainPassword = (string) $data['password'];
+            $data['password'] = Hash::make($this->plainPassword);
+        } else {
+            $this->plainPassword = Str::password(12);
+            $data['password'] = Hash::make($this->plainPassword);
+        }
 
-        $this->plainPassword = $plainPassword;
-
-        $data['password'] = Hash::make($plainPassword);
         $data['role'] = UserRole::Customer;
-        $data['status'] = CustomerStatus::Active;
-        $data['email_verified_at'] = now();
+        $data['status'] = $data['status'] ?? CustomerStatus::Active;
+        $data['email_verified_at'] = $data['email_verified_at'] ?? now();
 
         return $data;
     }
-
-    protected string $plainPassword = '';
 
     protected function afterCreate(): void
     {

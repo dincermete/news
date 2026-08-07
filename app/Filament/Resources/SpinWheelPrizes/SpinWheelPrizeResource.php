@@ -2,9 +2,7 @@
 
 namespace App\Filament\Resources\SpinWheelPrizes;
 
-use App\Filament\Resources\SpinWheelPrizes\Pages\CreateSpinWheelPrize;
-use App\Filament\Resources\SpinWheelPrizes\Pages\EditSpinWheelPrize;
-use App\Filament\Resources\SpinWheelPrizes\Pages\ListSpinWheelPrizes;
+use App\Filament\Resources\SpinWheelPrizes\Pages\ManageSpinWheelPrizes;
 use App\Filament\Resources\SpinWheelPrizes\Schemas\SpinWheelPrizeForm;
 use App\Filament\Resources\SpinWheelPrizes\Tables\SpinWheelPrizesTable;
 use App\Models\SpinWheelPrize;
@@ -51,9 +49,7 @@ class SpinWheelPrizeResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListSpinWheelPrizes::route('/'),
-            'create' => CreateSpinWheelPrize::route('/create'),
-            'edit' => EditSpinWheelPrize::route('/{record}/edit'),
+            'index' => ManageSpinWheelPrizes::route('/'),
         ];
     }
 }

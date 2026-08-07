@@ -78,6 +78,11 @@ class CatalogQuery
                 'promotional_listings.currency as currency',
                 'promotional_listings.id as promotional_listing_id',
                 'promotional_listings.public_path as listing_public_path',
+                'promotional_listings.name as listing_name',
+                'promotional_listings.estimated_delivery as estimated_delivery',
+                'promotional_listings.reference_content_url as reference_content_url',
+                'promotional_listings.reference_content_label as reference_content_label',
+                'promotional_listings.reference_content_image_paths as reference_content_image_paths',
             ])
             ->join('promotional_listings', function ($join) use ($type): void {
                 $join->on('promotional_listings.site_id', '=', 'sites.id')

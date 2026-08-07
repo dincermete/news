@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\ContentMode;
 use App\Enums\ContentSource;
 use App\Enums\Currency;
+use App\Enums\OrderFulfillmentTrack;
 use App\Enums\OrderStatus;
 use App\Enums\ProductType;
 use App\Enums\UserRole;
@@ -173,14 +174,48 @@ class Order extends Model
         return $this->hasOne(Invoice::class);
     }
 
+    public function fulfillmentTrack(): OrderFulfillmentTrack
+    {
+        $productType = $this->product_type instanceof ProductType
+            ? $this->product_type
+            : ProductType::SiteArticle;
+
+        return OrderFulfillmentTrack::forProductType($productType);
+    }
+
+    /**
+     * Public / UI transition graph. Instant PaymentPending→Completed and
+     * ContentPending→Completed are intentionally excluded (completion service / backfill only).
+     *
+     * @return list<OrderStatus>
+     */
+    public function allowedTransitions(): array
+    {
+        return match ($this->fulfillmentTrack()) {
+            OrderFulfillmentTrack::Instant => match ($this->status) {
+                OrderStatus::PaymentPending => [OrderStatus::Cancelled],
+                OrderStatus::Completed => [OrderStatus::Refunded],
+                default => [],
+            },
+            OrderFulfillmentTrack::Service => match ($this->status) {
+                OrderStatus::PaymentPending => [OrderStatus::ContentPending, OrderStatus::Cancelled, OrderStatus::Refunded],
+                OrderStatus::ContentPending => [OrderStatus::InQueue, OrderStatus::Cancelled, OrderStatus::Refunded],
+                OrderStatus::InQueue => [OrderStatus::Published, OrderStatus::Cancelled, OrderStatus::Refunded],
+                OrderStatus::Published => [OrderStatus::ReportSent, OrderStatus::Refunded],
+                default => [],
+            },
+            OrderFulfillmentTrack::Content => $this->status->allowedTransitions(),
+        };
+    }
+
     public function canTransitionTo(OrderStatus $status): bool
     {
-        return $this->status->canTransitionTo($status);
+        return in_array($status, $this->allowedTransitions(), true);
     }
 
     public function canEditContent(): bool
     {
-        if ($this->product_type === ProductType::Balance) {
+        if ($this->fulfillmentTrack() === OrderFulfillmentTrack::Instant) {
             return false;
         }
 
@@ -188,6 +223,23 @@ class Order extends Model
             OrderStatus::PaymentPending,
             OrderStatus::ContentPending,
         ], true);
+    }
+
+    /**
+     * Internal recovery / completion path for Instant (Balance) orders.
+     * Bypasses public canTransitionTo; caller must ensure ledger effects first.
+     */
+    public function forceCompleteInstantRecovery(): bool
+    {
+        if ($this->fulfillmentTrack() !== OrderFulfillmentTrack::Instant) {
+            return false;
+        }
+
+        if (! in_array($this->status, [OrderStatus::PaymentPending, OrderStatus::ContentPending], true)) {
+            return false;
+        }
+
+        return $this->forceFill(['status' => OrderStatus::Completed])->save();
     }
 
     public function isContentConfigured(): bool

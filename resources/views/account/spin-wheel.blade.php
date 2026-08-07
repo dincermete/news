@@ -87,8 +87,8 @@
                     <p class="mt-4 text-center text-sm text-ink-2" x-show="credits <= 0 && !result" x-cloak>
                         Bakiye yükleyerek hak kazanabilirsiniz.
                     </p>
-                    <p class="mt-4 text-center text-sm font-semibold text-accent-700" x-show="result" x-text="result" x-cloak></p>
-                    <p class="mt-2 text-center text-sm text-brand-600" x-show="error" x-text="error" x-cloak></p>
+                    <p class="mt-4 text-center text-sm font-semibold text-accent-700" x-show="result" x-text="result" x-cloak aria-live="polite"></p>
+                    <p class="mt-2 text-center text-sm text-brand-600" x-show="error" x-text="error" x-cloak aria-live="assertive"></p>
                 </div>
             </div>
 

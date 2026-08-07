@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 /**
- * Normalized GET filters for /siteler (SEO-friendly query string).
+ * Normalized filters for /siteler and /siteler/kategori/{slug}.
+ *
+ * Category lives in the path for SEO; other filters stay as query params.
  *
  * @phpstan-type SortOption 'price_asc'|'price_desc'|'da_asc'|'da_desc'|'newest'
  */
@@ -41,15 +43,17 @@ final class SiteCatalogFilters
         public readonly int $page,
     ) {}
 
-    public static function fromRequest(Request $request): self
+    public static function fromRequest(Request $request, ?string $kategori = null): self
     {
         $sort = (string) $request->query('sort', self::DEFAULT_SORT);
         if (! in_array($sort, self::SORTS, true)) {
             $sort = self::DEFAULT_SORT;
         }
 
-        $kategori = $request->query('kategori');
-        $kategori = is_string($kategori) && $kategori !== '' ? $kategori : null;
+        $routeKategori = $kategori ?? $request->route('kategori');
+        $resolvedKategori = is_string($routeKategori) && $routeKategori !== ''
+            ? $routeKategori
+            : null;
 
         $q = $request->query('q');
         $q = is_string($q) ? mb_substr(trim($q), 0, 100) : null;
@@ -57,7 +61,7 @@ final class SiteCatalogFilters
 
         return new self(
             q: $q,
-            kategori: $kategori,
+            kategori: $resolvedKategori,
             fiyatMin: self::nullableFloat($request->query('fiyat_min')),
             fiyatMax: self::nullableFloat($request->query('fiyat_max')),
             daMin: self::nullableFloat($request->query('da_min')),
@@ -90,7 +94,7 @@ final class SiteCatalogFilters
     }
 
     /**
-     * Query string values for forms / pagination (omit empty defaults).
+     * Query string values for forms / pagination (category stays in the path).
      *
      * @return array<string, scalar>
      */
@@ -100,9 +104,6 @@ final class SiteCatalogFilters
 
         if ($this->q !== null) {
             $params['q'] = $this->q;
-        }
-        if ($this->kategori !== null) {
-            $params['kategori'] = $this->kategori;
         }
         if ($this->fiyatMin !== null) {
             $params['fiyat_min'] = $this->fiyatMin;
@@ -127,6 +128,28 @@ final class SiteCatalogFilters
         }
 
         return $params;
+    }
+
+    /**
+     * Canonical catalog URL for the given category slug (null = all sites).
+     *
+     * @param  array<string, scalar>  $query
+     */
+    public static function catalogUrl(?string $kategori = null, array $query = []): string
+    {
+        if ($kategori !== null && $kategori !== '') {
+            return route('sites.category', ['kategori' => $kategori] + $query);
+        }
+
+        return route('sites.index', $query);
+    }
+
+    public function url(?string $kategori = null): string
+    {
+        return self::catalogUrl(
+            $kategori === null ? $this->kategori : $kategori,
+            $this->toQueryParameters(),
+        );
     }
 
     /**

@@ -4,8 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Enums\SiteStatus;
 use App\Models\BacklinkPackage;
+use App\Models\BlogPost;
+use App\Models\SiteQuestion;
+use App\Models\SiteReview;
 use App\Services\ProductPublicUrl;
 use App\Services\SeoMetaService;
+use App\Services\WhatsAppRedirectService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -31,9 +35,14 @@ class BacklinkPackageShowController extends Controller
         return $this->showPackage($package, $seo);
     }
 
-    public function showPackage(BacklinkPackage $package, SeoMetaService $seo): View
-    {
-        $related = BacklinkPackage::query()
+    public function showPackage(
+        BacklinkPackage $package,
+        SeoMetaService $seo,
+        ?WhatsAppRedirectService $whatsApp = null,
+    ): View {
+        $whatsApp ??= app(WhatsAppRedirectService::class);
+
+        $relatedPackages = BacklinkPackage::query()
             ->where('status', SiteStatus::Active)
             ->whereKeyNot($package->id)
             ->orderBy('sort_order')
@@ -41,9 +50,43 @@ class BacklinkPackageShowController extends Controller
             ->limit(4)
             ->get();
 
+        $latestBlogPosts = BlogPost::query()
+            ->published()
+            ->with('category')
+            ->latest('published_at')
+            ->limit(5)
+            ->get(['id', 'title', 'slug', 'featured_image', 'published_at', 'blog_category_id']);
+
+        $questions = SiteQuestion::query()
+            ->publicAnswered()
+            ->where('backlink_package_id', $package->id)
+            ->latest('answered_at')
+            ->limit(20)
+            ->get(['id', 'question', 'answer', 'answered_at', 'guest_email', 'user_id']);
+
+        $reviews = SiteReview::query()
+            ->approved()
+            ->where('backlink_package_id', $package->id)
+            ->latest('approved_at')
+            ->limit(50)
+            ->get(['id', 'name', 'message', 'approved_at', 'created_at']);
+
+        $whatsappUrl = null;
+        try {
+            $whatsappUrl = $whatsApp->buildLink(
+                "Merhaba, {$package->name} backlink paketi hakkında sipariş vermek istiyorum."
+            );
+        } catch (\RuntimeException) {
+            $whatsappUrl = null;
+        }
+
         return view('backlink-packages.show', [
             'package' => $package,
-            'relatedPackages' => $related,
+            'relatedPackages' => $relatedPackages,
+            'latestBlogPosts' => $latestBlogPosts,
+            'questions' => $questions,
+            'reviews' => $reviews,
+            'whatsappUrl' => $whatsappUrl,
             'meta' => $seo->forBacklinkPackage($package),
         ]);
     }

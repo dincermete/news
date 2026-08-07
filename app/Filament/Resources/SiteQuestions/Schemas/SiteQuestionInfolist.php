@@ -15,7 +15,22 @@ class SiteQuestionInfolist
             ->components([
                 Section::make('Detay')
                     ->schema([
-                        TextEntry::make('site.domain')->label('Site'),
+                        TextEntry::make('site.domain')
+                            ->label('Site')
+                            ->placeholder('—')
+                            ->visible(fn ($record): bool => filled($record->site_id)),
+                        TextEntry::make('bundle.name')
+                            ->label('Tanıtım paketi')
+                            ->placeholder('—')
+                            ->visible(fn ($record): bool => filled($record->site_bundle_id)),
+                        TextEntry::make('seoPackage.name')
+                            ->label('SEO paketi')
+                            ->placeholder('—')
+                            ->visible(fn ($record): bool => filled($record->seo_package_id)),
+                        TextEntry::make('backlinkPackage.name')
+                            ->label('Backlink paketi')
+                            ->placeholder('—')
+                            ->visible(fn ($record): bool => filled($record->backlink_package_id)),
                         TextEntry::make('user.name')->label('Kullanıcı')->placeholder('Misafir'),
                         TextEntry::make('guest_email')->label('Misafir e-posta')->placeholder('—'),
                         TextEntry::make('question')->label('Soru')->columnSpanFull(),

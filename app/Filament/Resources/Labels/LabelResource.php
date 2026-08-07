@@ -2,9 +2,7 @@
 
 namespace App\Filament\Resources\Labels;
 
-use App\Filament\Resources\Labels\Pages\CreateLabel;
-use App\Filament\Resources\Labels\Pages\EditLabel;
-use App\Filament\Resources\Labels\Pages\ListLabels;
+use App\Filament\Resources\Labels\Pages\ManageLabels;
 use App\Filament\Resources\Labels\Schemas\LabelForm;
 use App\Filament\Resources\Labels\Tables\LabelsTable;
 use App\Models\Label;
@@ -51,9 +49,7 @@ class LabelResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListLabels::route('/'),
-            'create' => CreateLabel::route('/create'),
-            'edit' => EditLabel::route('/{record}/edit'),
+            'index' => ManageLabels::route('/'),
         ];
     }
 }

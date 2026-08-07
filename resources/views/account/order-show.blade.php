@@ -12,7 +12,7 @@
         $btnDark = 'group inline-flex items-center justify-center gap-x-3 rounded-2xl bg-gradient-to-b from-black to-[#363b3c] p-1 pe-5 py-3 text-sm font-semibold text-white transition hover:scale-[1.01] active:scale-[0.98]';
         $tone = fn (?string $color) => match ($color) {
             'success' => 'bg-emerald-100 text-emerald-700',
-            'warning' => 'bg-amber-100 text-amber-700',
+            'warning' => 'bg-yellow-100 text-yellow-700',
             'danger' => 'bg-brand-100 text-brand-700',
             'info', 'primary' => 'bg-accent-100 text-accent-700',
             default => 'bg-ink/5 text-ink-3',
@@ -45,16 +45,16 @@
             </div>
         @endif
 
-        <div class="inline-flex items-center gap-1 rounded-2xl border border-ink/10 bg-white p-1">
-            <button type="button" class="rounded-xl px-4 py-2 text-sm font-semibold transition" :class="tab === 'detay' ? 'bg-ink text-white' : 'text-ink-2 hover:text-ink'" @click="tab = 'detay'">
+        <div class="inline-flex items-center gap-1 rounded-2xl border border-ink/10 bg-white p-1" role="tablist">
+            <button type="button" role="tab" :aria-selected="(tab === 'detay').toString()" aria-controls="order-tab-detay" class="rounded-xl px-4 py-2 text-sm font-semibold transition" :class="tab === 'detay' ? 'bg-ink text-white' : 'text-ink-2 hover:text-ink'" @click="tab = 'detay'">
                 Sipariş Detayı
             </button>
-            <button type="button" class="rounded-xl px-4 py-2 text-sm font-semibold transition" :class="tab === 'fatura' ? 'bg-ink text-white' : 'text-ink-2 hover:text-ink'" @click="tab = 'fatura'">
+            <button type="button" role="tab" :aria-selected="(tab === 'fatura').toString()" aria-controls="order-tab-fatura" class="rounded-xl px-4 py-2 text-sm font-semibold transition" :class="tab === 'fatura' ? 'bg-ink text-white' : 'text-ink-2 hover:text-ink'" @click="tab = 'fatura'">
                 Fatura
             </button>
         </div>
 
-        <div x-show="tab === 'detay'" x-cloak class="space-y-5">
+        <div id="order-tab-detay" role="tabpanel" x-show="tab === 'detay'" x-cloak class="space-y-5">
             <div class="rounded-[20px] border border-ink/10 bg-paper p-5">
                 <div class="flex flex-wrap items-center gap-3">
                     @if ($payment)
@@ -146,7 +146,7 @@
                                 @endif
                             </dl>
                         @elseif ($order->canEditContent())
-                            <p class="mt-4 border-t border-ink/10 pt-4 text-xs text-amber-700">Bu ürün henüz yapılandırılmadı. Aşağıdan içeriği tamamlayabilirsiniz.</p>
+                            <p class="mt-4 border-t border-ink/10 pt-4 text-xs text-yellow-700">Bu ürün henüz yapılandırılmadı. Aşağıdan içeriği tamamlayabilirsiniz.</p>
                         @endif
 
                         @if ($order->canEditContent())
@@ -197,7 +197,7 @@
             </div>
         </div>
 
-        <div x-show="tab === 'fatura'" x-cloak class="space-y-5">
+        <div id="order-tab-fatura" role="tabpanel" x-show="tab === 'fatura'" x-cloak class="space-y-5">
             @if (! $orderGroup->billingProfile)
                 <div class="rounded-[20px] border border-ink/10 bg-paper p-6 text-center sm:p-8">
                     <span class="mx-auto inline-flex size-12 items-center justify-center rounded-full bg-accent-100 text-accent-600">

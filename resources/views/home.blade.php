@@ -40,26 +40,6 @@
         ['count' => 3, 'radius' => 94, 'size' => 58, 'duration' => 24, 'ring' => 'orbit-ring', 'counter' => 'orbit-counter', 'offset' => 0],
     ];
 
-    $money = fn (float $amount, string $currency): string => number_format($amount, 2, ',', '.').($currency === 'TRY' ? '₺' : '$');
-
-    $moneyShort = function (?float $amount, string $suffix = ''): string {
-        if ($amount === null || $amount <= 0.0) {
-            return 'Katalog fiyatı';
-        }
-
-        return number_format($amount, 0, ',', '.').'₺'.$suffix;
-    };
-
-    $products = [
-        ['name' => 'Site Yazısı', 'text' => 'Katalogdan kategori, fiyat ve DA/PA\'ya göre site seçip tanıtım yazınızı yayınlayın.', 'price' => $moneyShort($productPrices['site_article']), 'suffix' => '\'den başlayan', 'url' => route('sites.index'), 'icon' => 'M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25M16.5 7.5V18a2.25 2.25 0 0 0 2.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 0 0 2.25 2.25h13.5'],
-        ['name' => 'Basın Bülteni', 'text' => 'Haber sitelerinde basın bülteninizi yayınlayın, geniş kitlelere ulaşın.', 'price' => $moneyShort($productPrices['press_release']), 'suffix' => '\'den başlayan', 'url' => route('press-release.index'), 'icon' => 'M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 1 1 0-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783'],
-        ['name' => 'Footer Link', 'text' => 'Seçtiğiniz sitenin footer\'ında kalıcı veya süreli link yerleşimi alın.', 'price' => 'Katalog fiyatı', 'suffix' => '', 'url' => route('footer-links.index'), 'icon' => 'M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244'],
-        ['name' => 'Tanıtım Paketleri', 'text' => 'Birden fazla siteyi tek pakette, tek işlemle satın alın.', 'price' => $moneyShort($productPrices['bundle']), 'suffix' => '\'den başlayan', 'url' => route('bundles.index'), 'icon' => 'M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9'],
-        ['name' => 'SEO Paketleri', 'text' => 'SEO, GEO ve AEO\'yu tek pakette birleştiren aylık büyüme paketleri.', 'price' => $moneyShort($productPrices['seo_package']), 'suffix' => '/ay\'dan başlayan', 'url' => route('seo-packages.index'), 'icon' => 'M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25'],
-        ['name' => 'Backlink Paketleri', 'text' => 'Yüksek otoriteli kaynaklardan doğal anchor dağılımıyla kalıcı backlink.', 'price' => $moneyShort($productPrices['backlink_package']), 'suffix' => '\'den başlayan', 'url' => route('backlink-packages.index'), 'icon' => 'M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22'],
-        ['name' => 'GEO', 'text' => 'ChatGPT, Gemini ve Perplexity gibi AI motorlarında kaynak gösterilin.', 'price' => 'Ücretsiz analiz', 'suffix' => '', 'url' => route('geo.index'), 'icon' => 'M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z'],
-    ];
-
     $fallbackFaqs = [
         ['q' => 'Başlamak için ödeme bilgisi gerekiyor mu?', 'a' => 'Hayır. Sadece e-postanızla ücretsiz kaydolursunuz; ödemeyi yalnızca sipariş verdiğinizde yaparsınız.'],
         ['q' => 'Makaleyi siz mi yazıyorsunuz?', 'a' => 'İsterseniz hazır içeriğinizi yükleyin, isterseniz editör ekibimiz SEO uyumlu özgün metni sizin için hazırlasın.'],
@@ -80,6 +60,61 @@
     $btnDark = 'group inline-flex items-center gap-x-3 rounded-2xl bg-gradient-to-b from-black to-[#363b3c] p-1 pe-4 text-sm font-medium text-white transition hover:scale-[1.03] active:scale-[0.98]';
     $btnChip = 'inline-flex size-8 items-center justify-center rounded-xl';
     $arrowIcon = '<svg class="size-3.5 transition group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>';
+
+    $siteUrl = fn (string $domain): string => route('sites.show', $domain);
+
+    $heroBrandBadges = [
+        ['domain' => 'hurriyet.com.tr', 'logo' => 'images/hero/logo-hurriyet.png', 'alt' => 'Hürriyet', 'class' => 'absolute -start-4 top-2 z-20 rotate-[-6deg]', 'delay' => '.2s'],
+        ['domain' => 'ntv.com.tr', 'logo' => 'images/hero/logo-ntv.png', 'alt' => 'NTV', 'class' => 'absolute end-2 top-14 z-20 rotate-[5deg]', 'delay' => '1s'],
+        ['domain' => 'mynet.com', 'logo' => 'images/hero/logo-mynet.png', 'alt' => 'Mynet', 'class' => 'absolute -start-6 top-[44%] z-20 -rotate-3', 'delay' => '1.6s'],
+        ['domain' => 'milliyet.com.tr', 'logo' => 'images/hero/logo-milliyet.png', 'alt' => 'Milliyet', 'class' => 'absolute end-[-10px] top-[56%] z-20 rotate-6', 'delay' => '.6s'],
+        ['domain' => 'sabah.com.tr', 'logo' => 'images/hero/logo-sabah.png', 'alt' => 'Sabah', 'class' => 'absolute start-[20%] bottom-4 z-20 rotate-3', 'delay' => '1.3s'],
+    ];
+
+    $tanitimBrandBadges = [
+        ['domain' => 'posta.com.tr', 'logo' => 'images/tanitim/logo-posta.png', 'alt' => 'Posta', 'class' => 'absolute start-0 top-0 z-20 -rotate-6', 'delay' => '.2s'],
+        ['domain' => 'iha.com.tr', 'logo' => 'images/tanitim/logo-iha.png', 'alt' => 'İHA', 'class' => 'absolute end-0 top-6 z-20 rotate-3', 'delay' => '1s'],
+        ['domain' => 'aksam.com.tr', 'logo' => 'images/tanitim/logo-aksam.png', 'alt' => 'Akşam', 'class' => 'absolute start-0 top-1/2 z-20 -translate-y-1/2 rotate-3', 'delay' => '1.6s'],
+        ['domain' => 'dha.com.tr', 'logo' => 'images/tanitim/logo-dha.png', 'alt' => 'DHA', 'class' => 'absolute end-0 bottom-16 z-20 -rotate-3', 'delay' => '.6s'],
+        ['domain' => 'onedio.com', 'logo' => 'images/tanitim/logo-onedio.png', 'alt' => 'onedio', 'class' => 'absolute start-1/2 bottom-0 z-20 -translate-x-1/2 rotate-2', 'delay' => '1.3s'],
+    ];
+
+    $showcaseFavorites = [
+        ['domain' => 'hurriyet.com.tr', 'da' => 'DA 89', 'tone' => 'bg-brand-100 text-brand-700'],
+        ['domain' => 'milliyet.com.tr', 'da' => 'DA 83', 'tone' => 'bg-accent-100 text-accent-700'],
+        ['domain' => 'sabah.com.tr', 'da' => 'DA 79', 'tone' => 'bg-amber-100 text-amber-700'],
+        ['domain' => 'posta.com.tr', 'da' => 'DA 77', 'tone' => 'bg-emerald-100 text-emerald-700'],
+        ['domain' => 'aksam.com.tr', 'da' => 'DA 75', 'tone' => 'bg-sky-100 text-sky-700'],
+    ];
+
+    // Site Yönetimi görseli — merkez + aynı portföydeki yörünge siteleri
+    $portfolioHub = [
+        'domain' => 'posta.com.tr',
+        'da' => 77,
+        'published' => 12,
+        'pending' => 4,
+        'notes' => 2,
+        'notesCapacity' => 8,
+    ];
+    $portfolioPublishedPct = $portfolioHub['published'] / max(1, $portfolioHub['published'] + $portfolioHub['pending']);
+    $portfolioActivityPct = $portfolioHub['notes'] / max(1, $portfolioHub['notesCapacity']);
+    $portfolioOuterC = 2 * M_PI * 90;
+    $portfolioInnerC = 2 * M_PI * 66;
+    $portfolioOuterDash = round($portfolioOuterC * $portfolioPublishedPct, 1);
+    $portfolioInnerDash = round($portfolioInnerC * $portfolioActivityPct, 1);
+
+    $portfolioOrbit = [
+        ['domain' => 'hurriyet.com.tr', 'status' => 'active', 'x' => 12, 'y' => 18, 'size' => 'size-9'],
+        ['domain' => 'milliyet.com.tr', 'status' => 'active', 'x' => 88, 'y' => 14, 'size' => 'size-10'],
+        ['domain' => 'sabah.com.tr', 'status' => 'attention', 'x' => 90, 'y' => 72, 'size' => 'size-8'],
+        ['domain' => 'aksam.com.tr', 'status' => 'idle', 'x' => 10, 'y' => 76, 'size' => 'size-9'],
+    ];
+    $portfolioStatusDot = [
+        'active' => 'bg-emerald-500',
+        'idle' => 'bg-ink/30',
+        'attention' => 'bg-rose-500',
+    ];
+    $faviconUrl = fn (string $domain): string => app(\App\Services\SeoMetaService::class)->faviconUrl($domain);
 @endphp
 
 @section('content')
@@ -131,31 +166,13 @@
                         <div class="pointer-events-none absolute -top-6 start-1/2 h-48 w-48 -translate-x-1/2 rounded-full bg-accent-500/25 blur-3xl" aria-hidden="true"></div>
                         <div class="pointer-events-none absolute bottom-0 start-1/2 h-24 w-56 -translate-x-1/2 rounded-full bg-brand-500/20 blur-3xl" aria-hidden="true"></div>
 
-                        <span class="absolute -start-4 top-2 z-20 rotate-[-6deg]">
-                            <span class="float-badge flex rounded-2xl border border-ink/5 bg-white p-3 shadow-pop" style="animation-delay:.2s">
-                                <img src="{{ asset('images/hero/logo-hurriyet.png') }}" alt="Hürriyet" class="h-8 w-auto">
-                            </span>
-                        </span>
-                        <span class="absolute end-2 top-14 z-20 rotate-[5deg]">
-                            <span class="float-badge flex rounded-2xl border border-ink/5 bg-white p-3 shadow-pop" style="animation-delay:1s">
-                                <img src="{{ asset('images/hero/logo-ntv.png') }}" alt="NTV" class="h-8 w-auto">
-                            </span>
-                        </span>
-                        <span class="absolute -start-6 top-[44%] z-20 -rotate-3">
-                            <span class="float-badge flex rounded-2xl border border-ink/5 bg-white p-3 shadow-pop" style="animation-delay:1.6s">
-                                <img src="{{ asset('images/hero/logo-mynet.png') }}" alt="Mynet" class="h-8 w-auto">
-                            </span>
-                        </span>
-                        <span class="absolute end-[-10px] top-[56%] z-20 rotate-6">
-                            <span class="float-badge flex rounded-2xl border border-ink/5 bg-white p-3 shadow-pop" style="animation-delay:.6s">
-                                <img src="{{ asset('images/hero/logo-milliyet.png') }}" alt="Milliyet" class="h-8 w-auto">
-                            </span>
-                        </span>
-                        <span class="absolute start-[20%] bottom-4 z-20 rotate-3">
-                            <span class="float-badge flex rounded-2xl border border-ink/5 bg-white p-3 shadow-pop" style="animation-delay:1.3s">
-                                <img src="{{ asset('images/hero/logo-sabah.png') }}" alt="Sabah" class="h-8 w-auto">
-                            </span>
-                        </span>
+                        @foreach ($heroBrandBadges as $badge)
+                            <a href="{{ $siteUrl($badge['domain']) }}" class="{{ $badge['class'] }}" aria-label="{{ $badge['alt'] }} ürün sayfası">
+                                <span class="float-badge flex rounded-2xl border border-ink/5 bg-white p-3 shadow-pop transition hover:scale-105" style="animation-delay:{{ $badge['delay'] }}">
+                                    <img src="{{ asset($badge['logo']) }}" alt="{{ $badge['alt'] }}" class="h-8 w-auto">
+                                </span>
+                            </a>
+                        @endforeach
 
                         <img src="{{ asset('images/hero/person.png') }}" alt="" aria-hidden="true" class="absolute inset-x-0 bottom-0 z-10 mx-auto h-full w-auto object-contain object-bottom">
                     </div>
@@ -206,26 +223,38 @@
                         type="button"
                         @click="siteTab = 'popular'"
                         :class="siteTab === 'popular' ? 'bg-white text-ink shadow-soft' : 'text-ink-2'"
-                        class="shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition"
-                    >Popüler Siteler</button>
+                        class="inline-flex shrink-0 items-center gap-x-1.5 rounded-full px-4 py-2 text-sm font-semibold transition"
+                    >
+                        <svg class="size-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.047 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 18a3.75 3.75 0 0 0 .495-7.468 5.99 5.99 0 0 0-1.925 3.547 5.974 5.974 0 0 1-2.133-1.001A3.75 3.75 0 0 0 12 18Z"/></svg>
+                        Popüler Siteler
+                    </button>
                     <button
                         type="button"
                         @click="siteTab = 'newest'"
                         :class="siteTab === 'newest' ? 'bg-white text-ink shadow-soft' : 'text-ink-2'"
-                        class="shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition"
-                    >Yeni Siteler</button>
+                        class="inline-flex shrink-0 items-center gap-x-1.5 rounded-full px-4 py-2 text-sm font-semibold transition"
+                    >
+                        <svg class="size-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.785 16.5 21.75l-.394-.965a1.5 1.5 0 0 0-1.079-1.078l-.965-.394.965-.394a1.5 1.5 0 0 0 1.079-1.078l.394-.965.394.965a1.5 1.5 0 0 0 1.078 1.078l.965.394-.965.394a1.5 1.5 0 0 0-1.078 1.078Z"/></svg>
+                        Yeni Siteler
+                    </button>
                     <button
                         type="button"
                         @click="siteTab = 'press'"
                         :class="siteTab === 'press' ? 'bg-white text-ink shadow-soft' : 'text-ink-2'"
-                        class="shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition"
-                    >Basın Bülteni</button>
+                        class="inline-flex shrink-0 items-center gap-x-1.5 rounded-full px-4 py-2 text-sm font-semibold transition"
+                    >
+                        <svg class="size-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25M16.5 7.5V18a2.25 2.25 0 0 0 2.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 0 0 2.25 2.25h13.5"/></svg>
+                        Basın Bülteni
+                    </button>
                     <button
                         type="button"
                         @click="siteTab = 'best'"
                         :class="siteTab === 'best' ? 'bg-white text-ink shadow-soft' : 'text-ink-2'"
-                        class="shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition"
-                    >Çok Satanlar</button>
+                        class="inline-flex shrink-0 items-center gap-x-1.5 rounded-full px-4 py-2 text-sm font-semibold transition"
+                    >
+                        <svg class="size-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-4.5A3.375 3.375 0 0 0 12.75 11h-1.5A3.375 3.375 0 0 0 8 14.25V18.75m9-12.75v-1.5a3 3 0 0 0-3-3h-3a3 3 0 0 0-3 3v1.5"/></svg>
+                        Çok Satanlar
+                    </button>
                 </div>
             </div>
         </div>
@@ -255,6 +284,42 @@
                 <span class="{{ $btnChip }} bg-white/15 text-white">{!! $arrowIcon !!}</span>
                 Tüm siteleri gör
             </a>
+        </div>
+    </section>
+
+    {{-- ================= İLLERE GÖRE HARİTA (hero banner dilinde, bg-paper) ================= --}}
+    <section class="px-2 py-2 sm:px-3">
+        <div class="relative overflow-hidden rounded-3xl bg-paper text-ink">
+            <div class="relative mx-auto max-w-7xl px-5 pb-12 pt-14 sm:px-8 sm:pb-14 lg:pt-16" data-reveal-group>
+                <div class="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between lg:gap-12">
+                    <div class="min-w-0 w-full lg:w-3/12 lg:shrink-0" data-reveal>
+                        <p class="inline-flex items-center gap-x-2 rounded-full border border-ink/10 bg-white py-1 pe-3.5 ps-1 text-xs text-ink-2 shadow-soft">
+                            <span class="rounded-full bg-brand-500 px-2.5 py-0.5 text-[10px] font-semibold text-white">81 il</span>
+                            Yerel tanıtım siteleri
+                        </p>
+
+                        <h2 class="mt-5 {{ $h2 }}">
+                            İllere göre
+                            <span class="font-semibold text-brand-500">tanıtım yazısı</span>
+                            siteleri
+                        </h2>
+
+                        <p class="mt-5 text-lg font-medium leading-relaxed text-ink-2">
+                            Haritadan il seçin; o ildeki yayın sitelerini metrikleri ve fiyatlarıyla inceleyin.
+                        </p>
+                    </div>
+
+                    <div class="min-w-0 w-full lg:w-8/12" data-reveal>
+                        <x-turkey-map
+                            class="w-full"
+                            :provinces="$provinces"
+                            :lazy="true"
+                            :show-list="false"
+                            :embed="true"
+                        />
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -328,47 +393,6 @@
         </section>
     @endif
 
-    {{-- ================= ÜRÜNLERİMİZ ================= --}}
-    <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group x-data="autoSlider({ auto: true, delay: 3500 })">
-        <div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-            <div class="max-w-xl">
-                <x-section-heading
-                    data-reveal
-                    gradient="from-[#f045aa] to-[#eeaad2]"
-                    icon="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
-                >İhtiyacınıza göre tek tek ya da paket halinde satın alın</x-section-heading>
-                <p class="mt-4 {{ $sub }}" data-reveal>Gizli ücret yok; her ürünün fiyatı katalog sayfasında net olarak görünür.</p>
-            </div>
-            <div class="flex shrink-0 items-center gap-2" data-reveal>
-                <button type="button" @click="prev()" class="inline-flex size-10 items-center justify-center rounded-full border border-ink/10 bg-white text-ink-2 shadow-soft transition hover:text-ink" aria-label="Önceki ürünler">
-                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
-                </button>
-                <button type="button" @click="next()" class="inline-flex size-10 items-center justify-center rounded-full border border-ink/10 bg-white text-ink-2 shadow-soft transition hover:text-ink" aria-label="Sonraki ürünler">
-                    <svg class="size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
-                </button>
-            </div>
-        </div>
-
-        <ul x-ref="track" class="no-scrollbar mt-10 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-2 pt-3" data-reveal>
-            @foreach ($products as $product)
-                <li class="w-full shrink-0 snap-start sm:w-[calc((100%-20px)/2)] lg:w-[calc((100%-60px)/4)]">
-                    <a href="{{ $product['url'] }}" class="group flex h-full flex-col rounded-[20px] bg-paper p-6 transition hover:-translate-y-0.5 hover:shadow-pop">
-                        <span class="inline-flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-ink text-white">
-                            <svg class="size-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $product['icon'] }}"/></svg>
-                        </span>
-                        <h3 class="mt-4 font-display text-lg font-semibold text-ink">{{ $product['name'] }}</h3>
-                        <p class="mt-1.5 text-sm font-medium leading-relaxed text-ink-2">{{ $product['text'] }}</p>
-                        <p class="mt-4 text-sm font-semibold text-ink">{{ $product['price'] }}{{ $product['suffix'] }}</p>
-                        <span class="mt-auto flex items-center gap-x-1.5 pt-4 text-xs font-semibold text-ink-2 transition group-hover:text-ink">
-                            İncele
-                            <svg class="size-3 transition group-hover:translate-x-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
-                        </span>
-                    </a>
-                </li>
-            @endforeach
-        </ul>
-    </section>
-
     <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8" data-reveal-group>
         <div class="mx-auto max-w-2xl text-center">
             <x-section-heading
@@ -423,14 +447,14 @@
                         @endforeach
                     </div>
                     <div class="mx-auto w-[86%] rounded-[11px] bg-white p-4 shadow-[0_5px_20px_rgba(10,11,11,0.1)]">
-                        <div class="flex items-center gap-x-2.5">
-                            <x-site-logo domain="habergazetesi.com.tr" :height="24" class="shrink-0" />
+                        <a href="{{ $siteUrl('milliyet.com.tr') }}" class="flex items-center gap-x-2.5 transition hover:opacity-90">
+                            <x-site-logo domain="milliyet.com.tr" :height="24" class="shrink-0" />
                             <div class="min-w-0 flex-1">
-                                <p class="truncate text-[13px] font-semibold text-ink">habergazetesi.com.tr</p>
-                                <p class="text-[11px] text-ink-2">Haber · Dofollow</p>
+                                <p class="truncate text-[13px] font-semibold text-ink">milliyet.com.tr</p>
+                                <p class="text-[11px] text-ink-2">Haber · Nofollow</p>
                             </div>
-                            <span class="rounded-full bg-accent-100 px-2 py-0.5 text-[10px] font-semibold text-accent-700">DA 45</span>
-                        </div>
+                            <span class="rounded-full bg-accent-100 px-2 py-0.5 text-[10px] font-semibold text-accent-700">DA 83</span>
+                        </a>
                         <div class="mt-3 flex items-center gap-1.5">
                             <span class="h-1.5 w-20 rounded-full bg-ink/10"></span>
                             <span class="h-1.5 w-10 rounded-full bg-ink/5"></span>
@@ -521,35 +545,99 @@
                 </div>
                 <p class="mt-3 {{ $sub }}">Her sitenin notu, DA/PA verisi ve yayın durumu düzenli kalsın.</p>
 
-                <div class="relative mt-6 h-[240px]">
-                    {{-- Eş merkezli halkalar --}}
-                    <div class="absolute start-1/2 top-1/2 size-[320px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-b from-[#dee6eb] to-transparent" aria-hidden="true"></div>
-                    <div class="absolute start-1/2 top-1/2 size-[230px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-ink/10 bg-white/40" aria-hidden="true"></div>
-                    {{-- Yörünge avatarları --}}
-                    @foreach ([['H', 'bg-brand-500', 'start-[8%] top-[16%] size-8'], ['E', 'bg-accent-500', 'end-[10%] top-[10%] size-9'], ['G', 'bg-emerald-500', 'end-[4%] bottom-[22%] size-7'], ['M', 'bg-amber-500', 'start-[4%] bottom-[14%] size-8']] as [$harf, $tone, $konum])
-                        <span class="{{ $tone }} {{ $konum }} absolute inline-flex items-center justify-center rounded-full text-[10px] font-bold text-white shadow-soft" aria-hidden="true">{{ $harf }}</span>
+                <div class="relative mt-6 h-[260px]" aria-label="Portföy site ağı: {{ $portfolioHub['domain'] }} ve ilişkili siteler">
+
+                    <svg class="pointer-events-none absolute inset-0 size-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                        @foreach ($portfolioOrbit as $orbit)
+                            <line
+                                x1="50"
+                                y1="50"
+                                x2="{{ $orbit['x'] }}"
+                                y2="{{ $orbit['y'] }}"
+                                stroke="rgba(10,11,11,0.12)"
+                                stroke-width="0.35"
+                            />
+                        @endforeach
+                    </svg>
+
+                    <svg class="pointer-events-none absolute start-1/2 top-1/2 size-[280px] -translate-x-1/2 -translate-y-1/2 sm:size-[300px]" viewBox="0 0 200 200" aria-hidden="true">
+                        {{-- Dış halka: yayın durumu (yeşil = yayında, gri = beklemede) --}}
+                        <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(10,11,11,0.08)" stroke-width="8" />
+                        <circle
+                            cx="100"
+                            cy="100"
+                            r="90"
+                            fill="none"
+                            stroke="#10b981"
+                            stroke-width="8"
+                            stroke-linecap="round"
+                            stroke-dasharray="{{ $portfolioOuterDash }} {{ round($portfolioOuterC - $portfolioOuterDash, 1) }}"
+                            transform="rotate(-90 100 100)"
+                        />
+                        {{-- İç halka: not / aktivite yoğunluğu --}}
+                        <circle cx="100" cy="100" r="66" fill="none" stroke="rgba(10,11,11,0.08)" stroke-width="6" />
+                        <circle
+                            cx="100"
+                            cy="100"
+                            r="66"
+                            fill="none"
+                            stroke="#f59e0b"
+                            stroke-width="6"
+                            stroke-linecap="round"
+                            stroke-dasharray="{{ $portfolioInnerDash }} {{ round($portfolioInnerC - $portfolioInnerDash, 1) }}"
+                            transform="rotate(-90 100 100)"
+                        />
+                    </svg>
+
+                    {{-- Yörünge: ilişkili siteler (favicon + durum noktası) --}}
+                    @foreach ($portfolioOrbit as $orbit)
+                        <a
+                            href="{{ $siteUrl($orbit['domain']) }}"
+                            class="group absolute z-10 -translate-x-1/2 -translate-y-1/2"
+                            style="left: {{ $orbit['x'] }}%; top: {{ $orbit['y'] }}%;"
+                            aria-label="{{ $orbit['domain'] }}"
+                        >
+                            <span class="relative inline-flex {{ $orbit['size'] }} items-center justify-center rounded-full border border-ink/10 bg-white p-1 shadow-soft transition group-hover:scale-110 group-hover:shadow-pop">
+                                <img
+                                    src="{{ $faviconUrl($orbit['domain']) }}"
+                                    alt=""
+                                    class="size-full rounded-full object-contain"
+                                    loading="lazy"
+                                    decoding="async"
+                                >
+                                <span class="{{ $portfolioStatusDot[$orbit['status']] }} absolute -end-0.5 -top-0.5 size-2.5 rounded-full ring-2 ring-white" aria-hidden="true"></span>
+                            </span>
+                            <span class="pointer-events-none absolute start-1/2 top-full z-20 mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md bg-ink px-2 py-1 text-[10px] font-semibold text-white opacity-0 shadow-soft transition group-hover:opacity-100">
+                                {{ $orbit['domain'] }}
+                            </span>
+                        </a>
                     @endforeach
+
                     {{-- Merkez site kartı --}}
-                    <div class="absolute start-1/2 top-1/2 w-[230px] -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-4 shadow-[0_5px_20px_rgba(10,11,11,0.1)]">
-                        <div class="flex items-center gap-x-2.5">
-                            <x-site-logo domain="olaymedya.com" :height="24" class="shrink-0" />
+                    <div class="absolute start-1/2 top-1/2 z-20 w-[210px] -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-4 shadow-[0_5px_20px_rgba(10,11,11,0.1)] sm:w-[230px]">
+                        <a href="{{ $siteUrl($portfolioHub['domain']) }}" class="flex items-center gap-x-2.5 transition hover:opacity-90">
+                            <x-site-logo :domain="$portfolioHub['domain']" :height="24" class="shrink-0" />
                             <div class="min-w-0 flex-1">
-                                <p class="truncate text-[13px] font-semibold text-ink">olaymedya.com</p>
-                                <p class="text-[11px] text-ink-2">12 yayın · 2 not</p>
+                                <p class="truncate text-[13px] font-semibold text-ink">{{ $portfolioHub['domain'] }}</p>
+                                <p class="text-[11px] text-ink-2">{{ $portfolioHub['published'] }} yayın · {{ $portfolioHub['notes'] }} not</p>
                             </div>
-                        </div>
-                        <div class="mt-3 flex gap-1.5">
-                            <span class="rounded-full bg-accent-100 px-2 py-0.5 text-[10px] font-semibold text-accent-700">DA 38</span>
-                            <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">Dofollow</span>
+                        </a>
+                        <div class="mt-3 flex flex-wrap gap-1.5">
+                            <span class="rounded-full bg-accent-100 px-2 py-0.5 text-[10px] font-semibold text-accent-700">DA {{ $portfolioHub['da'] }}</span>
+                            <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">{{ $portfolioHub['published'] }} yayında</span>
+                            <span class="rounded-full bg-ink/5 px-2 py-0.5 text-[10px] font-semibold text-ink-3">{{ $portfolioHub['pending'] }} bekliyor</span>
                         </div>
                     </div>
                 </div>
+
+                <div class="absolute start-1/2 bottom-0 w-full h-[140px] -translate-x-1/2 bg-gradient-to-b from-transparent to-paper z-[1000]" aria-hidden="true"></div>
+
             </div>
         </div>
 
         <div class="mt-5 grid gap-5 lg:grid-cols-2" data-reveal-group>
             {{-- Favori Sitelerim (dar) --}}
-            <div class="rounded-[20px] bg-paper p-8" data-reveal>
+            <div class="rounded-[20px] bg-paper p-8 relative overflow-hidden" data-reveal>
                 <div class="flex items-center gap-x-3">
                     <span class="inline-flex size-10 items-center justify-center rounded-[10px] bg-gradient-to-br from-[#67a429] to-[#aee576] text-white">
                         <svg class="size-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"/></svg>
@@ -558,16 +646,19 @@
                 </div>
                 <p class="mt-3 {{ $sub }}">Beğendiğiniz siteleri favorileyin, tek tıkla tekrar sipariş verin.</p>
 
-                <div class="mt-6 space-y-2.5">
-                    @foreach ([['habergazetesi.com.tr', 'DA 45', 'bg-brand-100 text-brand-700'], ['olaymedya.com', 'DA 38', 'bg-accent-100 text-accent-700'], ['nesilhaber.com', 'DA 41', 'bg-amber-100 text-amber-700']] as [$domain, $da, $tone])
-                        <div class="flex items-center gap-3 rounded-full bg-white p-2 pe-3 shadow-soft">
-                            <x-site-logo :domain="$domain" :height="32" class="shrink-0 rounded-full" />
-                            <p class="min-w-0 flex-1 truncate text-[13px] font-semibold text-ink">{{ $domain }}</p>
-                            <span class="{{ $tone }} shrink-0 rounded-md px-2 py-1 text-[11px] font-bold tabular-nums">{{ $da }}</span>
+                <div class="mt-6 space-y-2.5 h-[220px] overflow-hidden">
+                    @foreach ($showcaseFavorites as $favorite)
+                        <a href="{{ $siteUrl($favorite['domain']) }}" class="flex items-center gap-3 rounded-full bg-white p-2 pe-3 shadow-soft transition hover:bg-paper">
+                            <x-site-logo :domain="$favorite['domain']" :height="32" class="shrink-0 rounded-full" />
+                            <p class="min-w-0 flex-1 truncate text-[13px] font-semibold text-ink">{{ $favorite['domain'] }}</p>
+                            <span class="{{ $favorite['tone'] }} shrink-0 rounded-md px-2 py-1 text-[11px] font-bold tabular-nums">{{ $favorite['da'] }}</span>
                             <svg class="size-4 shrink-0 text-brand-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-6.5-4.35-9.192-8.51C1.02 9.72 1.9 6.5 4.6 5.24c2.1-.98 4.2-.2 5.4 1.36C11.2 5.04 13.3 4.26 15.4 5.24c2.7 1.26 3.58 4.48 1.79 7.25C18.5 16.65 12 21 12 21Z"/></svg>
-                        </div>
+                        </a>
                     @endforeach
                 </div>
+
+                <div class="absolute start-1/2 bottom-0 w-full h-[140px] -translate-x-1/2 bg-gradient-to-b from-transparent to-paper z-[1000]" aria-hidden="true"></div>
+
             </div>
 
             {{-- Harcama Takibi (geniş) --}}
@@ -581,7 +672,7 @@
                 <p class="mt-3 {{ $sub }}">Faturaları, ödemeleri ve aylık toplamları tek temiz panelde görün.</p>
 
                 <div class="mt-6 flex items-end gap-4">
-                    <div class="hidden h-[220px] w-[90px] shrink-0 rounded-t-2xl bg-ink/5 sm:block" aria-hidden="true"></div>
+                    <div class="hidden h-[200px] w-[90px] shrink-0 rounded-t-2xl bg-ink/5 sm:block" aria-hidden="true"></div>
                     <div class="min-w-0 flex-1 rounded-t-2xl bg-white p-5 shadow-[0_5px_20px_rgba(10,11,11,0.1)]">
                         <div class="flex items-center justify-between">
                             <p class="font-display text-lg font-semibold text-ink">Aylık Toplam</p>
@@ -654,31 +745,13 @@
             <div class="relative mx-auto hidden max-w-md py-6 lg:block" data-reveal>
                 <img src="{{ asset('images/tanitim/siteler-gorsel.png') }}" alt="Haber sitelerinde yayınlanmış tanıtım yazıları" class="mx-auto w-[85%]">
 
-                <span class="absolute start-0 top-0 z-20 -rotate-6">
-                    <span class="float-badge flex rounded-2xl border border-ink/5 bg-white p-3 shadow-pop" style="animation-delay:.2s">
-                        <img src="{{ asset('images/tanitim/logo-posta.png') }}" alt="Posta" class="h-6 w-auto">
-                    </span>
-                </span>
-                <span class="absolute end-0 top-6 z-20 rotate-3">
-                    <span class="float-badge flex rounded-2xl border border-ink/5 bg-white p-3 shadow-pop" style="animation-delay:1s">
-                        <img src="{{ asset('images/tanitim/logo-iha.png') }}" alt="İHA" class="h-6 w-auto">
-                    </span>
-                </span>
-                <span class="absolute start-0 top-1/2 z-20 -translate-y-1/2 rotate-3">
-                    <span class="float-badge flex rounded-2xl border border-ink/5 bg-white p-3 shadow-pop" style="animation-delay:1.6s">
-                        <img src="{{ asset('images/tanitim/logo-aksam.png') }}" alt="Akşam" class="h-6 w-auto">
-                    </span>
-                </span>
-                <span class="absolute end-0 bottom-16 z-20 -rotate-3">
-                    <span class="float-badge flex rounded-2xl border border-ink/5 bg-white p-3 shadow-pop" style="animation-delay:.6s">
-                        <img src="{{ asset('images/tanitim/logo-dha.png') }}" alt="DHA" class="h-6 w-auto">
-                    </span>
-                </span>
-                <span class="absolute start-1/2 bottom-0 z-20 -translate-x-1/2 rotate-2">
-                    <span class="float-badge flex rounded-2xl border border-ink/5 bg-white p-3 shadow-pop" style="animation-delay:1.3s">
-                        <img src="{{ asset('images/tanitim/logo-onedio.png') }}" alt="onedio" class="h-6 w-auto">
-                    </span>
-                </span>
+                @foreach ($tanitimBrandBadges as $badge)
+                    <a href="{{ $siteUrl($badge['domain']) }}" class="{{ $badge['class'] }}" aria-label="{{ $badge['alt'] }} ürün sayfası">
+                        <span class="float-badge flex rounded-2xl border border-ink/5 bg-white p-3 shadow-pop transition hover:scale-105" style="animation-delay:{{ $badge['delay'] }}">
+                            <img src="{{ asset($badge['logo']) }}" alt="{{ $badge['alt'] }}" class="h-6 w-auto">
+                        </span>
+                    </a>
+                @endforeach
             </div>
         </div>
     </section>

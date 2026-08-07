@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Orders\Tables;
 
 use App\Enums\ContentSource;
 use App\Enums\OrderStatus;
+use App\Enums\ProductType;
 use App\Enums\UserRole;
 use App\Filament\Actions\BulkActionGroup;
 use App\Filament\Resources\Orders\Actions\OrderStatusActions;
@@ -29,6 +30,15 @@ class OrdersTable
                     ->label('Müşteri')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('product_type')
+                    ->label('Ürün')
+                    ->badge()
+                    ->sortable(),
+                TextColumn::make('fulfillment_track')
+                    ->label('Akış')
+                    ->state(fn (Order $record) => $record->fulfillmentTrack())
+                    ->badge()
+                    ->toggleable(),
                 TextColumn::make('site.domain')
                     ->label('Site')
                     ->searchable()
@@ -67,6 +77,9 @@ class OrdersTable
                 SelectFilter::make('status')
                     ->label('Durum')
                     ->options(OrderStatus::class),
+                SelectFilter::make('product_type')
+                    ->label('Ürün tipi')
+                    ->options(ProductType::class),
                 SelectFilter::make('content_source')
                     ->label('İçerik kaynağı')
                     ->options(ContentSource::class),

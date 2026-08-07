@@ -6,6 +6,7 @@ use App\Enums\Currency;
 use App\Enums\CustomerStatus;
 use App\Filament\Actions\BulkActionGroup;
 use App\Filament\Resources\Customers\Actions\CustomerActions;
+use App\Filament\Resources\Customers\Schemas\CustomerForm;
 use App\Models\User;
 use App\Models\Wallet;
 use Filament\Actions\DeleteBulkAction;
@@ -113,7 +114,9 @@ class CustomersTable
             ])
             ->recordActions([
                 ViewAction::make(),
-                EditAction::make(),
+                EditAction::make()
+                    ->modalWidth(CustomerForm::modalWidth())
+                    ->slideOver(),
                 ...CustomerActions::recordActions(),
             ])
             ->toolbarActions([

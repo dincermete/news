@@ -185,6 +185,12 @@ class ProductCrossSellTest extends TestCase
         $response->assertSee('Tavsiye Edilen Ürünler', false);
         $response->assertSee('related-show.test', false);
         $response->assertSee('recommended-show.test', false);
+        $response->assertSee('Google', false);
+        $response->assertSee('Index', false);
+        $response->assertSee('Fiyat', false);
+        $response->assertSee('İşlem', false);
+        $response->assertDontSeeText('Semrush');
+        $response->assertDontSeeText('Ahrefs');
         $response->assertDontSee('Aynı kategoride diğer siteler', false);
         $this->assertNotNull($related->id);
         $this->assertNotNull($recommended->id);

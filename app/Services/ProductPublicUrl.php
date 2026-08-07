@@ -37,6 +37,7 @@ class ProductPublicUrl
         $static = [
             'siteler',
             'site',
+            'iller',
             'basin-bulteni',
             'tanitim-paketleri',
             'footer-linkler',

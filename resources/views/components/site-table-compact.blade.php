@@ -46,13 +46,14 @@
                     @click="window.location = '{{ storefront_site_url($site) }}'"
                 >
                     <td class="site-catalog-table__td sticky start-0 z-10 bg-white px-4 py-3 transition group-hover:bg-paper">
-                        <a href="{{ storefront_site_url($site) }}" class="flex min-w-0 items-center gap-x-2.5" @click.stop>
-                            <x-site-logo :site="$site" :height="24" class="shrink-0 rounded-md" />
-                            <span class="min-w-0">
-                                <span class="block truncate text-sm font-semibold text-ink group-hover:text-accent-700">{{ $site->domain }}</span>
-                                <span class="block truncate text-[11px] text-ink-3">{{ $site->category?->name ?? 'Kategorisiz' }}</span>
-                            </span>
-                        </a>
+                        <x-site-identity
+                            :site="$site"
+                            :height="24"
+                            :label="$site->domain"
+                            stop-propagation
+                            class="gap-x-2.5"
+                            logo-class="shrink-0 rounded-md"
+                        />
                     </td>
                     <td class="site-catalog-table__td whitespace-nowrap px-3 py-3 text-center">
                         <span class="text-xs font-bold text-ink">{{ $num($site->da_value !== null ? (float) $site->da_value : null) }}</span>

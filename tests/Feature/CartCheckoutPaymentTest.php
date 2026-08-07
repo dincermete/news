@@ -133,10 +133,13 @@ class CartCheckoutPaymentTest extends TestCase
                 ->count(),
         );
 
-        // ProcessSuccessfulPayment is queued; run it synchronously for invoice assertion
-        (new ProcessSuccessfulPayment($payment->fresh()))->handle();
-
         $invoice = Invoice::query()->where('order_group_id', $group->id)->first();
+
+        // Callback completes payment synchronously; invoice may be queued — run job if needed.
+        if ($invoice === null) {
+            (new ProcessSuccessfulPayment($payment->fresh()))->handle();
+            $invoice = Invoice::query()->where('order_group_id', $group->id)->first();
+        }
 
         $this->assertNotNull($invoice);
         $this->assertNull($invoice->order_id);

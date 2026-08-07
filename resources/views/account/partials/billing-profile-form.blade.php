@@ -2,7 +2,7 @@
     use App\Enums\BillingProfileType;
 
     $label = 'mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-ink-3';
-    $input = 'block w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm text-ink focus:border-ink/30 focus:ring-0';
+    $input = 'block w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm text-ink focus:border-ink/30 focus:ring-0 disabled:cursor-not-allowed disabled:border-ink/5 disabled:bg-paper disabled:text-ink-3';
     $btnDark = 'group inline-flex items-center justify-center gap-x-3 rounded-2xl bg-gradient-to-b from-black to-[#363b3c] p-1 pe-5 py-3 text-sm font-semibold text-white transition hover:scale-[1.01] active:scale-[0.98]';
 @endphp
 <div

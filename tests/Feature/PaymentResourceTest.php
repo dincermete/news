@@ -7,9 +7,9 @@ use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Events\WalletRefundRequested;
+use App\Filament\Resources\Orders\Pages\ListOrders;
 use App\Filament\Resources\Payments\Pages\ListPayments;
 use App\Jobs\InvoiceGenerationJob;
-use App\Jobs\ProcessSuccessfulPayment;
 use App\Listeners\RefundToWallet;
 use App\Models\Invoice;
 use App\Models\Order;
@@ -110,7 +110,7 @@ class PaymentResourceTest extends TestCase
 
         $this->actingAs($admin);
 
-        Livewire::test(\App\Filament\Resources\Orders\Pages\ListOrders::class)
+        Livewire::test(ListOrders::class)
             ->callTableAction('refund', $order)
             ->assertNotified();
 
@@ -138,7 +138,7 @@ class PaymentResourceTest extends TestCase
         $this->assertSame("INV-{$year}-000003", $third);
     }
 
-    public function test_approve_bank_transfer_marks_payment_and_order_and_dispatches_job(): void
+    public function test_approve_bank_transfer_marks_payment_and_order_and_dispatches_invoice_job(): void
     {
         Queue::fake();
 
@@ -166,7 +166,7 @@ class PaymentResourceTest extends TestCase
             'status' => OrderStatus::ContentPending->value,
         ]);
 
-        Queue::assertPushed(ProcessSuccessfulPayment::class);
+        Queue::assertPushed(InvoiceGenerationJob::class);
     }
 
     public function test_paytr_callback_verifies_hash_and_marks_payment_paid(): void
@@ -215,7 +215,7 @@ class PaymentResourceTest extends TestCase
             'status' => OrderStatus::ContentPending->value,
         ]);
 
-        Queue::assertPushed(ProcessSuccessfulPayment::class);
+        Queue::assertPushed(InvoiceGenerationJob::class);
     }
 
     public function test_paytr_callback_rejects_invalid_hash(): void

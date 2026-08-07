@@ -114,13 +114,7 @@
                                         x-data="{ optionId: '{{ $durationOptions->first()?->id }}', prices: {{ $optionPrices->toJson() }} }"
                                     >
                                         <td class="sticky start-0 z-10 bg-white px-5 py-3.5 transition group-hover:bg-paper">
-                                            <a href="{{ storefront_site_url($site) }}" class="flex items-center gap-x-3">
-                                                <x-site-logo :site="$site" :height="28" class="shrink-0 rounded-lg" />
-                                                <span class="min-w-0">
-                                                    <span class="block truncate text-sm font-semibold text-ink transition group-hover:text-accent-700">{{ $site->domain }}</span>
-                                                    <span class="block truncate text-xs text-ink-3">{{ $site->category?->name ?? 'Kategorisiz' }}</span>
-                                                </span>
-                                            </a>
+                                            <x-site-identity :site="$site" :height="28" />
                                         </td>
                                         <td class="px-3 py-3.5 text-center">
                                             @if ($site->is_google_indexed)
@@ -170,8 +164,6 @@
                                         </td>
                                     <td class="px-5 py-3.5">
                                         <div class="flex items-center justify-end gap-2">
-                                            <x-visit-site-button :site="$site" compact />
-
                                             <button
                                                 type="button"
                                                 @click="openRows[{{ $site->id }}] = !openRows[{{ $site->id }}]"

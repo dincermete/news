@@ -10,13 +10,17 @@
     /** @var \App\Support\SiteCatalogFilters $filters */
     /** @var \Illuminate\Pagination\LengthAwarePaginator<\App\Models\Site> $sites */
     /** @var \Illuminate\Support\Collection<int, \App\Models\SiteCategory> $categories */
+    /** @var \App\Models\SiteCategory|null $activeCategory */
     /** @var int $activeSiteCount */
 
     $fmt = fn (int $n): string => number_format($n, 0, ',', '.');
 
-    // Kategori pilleri ve filtre formu, mevcut filtreleri korumak için ortak parametre seti kullanır.
     $baseParams = collect($filters->toQueryParameters());
-    $categoryUrl = fn (?string $slug) => route('sites.index', $baseParams->except('kategori')->when($slug, fn ($c) => $c->put('kategori', $slug))->all());
+    $formAction = \App\Support\SiteCatalogFilters::catalogUrl($filters->kategori);
+    $categoryUrl = fn (?string $slug) => \App\Support\SiteCatalogFilters::catalogUrl(
+        $slug,
+        $baseParams->all(),
+    );
 
     $chip = 'inline-flex items-center rounded-[10px] border border-ink/5 bg-white px-3.5 py-2 text-sm font-medium text-ink shadow-soft';
     $sortOptions = [
@@ -39,14 +43,24 @@
                 </p>
 
                 <h1 class="mt-5 max-w-2xl font-display text-4xl font-medium leading-[1.12] sm:text-5xl" data-reveal>
-                    Markanıza uygun siteyi seçin, yayına hazırlayın
+                    @if ($activeCategory)
+                        {{ $activeCategory->name }} siteleri
+                    @else
+                        Markanıza uygun siteyi seçin, yayına hazırlayın
+                    @endif
                 </h1>
 
                 <p class="mt-4 max-w-xl text-lg font-medium leading-relaxed text-ink-2" data-reveal>
-                    Kategori, fiyat ve DA/PA'ya göre filtreleyin; sepete ekleyip aynı gün sipariş oluşturun.
+                    @if ($activeCategory && filled($activeCategory->description))
+                        {{ \Illuminate\Support\Str::limit(strip_tags($activeCategory->description), 160) }}
+                    @elseif ($activeCategory)
+                        {{ $activeCategory->name }} kategorisindeki siteleri fiyat ve DA/PA'ya göre filtreleyin; sepete ekleyip aynı gün sipariş oluşturun.
+                    @else
+                        Kategori, fiyat ve DA/PA'ya göre filtreleyin; sepete ekleyip aynı gün sipariş oluşturun.
+                    @endif
                 </p>
 
-                <form method="get" action="{{ route('sites.index') }}" class="mt-7 flex w-full max-w-xl items-center gap-2 rounded-full border border-ink/10 bg-white p-1.5 shadow-pop" role="search">
+                <form method="get" action="{{ $formAction }}" class="mt-7 flex w-full max-w-xl items-center gap-2 rounded-full border border-ink/10 bg-white p-1.5 shadow-pop" role="search">
                     @foreach ($baseParams->except('q') as $key => $value)
                         <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                     @endforeach
@@ -87,8 +101,7 @@
 
     <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         {{-- ================= FİLTRE BARI ================= --}}
-        <form method="get" action="{{ route('sites.index') }}" class="rounded-[20px] border border-ink/10 bg-paper p-4 sm:p-5" data-reveal>
-            <input type="hidden" name="kategori" value="{{ $filters->kategori }}">
+        <form method="get" action="{{ $formAction }}" class="rounded-[20px] border border-ink/10 bg-paper p-4 sm:p-5" data-reveal>
             <input type="hidden" name="q" value="{{ $filters->q }}">
 
             <div class="flex flex-wrap items-end gap-3">
