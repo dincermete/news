@@ -25,13 +25,12 @@
         ? request()->route('kategori')
         : null;
 
-    $categoryNav = \App\Models\SiteCategory::query()
-        ->orderBy('name')
-        ->get(['name', 'slug'])
-        ->map(fn (\App\Models\SiteCategory $category): array => [
-            'label' => $category->name,
-            'url' => route('sites.category', ['kategori' => $category->slug]),
-            'active' => $currentKategori === $category->slug,
+    $megaMenu = $megaMenu ?? ['topCategories' => [], 'activeSiteCount' => 0, 'categoryCount' => 0, 'latestPost' => null];
+
+    $topCategoryNav = collect($megaMenu['topCategories'])
+        ->map(fn (array $category): array => [
+            ...$category,
+            'active' => $currentKategori === $category['slug'],
         ])
         ->all();
 
@@ -89,33 +88,78 @@
         [
             'key' => 'siteler',
             'label' => 'Siteler',
-            'width' => 'w-72 sm:w-80',
+            'layout' => 'split',
             'sections' => [
-                ['label' => null, 'items' => $sitesExploreNav],
-                ['label' => 'Kategoriler', 'items' => $categoryNav],
+                ['label' => 'Keşfet', 'variant' => 'icons', 'items' => $sitesExploreNav],
+                [
+                    'label' => 'Popüler Kategoriler',
+                    'variant' => 'compact',
+                    'items' => $topCategoryNav,
+                    'footer' => ['label' => 'Tüm kategorileri gör', 'url' => route('sites.index')],
+                ],
+            ],
+            'feature' => [
+                'type' => 'promo',
+                'eyebrow' => 'Neden '.$siteSettings->siteName(),
+                'title' => 'Gerçek, onaylı yayın ağı',
+                'body' => 'Binlerce aktif haber ve blog sitesi arasından bütçenize uygun olanı birkaç saniyede bulun.',
+                'stats' => [
+                    ['value' => number_format($megaMenu['activeSiteCount'], 0, ',', '.').'+', 'label' => 'Aktif site'],
+                    ['value' => (string) $megaMenu['categoryCount'], 'label' => 'Kategori'],
+                ],
+                'cta' => ['label' => 'Siteni Ücretsiz Ekle', 'url' => route('account.site-submissions')],
             ],
         ],
         [
             'key' => 'paketler',
             'label' => 'Paketler',
-            'width' => 'w-72 sm:w-80',
+            'layout' => 'grid2',
             'sections' => [
-                ['label' => null, 'items' => $packagesNav],
+                ['label' => null, 'variant' => 'icons', 'items' => $packagesNav],
+            ],
+            'feature' => [
+                'type' => 'article',
+                'eyebrow' => 'Kaynak',
+                'post' => $megaMenu['latestPost'],
+                'fallback' => [
+                    'title' => 'Bütçenize uygun paketi bulalım',
+                    'body' => 'Hedefinizi anlatın, size özel bir plan çıkaralım.',
+                    'cta_label' => 'Bize ulaşın',
+                    'cta_url' => route('contact.show'),
+                ],
             ],
         ],
         [
             'key' => 'hizmetler',
             'label' => 'Hizmetler',
-            'width' => 'w-72 sm:w-80',
+            'layout' => 'grid2',
             'sections' => [
-                ['label' => null, 'items' => $servicesNav],
+                ['label' => null, 'variant' => 'icons', 'items' => $servicesNav],
+            ],
+            'feature' => [
+                'type' => 'promo',
+                'eyebrow' => 'Ücretsiz Danışmanlık',
+                'title' => 'Size en uygun hizmeti birlikte seçelim',
+                'body' => 'Hedefinizi anlatın, ekibimiz aynı gün dönüş yapsın.',
+                'stats' => [],
+                'cta' => ['label' => 'Bize Ulaşın', 'url' => route('contact.show')],
             ],
         ],
         [
             'key' => 'araclar',
             'label' => 'Araçlar',
-            'width' => 'w-72 sm:w-80',
-            'sections' => $toolsSections,
+            'layout' => 'columns',
+            'sections' => collect($toolsSections)
+                ->map(fn (array $section): array => [...$section, 'variant' => 'icons'])
+                ->all(),
+            'feature' => [
+                'type' => 'tool',
+                'eyebrow' => 'Öne Çıkan Araç',
+                'name' => 'SEO ROI Hesaplayıcı',
+                'excerpt' => 'Trafik, dönüşüm oranı ve sipariş değerinden SEO yatırımınızın geri dönüşünü hesaplayın.',
+                'url' => route('tools.show', 'seo-roi-hesaplama'),
+                'icon' => $icons['trending'],
+            ],
         ],
     ];
 
@@ -177,7 +221,7 @@
                 @endif
             </a>
 
-            <div class="hidden min-w-0 flex-1 items-center justify-center gap-x-0.5 lg:flex xl:gap-x-1" role="navigation">
+            <div class="relative hidden min-w-0 flex-1 items-center justify-center gap-x-0.5 lg:flex xl:gap-x-1" role="navigation">
                 <a href="{{ route('home') }}" @class([request()->routeIs('home') ? $navLinkActive : $navLink, 'shrink-0 whitespace-nowrap'])>Anasayfa</a>
 
                 @foreach ($navGroups as $group)
@@ -185,9 +229,14 @@
                         $groupActive = collect($group['sections'])
                             ->flatMap(fn (array $section): array => $section['items'])
                             ->contains(fn (array $item): bool => $item['active']);
+                        $sectionsGridClass = match ($group['layout']) {
+                            'split' => 'grid gap-x-8 sm:grid-cols-2',
+                            'columns' => 'grid gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-4',
+                            default => '',
+                        };
                     @endphp
                     <div
-                        class="relative shrink-0"
+                        class="shrink-0"
                         x-data="{ open: false }"
                         @keydown.escape.window="open = false"
                     >
@@ -210,24 +259,56 @@
                             x-cloak
                             x-transition
                             @click.outside="open = false"
-                            @class([
-                                'absolute start-1/2 z-50 mt-3 max-h-[80vh] -translate-x-1/2 space-y-4 overflow-y-auto rounded-2xl border border-ink/10 bg-white p-3 shadow-pop',
-                                $group['width'],
-                            ])
+                            class="absolute inset-x-0 top-full z-50 mt-3 max-h-[80vh] overflow-y-auto rounded-2xl border border-ink/10 bg-white shadow-pop"
                         >
-                            @foreach ($group['sections'] as $section)
-                                @continue(empty($section['items']))
-                                <div>
-                                    @if ($section['label'])
-                                        <p class="px-2 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-3">{{ $section['label'] }}</p>
-                                    @endif
-                                    <div class="space-y-0.5">
-                                        @foreach ($section['items'] as $item)
-                                            @include('partials.nav-menu-item', ['item' => $item, 'onClick' => 'open = false'])
-                                        @endforeach
-                                    </div>
+                            <div class="grid gap-8 p-6 lg:grid-cols-[minmax(0,1fr)_18rem] xl:grid-cols-[minmax(0,1fr)_20rem]">
+                                <div @class([$sectionsGridClass, 'space-y-6' => $sectionsGridClass === ''])>
+                                    @foreach ($group['sections'] as $section)
+                                        @continue(empty($section['items']))
+                                        <div>
+                                            @if ($section['label'])
+                                                <p class="px-1 pb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-3">{{ $section['label'] }}</p>
+                                            @endif
+
+                                            @if (($section['variant'] ?? 'icons') === 'compact')
+                                                <div class="grid grid-cols-2 gap-x-3 gap-y-0.5">
+                                                    @foreach ($section['items'] as $item)
+                                                        <a
+                                                            href="{{ $item['url'] }}"
+                                                            @click="open = false"
+                                                            @class([
+                                                                'flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-[13px] transition',
+                                                                $item['active'] ? 'bg-ink text-white' : 'text-ink-2 hover:bg-paper hover:text-ink',
+                                                            ])
+                                                        >
+                                                            <span class="truncate">{{ $item['label'] }}</span>
+                                                            @if (isset($item['count']))
+                                                                <span @class(['shrink-0 text-[11px] tabular-nums', $item['active'] ? 'text-white/60' : 'text-ink-3'])>{{ $item['count'] }}</span>
+                                                            @endif
+                                                        </a>
+                                                    @endforeach
+                                                </div>
+                                                @if (! empty($section['footer']))
+                                                    <a href="{{ $section['footer']['url'] }}" @click="open = false" class="mt-2 inline-flex items-center gap-x-1 px-2 text-[12px] font-semibold text-accent-600 transition hover:text-accent-700">
+                                                        {{ $section['footer']['label'] }}
+                                                        <svg class="size-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0-4 4m4-4H3"/></svg>
+                                                    </a>
+                                                @endif
+                                            @else
+                                                <div @class(['space-y-0.5', 'grid grid-cols-1 gap-x-4 sm:grid-cols-2' => $group['layout'] === 'grid2'])>
+                                                    @foreach ($section['items'] as $item)
+                                                        @include('partials.nav-menu-item', ['item' => $item, 'onClick' => 'open = false'])
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
                                 </div>
-                            @endforeach
+
+                                @if (! empty($group['feature']))
+                                    @include('partials.nav-mega-feature', ['feature' => $group['feature'], 'onClick' => 'open = false'])
+                                @endif
+                            </div>
                         </div>
                     </div>
                 @endforeach

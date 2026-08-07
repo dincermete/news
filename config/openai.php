@@ -16,5 +16,9 @@ return [
     ],
 
     'timeout' => (int) env('OPENAI_TIMEOUT', 60),
-    'tool_max_rounds' => (int) env('OPENAI_TOOL_MAX_ROUNDS', 3),
+    // Chatbot runs synchronously inside an HTTP request with a tool-call loop, so it needs a
+    // tighter per-call budget than long-form article generation or it can blow past the web
+    // server's max_execution_time and return a broken (non-JSON) response to the widget.
+    'timeout_chatbot' => (int) env('OPENAI_TIMEOUT_CHATBOT', 20),
+    'tool_max_rounds' => (int) env('OPENAI_TOOL_MAX_ROUNDS', 2),
 ];

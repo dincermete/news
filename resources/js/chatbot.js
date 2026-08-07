@@ -62,8 +62,14 @@ function appendBubble(container, text, role) {
     bubble.className =
         role === 'user'
             ? 'max-w-[85%] rounded-2xl rounded-br-sm bg-white px-3.5 py-2.5 text-[13px] leading-relaxed text-ink'
-            : 'max-w-[85%] rounded-2xl rounded-bl-sm bg-white/10 px-3.5 py-2.5 text-[13px] leading-relaxed text-white';
-    bubble.textContent = text;
+            : 'chatbot-markdown max-w-[85%] rounded-2xl rounded-bl-sm bg-white/10 px-3.5 py-2.5 text-[13px] leading-relaxed text-white';
+
+    if (role === 'user') {
+        bubble.textContent = text;
+    } else {
+        bubble.innerHTML = renderMarkdown(text);
+    }
+
     row.appendChild(bubble);
 
     container.appendChild(row);
@@ -119,12 +125,102 @@ function appendEscalation(container, escalation) {
     animateIn(row);
 }
 
+/**
+ * Quick-reply chips shown under the latest bot message. Each button shows the short
+ * `label`, but tapping it sends the full `text` as if the user had typed it themselves.
+ */
+function appendSuggestions(container, suggestions, onPick) {
+    if (!Array.isArray(suggestions) || suggestions.length === 0) {
+        return;
+    }
+
+    const row = document.createElement('div');
+    row.className = 'flex flex-wrap gap-1.5 ps-8';
+    row.dataset.chatbotSuggestions = '1';
+
+    suggestions.slice(0, 3).forEach((suggestion) => {
+        const label = String(suggestion?.label || '').trim();
+        const text = String(suggestion?.text || '').trim();
+        if (!label || !text) {
+            return;
+        }
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className =
+            'max-w-[13rem] truncate rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[12px] font-medium text-white/80 transition hover:border-white/30 hover:bg-white/10 hover:text-white';
+        btn.textContent = label;
+        btn.title = text;
+        btn.addEventListener('click', () => {
+            row.remove();
+            onPick(text);
+        });
+        row.appendChild(btn);
+    });
+
+    if (!row.childElementCount) {
+        return;
+    }
+
+    container.appendChild(row);
+    container.scrollTop = container.scrollHeight;
+    animateIn(row);
+}
+
 function escapeHtml(text) {
     return String(text)
         .replaceAll('&', '&amp;')
         .replaceAll('<', '&lt;')
         .replaceAll('>', '&gt;')
         .replaceAll('"', '&quot;');
+}
+
+/**
+ * Minimal, XSS-safe Markdown renderer for bot replies: escapes HTML first, then
+ * only ever introduces tags for a small known subset (bold/italic/code/links/lists),
+ * so nothing from the model's raw text can inject arbitrary markup.
+ */
+function renderMarkdown(text) {
+    const escaped = escapeHtml(text).replace(/\r\n/g, '\n');
+    const blocks = escaped.split(/\n{2,}/);
+
+    return blocks
+        .map((block) => {
+            const lines = block.split('\n').filter((line) => line.trim() !== '');
+            if (lines.length === 0) {
+                return '';
+            }
+
+            const isBulletList = lines.every((line) => /^\s*[-*]\s+/.test(line));
+            const isNumberedList = lines.every((line) => /^\s*\d+[.)]\s+/.test(line));
+
+            if (isBulletList) {
+                const items = lines.map((line) => `<li>${inlineMarkdown(line.replace(/^\s*[-*]\s+/, ''))}</li>`).join('');
+
+                return `<ul class="list-disc space-y-0.5 ps-4">${items}</ul>`;
+            }
+
+            if (isNumberedList) {
+                const items = lines.map((line) => `<li>${inlineMarkdown(line.replace(/^\s*\d+[.)]\s+/, ''))}</li>`).join('');
+
+                return `<ol class="list-decimal space-y-0.5 ps-4">${items}</ol>`;
+            }
+
+            return `<p>${lines.map(inlineMarkdown).join('<br>')}</p>`;
+        })
+        .filter(Boolean)
+        .join('');
+}
+
+function inlineMarkdown(line) {
+    return line
+        .replace(/`([^`]+)`/g, '<code class="rounded bg-black/20 px-1 py-0.5 text-[12px]">$1</code>')
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<em>$1</em>')
+        .replace(
+            /(https?:\/\/[^\s<]+)/g,
+            '<a href="$1" target="_blank" rel="noopener noreferrer" class="underline underline-offset-2">$1</a>',
+        );
 }
 
 function mountChatbot() {
@@ -150,6 +246,7 @@ function mountChatbot() {
     const messages = root.querySelector('[data-chatbot-messages]');
     const welcomeRow = root.querySelector('[data-chatbot-welcome]');
     const chips = root.querySelectorAll('[data-chip]');
+    const chipsRow = root.querySelector('[data-chatbot-chips]');
     const badge = root.querySelector('[data-chatbot-badge]');
     const iconChat = root.querySelector('[data-chatbot-icon-chat]');
     const iconClose = root.querySelector('[data-chatbot-icon-close]');
@@ -369,6 +466,7 @@ function mountChatbot() {
         historyRendered = true;
 
         welcomeRow?.remove();
+        chipsRow?.classList.add('hidden');
 
         cachedHistory.forEach((entry) => {
             appendBubble(messages, entry.content, entry.role === 'user' ? 'user' : 'bot');
@@ -386,6 +484,8 @@ function mountChatbot() {
             sendBtn.disabled = true;
         }
 
+        messages?.querySelectorAll('[data-chatbot-suggestions]').forEach((el) => el.remove());
+        chipsRow?.classList.add('hidden');
         appendBubble(messages, message, 'user');
         if (input) {
             input.value = '';
@@ -426,6 +526,8 @@ function mountChatbot() {
                 }
                 if (data.escalation) {
                     appendEscalation(messages, data.escalation);
+                } else if (Array.isArray(data.suggestions) && data.suggestions.length > 0) {
+                    appendSuggestions(messages, data.suggestions, send);
                 }
             }
 

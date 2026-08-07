@@ -3,8 +3,14 @@
 namespace App\View\Composers;
 
 use App\Enums\NotificationAudience;
+use App\Enums\SiteStatus;
 use App\Models\Announcement;
+use App\Models\BlogPost;
+use App\Models\Site;
+use App\Models\SiteCategory;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Route;
 use Illuminate\View\View;
 
 class StorefrontHeaderComposer
@@ -77,6 +83,48 @@ class StorefrontHeaderComposer
             'headerNotifications' => $headerNotifications,
             'headerUnreadCount' => $headerUnreadCount,
             'headerBellItems' => $headerBellItems,
+            'megaMenu' => $this->megaMenuHighlights(),
         ]);
+    }
+
+    /**
+     * Precomputed, cached content for the header's full-width mega menus: popular
+     * categories with real listing counts, catalogue-wide stats, and the latest blog
+     * post. Cached because the header renders on every single page.
+     *
+     * @return array{topCategories: list<array{label: string, url: string, count: int}>, activeSiteCount: int, categoryCount: int, latestPost: null|array{title: string, excerpt: ?string, image: ?string, url: string}}
+     */
+    private function megaMenuHighlights(): array
+    {
+        return Cache::remember('header.mega_menu_highlights', now()->addMinutes(15), function (): array {
+            $topCategories = SiteCategory::query()
+                ->withCount(['sites' => fn ($query) => $query->where('status', SiteStatus::Active)])
+                ->orderByDesc('sites_count')
+                ->limit(8)
+                ->get(['name', 'slug'])
+                ->filter(fn (SiteCategory $category): bool => $category->sites_count > 0)
+                ->map(fn (SiteCategory $category): array => [
+                    'label' => $category->name,
+                    'slug' => $category->slug,
+                    'url' => Route::has('sites.category') ? route('sites.category', ['kategori' => $category->slug]) : '#',
+                    'count' => $category->sites_count,
+                ])
+                ->values()
+                ->all();
+
+            $latestPost = BlogPost::query()->published()->latest('published_at')->first();
+
+            return [
+                'topCategories' => $topCategories,
+                'activeSiteCount' => Site::query()->where('status', SiteStatus::Active)->count(),
+                'categoryCount' => SiteCategory::query()->count(),
+                'latestPost' => $latestPost ? [
+                    'title' => $latestPost->title,
+                    'excerpt' => $latestPost->excerpt,
+                    'image' => $latestPost->featuredImageUrl(),
+                    'url' => $latestPost->url(),
+                ] : null,
+            ];
+        });
     }
 }

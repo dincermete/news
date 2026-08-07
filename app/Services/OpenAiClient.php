@@ -18,6 +18,7 @@ class OpenAiClient
         ?int $maxTokens = null,
         ?array $tools = null,
         ?string $model = null,
+        ?int $timeoutSeconds = null,
     ): array {
         $apiKey = (string) config('openai.api_key');
 
@@ -25,10 +26,13 @@ class OpenAiClient
             throw new RuntimeException('OpenAI API anahtarı yapılandırılmamış.');
         }
 
+        $resolvedModel = $model ?? (string) config('openai.model');
+        $tokenLimit = $maxTokens ?? (int) config('openai.max_tokens.suggestion');
+
         $payload = [
-            'model' => $model ?? (string) config('openai.model'),
+            'model' => $resolvedModel,
             'messages' => $messages,
-            'max_tokens' => $maxTokens ?? (int) config('openai.max_tokens.suggestion'),
+            ...$this->tokenLimitPayload($resolvedModel, $tokenLimit),
         ];
 
         if ($tools !== null && $tools !== []) {
@@ -40,7 +44,7 @@ class OpenAiClient
             $response = Http::withToken($apiKey)
                 ->acceptJson()
                 ->asJson()
-                ->timeout((int) config('openai.timeout', 60))
+                ->timeout($timeoutSeconds ?? (int) config('openai.timeout', 60))
                 ->post(rtrim((string) config('openai.base_url'), '/').'/chat/completions', $payload)
                 ->throw()
                 ->json();
@@ -61,9 +65,9 @@ class OpenAiClient
     /**
      * @param  list<array{role: string, content?: string|null, tool_calls?: mixed, tool_call_id?: string, name?: string}>  $messages
      */
-    public function chatText(array $messages, ?int $maxTokens = null, ?string $model = null): string
+    public function chatText(array $messages, ?int $maxTokens = null, ?string $model = null, ?int $timeoutSeconds = null): string
     {
-        $result = $this->chat($messages, $maxTokens, null, $model);
+        $result = $this->chat($messages, $maxTokens, null, $model, $timeoutSeconds);
 
         return trim((string) ($result['content'] ?? ''));
     }
@@ -80,12 +84,13 @@ class OpenAiClient
         ?int $maxTokens = null,
         ?string $model = null,
         ?int $maxRounds = null,
+        ?int $timeoutSeconds = null,
     ): string {
-        $maxRounds ??= (int) config('openai.tool_max_rounds', 3);
+        $maxRounds ??= (int) config('openai.tool_max_rounds', 2);
         $conversation = $messages;
 
         for ($round = 0; $round < $maxRounds; $round++) {
-            $result = $this->chat($conversation, $maxTokens, $tools, $model);
+            $result = $this->chat($conversation, $maxTokens, $tools, $model, $timeoutSeconds);
 
             if ($result['tool_calls'] === []) {
                 return trim((string) ($result['content'] ?? ''));
@@ -116,8 +121,32 @@ class OpenAiClient
             }
         }
 
-        $final = $this->chat($conversation, $maxTokens, null, $model);
+        $final = $this->chat($conversation, $maxTokens, null, $model, $timeoutSeconds);
 
         return trim((string) ($final['content'] ?? ''));
+    }
+
+    /**
+     * Newer OpenAI models (gpt-5*, o-series) reject max_tokens and require max_completion_tokens.
+     *
+     * @return array{max_tokens: int}|array{max_completion_tokens: int}
+     */
+    private function tokenLimitPayload(string $model, int $tokenLimit): array
+    {
+        if ($this->usesMaxCompletionTokens($model)) {
+            return ['max_completion_tokens' => $tokenLimit];
+        }
+
+        return ['max_tokens' => $tokenLimit];
+    }
+
+    private function usesMaxCompletionTokens(string $model): bool
+    {
+        $normalized = strtolower(trim($model));
+
+        return str_starts_with($normalized, 'gpt-5')
+            || str_starts_with($normalized, 'o1')
+            || str_starts_with($normalized, 'o3')
+            || str_starts_with($normalized, 'o4');
     }
 }

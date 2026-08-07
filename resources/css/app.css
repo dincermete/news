@@ -195,6 +195,24 @@ html.js [data-reveal] {
     border-radius: 999px;
 }
 
+/* Bot mesajlarında render edilen sınırlı markdown (kalın, liste, link, kod) için boşluklar */
+.chatbot-markdown p + p,
+.chatbot-markdown p + ul,
+.chatbot-markdown p + ol,
+.chatbot-markdown ul + p,
+.chatbot-markdown ol + p {
+    margin-top: 0.5em;
+}
+
+.chatbot-markdown a {
+    color: inherit;
+    text-decoration-color: rgb(255 255 255 / 0.5);
+}
+
+.chatbot-markdown code {
+    word-break: break-word;
+}
+
 /* Sonsuz bant (marquee) */
 @keyframes marquee-x {
     from {

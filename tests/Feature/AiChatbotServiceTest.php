@@ -43,6 +43,33 @@ class AiChatbotServiceTest extends TestCase
 
         $this->assertSame('Merhaba, nasıl yardımcı olabilirim?', $result['reply']);
         $this->assertNull($result['escalation']);
+        $this->assertSame([], $result['suggestions']);
+    }
+
+    public function test_respond_extracts_quick_reply_suggestions(): void
+    {
+        Http::fake([
+            'https://api.openai.com/v1/chat/completions' => Http::response([
+                'choices' => [[
+                    'message' => [
+                        'content' => 'Bütçenizi öğrenirsem hemen öneri çıkarabilirim.'
+                            ."\n"
+                            .'[SUGGESTIONS][{"label":"5000 TL bütçem var","text":"5000 TL bütçem var, uygun siteler önerir misin?"},'
+                            .'{"label":"Haber kategorisi","text":"Haber kategorisinde site istiyorum"},'
+                            .'{"label":"Destek istiyorum","text":"Bir temsilciyle görüşmek istiyorum"}]',
+                    ],
+                ]],
+            ]),
+        ]);
+
+        $result = app(AiChatbotService::class)->respond('sess-sugg', 'Site önerir misin');
+
+        $this->assertSame('Bütçenizi öğrenirsem hemen öneri çıkarabilirim.', $result['reply']);
+        $this->assertStringNotContainsString('[SUGGESTIONS]', $result['reply']);
+        $this->assertNull($result['escalation']);
+        $this->assertCount(3, $result['suggestions']);
+        $this->assertSame('5000 TL bütçem var', $result['suggestions'][0]['label']);
+        $this->assertSame('5000 TL bütçem var, uygun siteler önerir misin?', $result['suggestions'][0]['text']);
     }
 
     public function test_respond_handles_tool_calls_then_final_answer(): void
@@ -102,6 +129,24 @@ class AiChatbotServiceTest extends TestCase
         $this->assertStringNotContainsString('[ESCALATE]', $result['reply']);
         $this->assertNotNull($result['escalation']);
         $this->assertStringStartsWith('https://wa.me/905321234567', $result['escalation']['whatsapp_link']);
+
+        $this->assertDatabaseHas(SupportTicket::class, [
+            'id' => $result['escalation']['support_ticket_id'],
+            'source' => SupportTicketSource::ChatbotEscalation->value,
+        ]);
+    }
+
+    public function test_openai_failure_falls_back_to_escalation_instead_of_throwing(): void
+    {
+        Http::fake([
+            'https://api.openai.com/v1/chat/completions' => Http::response(['error' => ['message' => 'boom']], 500),
+        ]);
+
+        $result = app(AiChatbotService::class)->respond('sess-fail', 'Merhaba');
+
+        $this->assertNotSame('', trim($result['reply']));
+        $this->assertStringNotContainsString('[ESCALATE]', $result['reply']);
+        $this->assertNotNull($result['escalation']);
 
         $this->assertDatabaseHas(SupportTicket::class, [
             'id' => $result['escalation']['support_ticket_id'],
